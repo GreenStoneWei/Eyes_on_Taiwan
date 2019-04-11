@@ -49,7 +49,7 @@ router.get('/washingtonpost/list', (req, res) => {
                             let oneRow = {
                                 url: array[j].url,
                                 source: 'The Washington Post',
-                                category: null,
+                                category: array[j].category,
                                 title: array[j].title,
                                 subtitle: array[j].subtitle, 
                                 abstract: null,
@@ -61,23 +61,21 @@ router.get('/washingtonpost/list', (req, res) => {
                                 tag: null
                             }
                             con.query(insertNewURL, oneRow, function(err, result, fields){
-                                // con.release(); // it seems not matter here.  Connection already released
                                 if(err){
                                     res.send({err:'Database query error.'});
                                     throw err;
                                 }
                                 if (j===array.length-1){
-                                    res.send('ok');
+                                    res.redirect('/washingtonpost/article');
                                 }
                                 else{
-                                    console.log('a/ '+j+array[j].title)
                                     insert(array,j+1);
                                 }
                             })
                         }
                         else{
                             if (j===array.length-1){
-                                res.send('up-to-date');
+                                res.redirect('/washingtonpost/article');
                             }
                             else{
                                 insert(array,j+1);
@@ -88,57 +86,6 @@ router.get('/washingtonpost/list', (req, res) => {
             }
         }
         insert(articleArray,0);
-
-        // for (let j = 0; j < articleArray.length ; j++){
-        //     (function(j){
-        //         mysql.conPool.getConnection((err,con)=>{
-        //             if (err){
-        //                 res.send({err:'Database query error.'})
-        //             }
-        //             let checkIfTitleExist = `SELECT * FROM washingtonpost WHERE title = "${articleArray[j].title}"`; // Must to use double quote because there are signle quotes in titles
-        //             con.query(checkIfTitleExist, function(err, rows){
-        //                 if (err){
-        //                     res.send({err:'Database query error.'})
-        //                 }
-        //                 if (rows.length === 0){
-        //                     let insertNewURL = `INSERT INTO washingtonpost SET ?`;
-        //                     let oneRow = {
-        //                         url: articleArray[j].originalURL,
-        //                         source: 'The Washington Post',
-        //                         category: null,
-        //                         title: articleArray[j].title,
-        //                         subtitle: null, 
-        //                         abstract: null,
-        //                         author: articleArray[j].author, 
-        //                         src_datetime: articleArray[j].pubDatetime, 
-        //                         unixtime: articleArray[j].pubDatetime,
-        //                         context: null,
-        //                         translate: null,
-        //                         tag: null
-        //                     }
-        //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-        //                         con.release();
-        //                         if(err){
-        //                             res.send({err:'Database query error.'});
-        //                             throw err;
-        //                         }
-        //                         pendingQuery -= 1;
-        //                         if ( pendingQuery === 0){
-        //                             res.send({success:'Insert URLs.'});
-        //                         }
-        //                     })
-        //                 }
-        //                 else{
-        //                     pendingQuery -= 1;
-        //                     console.log(pendingQuery);
-        //                     if ( pendingQuery === 0){
-        //                         res.send({success:'All articles are up to date.'});
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     })(j);
-        // }
     }) // End of request
 })
 
@@ -183,9 +130,7 @@ router.get('/washingtonpost/article',(req,res)=>{
                                 }
                                 
                             }
-                            context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            // console.log(main_img);
-                            
+                            context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");               
                             con.query(`UPDATE washingtonpost SET main_img = "${main_img}", context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
                                 if (err){
                                     fetched++;
@@ -271,17 +216,16 @@ router.get('/independent/list', (req, res) => {
                                             throw err;
                                         }
                                         if (j==array.length-1){
-                                            res.send('ok');
+                                            res.redirect('/independent/article');
                                         }
                                         else{
-                                            console.log('a/ '+j)
                                             idinsert(array,j+1);
                                         }
                                     })
                                 }
                                 else{
                                     if (j==array.length-1){
-                                        res.send('up-to-date');
+                                        res.redirect('/independent/article');
                                     }
                                     else{
                                         idinsert(array,j+1);
@@ -429,7 +373,7 @@ router.get('/quartz/list',(req,res)=>{
                                     throw err;
                                 }
                                 if (j===array.length-1){
-                                    res.redirect('/quartzarticle');
+                                    res.redirect('/quartz/article');
                                 }
                                 else{
                                     insert(array,j+1);
@@ -438,7 +382,7 @@ router.get('/quartz/list',(req,res)=>{
                         }
                         else{
                             if (j===array.length-1){
-                                res.redirect('/quartzarticle');
+                                res.redirect('/quartz/article');
                             }
                             else{
                                 insert(array,j+1);
@@ -584,7 +528,7 @@ router.get('/economist/list', (req, res) => {
                                             throw err;
                                         }
                                         if (j==array.length-1){
-                                            res.send('ok');
+                                            res.redirect('/economist/article');
                                         }
                                         else{
                                             insert(array,j+1);
@@ -593,7 +537,7 @@ router.get('/economist/list', (req, res) => {
                                 }
                                 else{
                                     if (j==array.length-1){
-                                        res.send('up-to-date');
+                                        res.redirect('/economist/article');
                                     }
                                     else{
                                         insert(array,j+1);
@@ -734,7 +678,7 @@ router.get('/guardian/list',(req,res)=>{
                                     throw err;
                                 }
                                 if (j===array.length-1){
-                                    res.send('ok');
+                                    res.redirect('/guardian/article');
                                 }
                                 else{
                                     insert(array,j+1);
@@ -743,7 +687,7 @@ router.get('/guardian/list',(req,res)=>{
                         }
                         else{
                             if (j===array.length-1){
-                                res.send('ok');
+                                res.redirect('/guardian/article');
                             }
                             else{
                                 insert(array,j+1);
@@ -885,7 +829,7 @@ router.get('/aljazeera/list',(req,res)=>{
                                     throw err;
                                 }
                                 if (j===array.length-1){
-                                    res.send('ok');
+                                    res.redirect('/aljazeera/article');
                                 }
                                 else{
                                     insert(array,j+1);
@@ -894,7 +838,7 @@ router.get('/aljazeera/list',(req,res)=>{
                         }
                         else{
                             if (j===array.length-1){
-                                res.send('ok');
+                                res.redirect('/aljazeera/article');
                             }
                             else{
                                 insert(array,j+1);
@@ -1025,7 +969,7 @@ router.get('/nytimes/list',(req,res)=>{
                                     throw err;
                                 }
                                 if (j===array.length-1){
-                                    res.send('ok');
+                                    res.redirect('/nytimes/article');
                                 }
                                 else{
                                     insert(array,j+1);
@@ -1034,7 +978,7 @@ router.get('/nytimes/list',(req,res)=>{
                         }
                         else{
                             if (j===array.length-1){
-                                res.send('ok');
+                                res.redirect('/nytimes/article');
                             }
                             else{
                                 insert(array,j+1);
@@ -1174,7 +1118,7 @@ router.get('/cnn/list',(req,res)=>{
                                     throw err;
                                 }
                                 if (j===array.length-1){
-                                    res.send('ok');
+                                    res.redirect('/cnn/article');
                                 }
                                 else{
                                     insert(array,j+1);
@@ -1183,7 +1127,7 @@ router.get('/cnn/list',(req,res)=>{
                         }
                         else{
                             if (j===array.length-1){
-                                res.send('ok');
+                                res.redirect('/cnn/article');
                             }
                             else{
                                 insert(array,j+1);
@@ -1308,7 +1252,7 @@ router.get('/bbc/list',(req,res)=>{
                                     throw err;
                                 }
                                 if (j===array.length-1){
-                                    res.send('ok');
+                                    res.redirect('/bbc/article');
                                 }
                                 else{
                                     insert(array,j+1);
@@ -1317,7 +1261,7 @@ router.get('/bbc/list',(req,res)=>{
                         }
                         else{
                             if (j===array.length-1){
-                                res.send('ok');
+                                res.redirect('/bbc/article');
                             }
                             else{
                                 insert(array,j+1);

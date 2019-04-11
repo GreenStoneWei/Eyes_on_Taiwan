@@ -1,4 +1,3 @@
-
 if (!Date.now) {
 	Date.now = function now() {
 	  return new Date().getTime();
@@ -14,4 +13,3 @@ return [this.getFullYear(),
 		(dd>9 ? '' : '0') + dd
 		].join('');
 };
-

@@ -71,7 +71,7 @@ app.get('/pendingtest', (req,res)=>{
 	}
 })
 
-app.get('/existtest',(req,res)=>{
+app.get('/test',(req,res)=>{
 //    let arrayTest = ['a','b','c','d','e'];
 //    let pending = arrayTest.length;
 //    for (let i =0 ; i< arrayTest.length; i++){
@@ -80,9 +80,10 @@ app.get('/existtest',(req,res)=>{
 //            res.send('finished');
 //        }
 //    }
-    mysql.conPool.query('SELECT * FROM guardian', function(err,result){
-        res.send(result);
-    })
+    // mysql.conPool.query('SELECT * FROM guardian', function(err,result){
+    //     res.send(result);
+    // })
+    console.log('got!');
 })
 app.listen(3000, () => {
   console.log('The application is running on localhost:3000!');

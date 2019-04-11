@@ -18,31 +18,13 @@ app.use('/', scraping);
 const api = require('./routes/api.js')
 app.use('/api', api)
 
-app.get('/', (req, res) => {
-  res.send('Hello My Server!');
-})
+const autoDeploy = require('./controllers/autodeploy')
+app.use('/', autoDeploy);
 
-function getArticleByNewsName (newsName, array){
-    return new Promise((resovle,reject)=>{
-        mysql.conPool.query(`SELECT * FROM ${newsName}`,function(error,result){
-            if (error){
-                console.log(`error at ${newsName} query`);
-                reject(error);
-            }
-            let fetched = 0;
-            for (let i=0; i< result.length;i++){
-                if (result[i].context !== "" && result[i].title !== null){
-                    fetched ++;
-                    array.push(result[i]);
-                }
-                fetched ++;
-                if (fetched == result.length){
-                    resovle();
-                }
-            }
-        })
-    })
-}
+// app.get('/', (req, res) => {
+//   res.send('Hello My Server!');
+// })
+
 
 
 

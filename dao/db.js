@@ -4,14 +4,14 @@ function insertUrlList(array, j, newsname, identifier, resdirect){
             if (err){
                 res.send({err:'Database query error.'})
             }
-            let checkIfTitleExist = `SELECT * FROM nytimes WHERE url = "${array[j].url}"`;
+            let checkIfTitleExist = `SELECT * FROM ${newsname} WHERE ${identifier} = "${array[j].identifier}"`;
             con.query(checkIfTitleExist, function(err, rows){
                 con.release();
                 if (err){
                     res.send({err:'Database query error.'})
                 }
                 if (rows.length === 0){
-                    let insertNewURL = `INSERT INTO nytimes SET ?`;
+                    let insertNewURL = `INSERT INTO ${newsname} SET ?`;
                     let oneRow = {
                                 url: array[j].url,
                                 source: array[j].source,

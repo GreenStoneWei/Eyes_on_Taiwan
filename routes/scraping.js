@@ -4,6 +4,52 @@ const mysql   = require('../util/mysql.js');
 const request = require("request");
 const cheerio = require("cheerio");
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const util = require('util');
+const logFile = fs.createWriteStream( __dirname + '/../errorlog/error.log', {flags : 'a'});
+const logStdOut = process.stdout; // log to console as normal.
+const now = new Date().toLocaleString('en-US',{timeZone: 'Asia/Taipei'});
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: '',
+        pass: '',
+    }
+});
+
+
+const consoleFile = function(d){
+    logFile.write('---start---'+'\n'+now + '\n' + util.format(d) + '\n' + '----end----'+'\n');
+    // console.log(d);
+    logStdOut.write('---start---'+'\n'+now + '\n' + util.format(d) + '\n' + '----end----'+'\n'); // log to console as normal.
+    let mailOptions = {
+        from: '',
+        to: '',
+        subject: 'Eyes on Taiwan: Errors happen!',
+        text: `${d}`,
+      };
+    transporter.sendMail(mailOptions, function(error, info) {
+    if (error) {
+        console.log(error);
+    }
+    else {
+        console.log('Email sent: ', info.response);
+    }
+    });
+}
+
+
+
+router.get('/console/test', (req,res) =>{
+    mysql.conPool.query('SELECT * FROM xxx',function(error,result){
+        if(error){
+            consoleFile(error);
+        }
+        res.end();
+    })
+})
 
 // Washington Post
 router.get('/washingtonpost/list', (req, res) => {

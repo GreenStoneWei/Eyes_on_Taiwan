@@ -66,7 +66,7 @@ router.get('/washingtonpost/list', (req, res) => {
                                     throw err;
                                 }
                                 if (j===array.length-1){
-                                    console.log('schedule test: washinton post')
+                                    console.log('schedule test: washington post')
                                     res.redirect('/washingtonpost/article');
                                 }
                                 else{
@@ -577,7 +577,7 @@ router.get('/economist/article',(req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            fetched++;
+                            
                             if (error || !body) {
                                 return;
                             }
@@ -604,9 +604,12 @@ router.get('/economist/article',(req,res)=>{
                                               unixtime = ${unixtime} 
                                        WHERE id = ${article[i].id}`, function(err,result){
                                 if (err){
+                                    fetched++;
+                                    console.log(err);
                                     res.send({err:'Database query error. here'+i});
                                     throw err;
                                 }
+                                fetched++;
                                 if (fetched === article.length){
                                     res.send('ok');
                                     return;

@@ -60,20 +60,11 @@ app.get('/downloadtest', (req,res)=>{
 
 
 
-app.get('/test',(req,res)=>{
-//    let arrayTest = ['a','b','c','d','e'];
-//    let pending = arrayTest.length;
-//    for (let i =0 ; i< arrayTest.length; i++){
-//        console.log(arrayTest[i])
-//        if (--pending===0){
-//            res.send('finished');
-//        }
-//    }
-    // mysql.conPool.query('SELECT * FROM guardian', function(err,result){
-    //     res.send(result);
-    // })
-    console.log('got!');
+app.get('/schedule/test',(req,res)=>{
+    console.log('schedule test!');
+    res.end();
 })
+
 app.listen(3000, () => {
   console.log('The application is running on localhost:3000!');
 });

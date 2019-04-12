@@ -5,7 +5,8 @@ const conPool = mysql.createPool({
     host:"localhost",
 	user:"root",
 	password:"@WEIzinc6538",
-	database:"newscraping"
+	database:"newscraping",
+	debug: true
 })
 
 module.exports = {

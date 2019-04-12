@@ -178,8 +178,9 @@ router.get('/independent/list', (req, res) => {
                 for (let i=0; i<resultArea.find('.gs-per-result-labels').length;i++){
                     let source = 'INDEPEDENT';
                     let url = resultArea.find('.gs-per-result-labels').eq(i).attr('url');
-                    
-                    list.push(Object.assign({source, url}));
+                    if(url!=="https://www.independent.co.uk/topic/Taiwan"){
+                        list.push(Object.assign({source, url}));
+                    }
                 }
                 function idinsert(array, j){ // this function should recompose in DAO.
                     if (j < array.length){
@@ -271,7 +272,7 @@ router.get('/independent/article', (req, res) => {
                             title = title.replace(/"/g,'\\"').replace(/'/g,"\\'");
                             let subtitle = topContainerWrapper.find('h2').text();
                             subtitle = subtitle.replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            let meta = topContainerWrapper.find('.meta-wrap ul');
+                            let meta = topContainerWrapper.find('.meta');
                             let author = meta.find('.author').find('a').attr('title');
                             let datetime = meta.find('.publish-date').find('amp-timeago').attr('datetime');
                             let unixtime = Date.parse(datetime);
@@ -298,7 +299,6 @@ router.get('/independent/article', (req, res) => {
                                 if (err){
                                     res.send({err:'Database query error. here'+i});
                                     throw err;
-                                    return;
                                 }
                                 if (fetched === article.length){
                                     // console.log('update '+i);
@@ -489,11 +489,14 @@ router.get('/economist/list', (req, res) => {
                 let resultArea = $('.gsc-expansionArea');
                 let webResult = resultArea.find('.gsc-webResult');
                 let articleArray = [];
-                for (let i = 1; i < webResult.length ; i++){
+                for (let i = 0; i < webResult.length ; i++){
                     let source = 'The Economist';
                     let url = webResult.eq(i).find('a').attr('data-ctorig');
-                    articleArray.push(Object.assign({source, url}));
+                    if(url !=="https://www.economist.com/topics/taiwan"){
+                        articleArray.push(Object.assign({source, url}));
+                    }
                 }
+                // console.log(articleArray);
                 function insert(array, j){ // this function should recompose in DAO.
                     if (j < array.length){
                         mysql.conPool.getConnection((err,con)=>{
@@ -518,8 +521,8 @@ router.get('/economist/list', (req, res) => {
                                         subtitle: array[j].subtitle, 
                                         abstract: array[j].abstract,
                                         author: array[j].author, 
-                                        src_datetime: array[j].pubDatetime, 
-                                        unixtime: array[j].pubDatetime,
+                                        src_datetime: array[j].src_datetime, 
+                                        unixtime: array[j].unixtime,
                                         context: array[j].context,
                                         translate: array[j].translate,
                                         tag: array[j].tag
@@ -603,7 +606,6 @@ router.get('/economist/article',(req,res)=>{
                                 if (err){
                                     res.send({err:'Database query error. here'+i});
                                     throw err;
-                                    return;
                                 }
                                 if (fetched === article.length){
                                     res.send('ok');
@@ -1010,7 +1012,7 @@ router.get('/nytimes/article',(req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            fetched++;
+                            
                             if (error || !body) {
                                 return;
                             }
@@ -1043,6 +1045,7 @@ router.get('/nytimes/article',(req,res)=>{
                                 //     res.send({err:`Database query error at ${i}`});
                                 //     throw err;
                                 // }
+                                fetched++;
                                 if (fetched === article.length){
                                     res.send('ok');
                                     return;
@@ -1159,7 +1162,7 @@ router.get('/cnn/article',(req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            fetched++;
+                            
                             if (error || !body) {
                                 return;
                             }
@@ -1175,9 +1178,11 @@ router.get('/cnn/article',(req,res)=>{
                                               context = "${context}"
                                        WHERE id = ${article[i].id}`, function(err,result){
                                 if (err){ 
+                                    fetched++;
                                     res.send({err:`Database query error at ${i}`});
                                     throw err;
                                 }
+                                fetched++;
                                 if (fetched === article.length){
                                     res.send('ok');
                                     return;

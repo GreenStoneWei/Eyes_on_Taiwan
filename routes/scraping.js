@@ -10,12 +10,13 @@ const logFile = fs.createWriteStream( __dirname + '/../errorlog/error.log', {fla
 const logStdOut = process.stdout; // log to console as normal.
 const now = new Date().toLocaleString('en-US',{timeZone: 'Asia/Taipei'});
 const nodemailer = require('nodemailer');
+const credential = require('../util/credentials.js');
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: '',
-        pass: '',
+        user: credential.gmail.user,
+        pass: credential.gmail.pass,
     }
 });
 
@@ -25,8 +26,8 @@ const consoleFile = function(d){
     // console.log(d);
     logStdOut.write('---start---'+'\n'+now + '\n' + util.format(d) + '\n' + '----end----'+'\n'); // log to console as normal.
     let mailOptions = {
-        from: '',
-        to: '',
+        from: credential.gmail.user,
+        to: credential.gmail.user,
         subject: 'Eyes on Taiwan: Errors happen!',
         text: `${d}`,
       };

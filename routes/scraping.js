@@ -66,6 +66,7 @@ router.get('/washingtonpost/list', (req, res) => {
                                     throw err;
                                 }
                                 if (j===array.length-1){
+                                    console.log('schedule test: washinton post')
                                     res.redirect('/washingtonpost/article');
                                 }
                                 else{
@@ -373,6 +374,7 @@ router.get('/quartz/list',(req,res)=>{
                                     throw err;
                                 }
                                 if (j===array.length-1){
+                                    console.log('schedule test QUARTZ');
                                     res.redirect('/quartz/article');
                                 }
                                 else{

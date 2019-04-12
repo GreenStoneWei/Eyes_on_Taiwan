@@ -1094,14 +1094,14 @@ router.get('/cnn/list',(req,res)=>{
                     if (err){
                         res.send({err:'Database query error.'})
                     }
-                    let checkIfTitleExist = `SELECT * FROM CNN WHERE url = "${array[j].url}"`;
+                    let checkIfTitleExist = `SELECT * FROM cnn WHERE url = "${array[j].url}"`;
                     con.query(checkIfTitleExist, function(err, rows){
                         con.release();
                         if (err){
                             res.send({err:'Database query error.'})
                         }
                         if (rows.length === 0){
-                            let insertNewURL = `INSERT INTO CNN SET ?`;
+                            let insertNewURL = `INSERT INTO cnn SET ?`;
                             let oneRow = {
                                         url: array[j].url,
                                         source: array[j].source,

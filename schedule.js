@@ -8,10 +8,13 @@ let routeList = ['/washingtonpost/list',
                  '/aljazeera/list',
                  '/nytimes/list',
                  '/cnn/list',
-                 '/bbc/list']
+                 '/bbc/list'];
+
+
+
 for (let i=0; i< routeList.length ; i++){
     let options = {
-        url: "http://localhost:3000"+routeList[i],
+        url: "https://wheatxstone.com"+routeList[i],
         method: "GET"
     }
     request(options, function(error, response, body){

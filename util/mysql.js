@@ -2,7 +2,7 @@ const mysql = require("mysql");
 const credential = require("../util/credentials.js");
 
 const conPool = mysql.createPool({
-    connectionLimit: 10,
+    connectionLimit: 20,
     host:"localhost",
 	user:"root",
 	password: credential.mysqlPWD,

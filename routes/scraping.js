@@ -11,6 +11,7 @@ const logStdOut = process.stdout; // log to console as normal.
 const now = new Date().toLocaleString('en-US',{timeZone: 'Asia/Taipei'});
 const nodemailer = require('nodemailer');
 const credential = require('../util/credentials.js');
+const amsS3 = 'https://s3.amazonaws.com/wheatxstone/news';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -23,7 +24,6 @@ const transporter = nodemailer.createTransport({
 
 const consoleFile = function(d){
     logFile.write('---start---'+'\n'+now + '\n' + util.format(d) + '\n' + '----end----'+'\n');
-    // console.log(d);
     logStdOut.write('---start---'+'\n'+now + '\n' + util.format(d) + '\n' + '----end----'+'\n'); // log to console as normal.
     let mailOptions = {
         from: credential.gmail.user,
@@ -32,21 +32,51 @@ const consoleFile = function(d){
         text: `${d}`,
       };
     transporter.sendMail(mailOptions, function(error, info) {
-    if (error) {
-        console.log(error);
-    }
-    else {
-        console.log('Email sent: ', info.response);
-    }
+        if (error) {
+            console.log(error);
+        }
+        else {
+            console.log('Email sent: ', info.response);
+        }
     });
 }
+const aws = require('aws-sdk');
+const s3 = new aws.S3();
 
+
+
+  router.get('/upload/test',(req,res)=>{
+    let options = {
+        url: 'https://www.geek.com/wp-content/uploads/2018/07/amazon-625x352.jpg',
+        encoding: null
+    }
+    request(options, function(error, response, body) {
+        if (error || response.statusCode !== 200) { 
+            console.log("failed to get image");
+            console.log(error);
+        } else {
+            s3.putObject({
+                Body: body,
+                Key: 'test',
+                Bucket: 'wheatxstone/news',
+                ACL: 'public-read'
+            }, function(error, data) { 
+                if (error) {
+                    console.log("error downloading image to s3");
+                } else {
+                    console.log("success uploading to s3");
+                }
+            }); 
+        }   
+    });
+})
 
 
 router.get('/console/test', (req,res) =>{
     mysql.conPool.query('SELECT * FROM xxx',function(error,result){
         if(error){
             consoleFile(error);
+            return;
         }
         res.end();
     })
@@ -60,6 +90,7 @@ router.get('/washingtonpost/list', (req, res) => {
     }
     request(options, function(error, response, body){
         if (error || !body) {
+            consoleFile(error);
             return;
         }
         let articleList = JSON.parse(body).results.documents;
@@ -83,13 +114,17 @@ router.get('/washingtonpost/list', (req, res) => {
             if (j < array.length){
                 mysql.conPool.getConnection((err,con)=>{
                     if (err){
+                        consoleFile(err);
                         res.send({err:'Database query error.'})
+                        return;
                     }
                     let checkIfTitleExist = `SELECT * FROM washingtonpost WHERE title = "${array[j].title}"`; // Must to use double quote because there are signle quotes in titles
                     con.query(checkIfTitleExist, function(err, rows){
                         con.release();
                         if (err){
+                            consoleFile(err);
                             res.send({err:'Database query error.'})
+                            return;
                         }
                         if (rows.length === 0){
                             let insertNewURL = `INSERT INTO washingtonpost SET ?`;
@@ -105,16 +140,18 @@ router.get('/washingtonpost/list', (req, res) => {
                                 unixtime: array[j].unixtime,
                                 context: null,
                                 translate: null,
-                                tag: null
+                                tag: null,
+                                main_img: array[j].main_img
                             }
                             con.query(insertNewURL, oneRow, function(err, result, fields){
                                 if(err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'});
-                                    throw err;
+                                    return;
                                 }
                                 if (j===array.length-1){
-                                    console.log('schedule test: washington post')
                                     res.redirect('/washingtonpost/article');
+                                    return;
                                 }
                                 else{
                                     insert(array,j+1);
@@ -124,6 +161,7 @@ router.get('/washingtonpost/list', (req, res) => {
                         else{
                             if (j===array.length-1){
                                 res.redirect('/washingtonpost/article');
+                                return;
                             }
                             else{
                                 insert(array,j+1);
@@ -142,6 +180,7 @@ router.get('/washingtonpost/article',(req,res)=>{
         con.query('SELECT id, context, url FROM washingtonpost', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -154,12 +193,12 @@ router.get('/washingtonpost/article',(req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            
                             if (error || !body) {
+                                consoleFile(error);
                                 return;
                             }
                             let $ = cheerio.load(body);
-                            let main_img = $('.inline-photo').find('img').attr('src');
+                            let main_img = $('#article-body article .inline-photo').find('img').attr('src');
                             let paragraph = $('article').children();
                             let context = '';
                             for (let j = 0; j < paragraph.length; j++){
@@ -178,12 +217,13 @@ router.get('/washingtonpost/article',(req,res)=>{
                                 }
                                 
                             }
-                            context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");               
+                            context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");        
                             con.query(`UPDATE washingtonpost SET main_img = "${main_img}", context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
                                 if (err){
                                     fetched++;
-                                    res.send({err:'Database query error.'});
-                                    throw err;
+                                    consoleFile(err);
+                                    // res.send({err:'Database query error.'});
+                                    return;
                                 }
                                 fetched++;
                                 if (fetched === article.length){
@@ -233,15 +273,17 @@ router.get('/independent/list', (req, res) => {
                     if (j < array.length){
                         mysql.conPool.getConnection((err,con)=>{
                             if (err){
+                                consoleFile(err);
                                 res.send({err:'Database query error.'})
-                                throw err;
+                                return;
                             }
                             let checkIfTitleExist = `SELECT * FROM independent WHERE url = "${array[j].url}"`; // Must to use double quote because there are signle quotes in titles
                             con.query(checkIfTitleExist, function(err, rows){
                                 con.release();
                                 if (err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'})
-                                    throw err;
+                                    return;
                                 }
                                 if (rows.length === 0){
                                     let insertNewURL = `INSERT INTO independent SET ?`;
@@ -257,15 +299,18 @@ router.get('/independent/list', (req, res) => {
                                         unixtime: array[j].pubDatetime,
                                         context: array[j].context,
                                         translate: array[j].translate,
-                                        tag: array[j].tag
+                                        tag: array[j].tag,
+                                        main_img: array[j].main_img
                                     }
                                     con.query(insertNewURL, oneRow, function(err, result, fields){
                                         if(err){
+                                            consoleFile(err);
                                             res.send({err:'Database query error.'});
-                                            throw err;
+                                            return;
                                         }
                                         if (j==array.length-1){
                                             res.redirect('/independent/article');
+                                            return;
                                         }
                                         else{
                                             idinsert(array,j+1);
@@ -275,6 +320,7 @@ router.get('/independent/list', (req, res) => {
                                 else{
                                     if (j==array.length-1){
                                         res.redirect('/independent/article');
+                                        return;
                                     }
                                     else{
                                         idinsert(array,j+1);
@@ -287,7 +333,7 @@ router.get('/independent/list', (req, res) => {
                 idinsert(list,0);
             })
             .catch(function(error){
-                console.log(error);
+                consoleFile(error);
                 res.end();
             })
 })
@@ -297,6 +343,7 @@ router.get('/independent/article', (req, res) => {
         con.query('SELECT id, context, url FROM independent', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -309,8 +356,10 @@ router.get('/independent/article', (req, res) => {
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            fetched++;
+                            
                             if (error || !body) {
+                                consoleFile(err);
+                                res.end();
                                 return;
                             }
                             let $ = cheerio.load(body);
@@ -343,12 +392,13 @@ router.get('/independent/article', (req, res) => {
                                               src_datetime = '${datetime}', 
                                               unixtime = ${unixtime} 
                                        WHERE id = ${article[i].id}`, function(err,result){
+                                fetched++;
                                 if (err){
-                                    res.send({err:'Database query error. here'+i});
-                                    throw err;
+                                    consoleFile(err);
+                                    // res.send({err:'Database query error. here'+i});
+                                    return;
                                 }
                                 if (fetched === article.length){
-                                    // console.log('update '+i);
                                     res.send('ok');
                                     return;
                                 }
@@ -377,6 +427,7 @@ router.get('/quartz/list',(req,res)=>{
     }
     request(options, function(error, response, body){
         if (error || !body) {
+            consoleFile(error);
             return;
         }
         let $ = cheerio.load(body);
@@ -391,13 +442,17 @@ router.get('/quartz/list',(req,res)=>{
             if (j < array.length){
                 mysql.conPool.getConnection((err,con)=>{
                     if (err){
+                        consoleFile(err);
                         res.send({err:'Database query error.'})
+                        return;
                     }
                     let checkIfTitleExist = `SELECT * FROM quartz WHERE url = "${array[j].url}"`;
                     con.query(checkIfTitleExist, function(err, rows){
                         con.release();
                         if (err){
-                            res.send({err:'Database query error.'})
+                            consoleFile(err);
+                            res.send({err:'Database query error.'});
+                            return;
                         }
                         if (rows.length === 0){
                             let insertNewURL = `INSERT INTO quartz SET ?`;
@@ -413,16 +468,19 @@ router.get('/quartz/list',(req,res)=>{
                                         unixtime: array[j].pubDatetime,
                                         context: array[j].context,
                                         translate: array[j].translate,
-                                        tag: array[j].tag
+                                        tag: array[j].tag,
+                                        main_img: array[j].main_img
                             }
                             con.query(insertNewURL, oneRow, function(err, result, fields){
                                 if(err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'});
-                                    throw err;
+                                    return;
                                 }
                                 if (j===array.length-1){
                                     console.log('schedule test QUARTZ');
                                     res.redirect('/quartz/article');
+                                    return;
                                 }
                                 else{
                                     insert(array,j+1);
@@ -432,6 +490,7 @@ router.get('/quartz/list',(req,res)=>{
                         else{
                             if (j===array.length-1){
                                 res.redirect('/quartz/article');
+                                return;
                             }
                             else{
                                 insert(array,j+1);
@@ -450,6 +509,7 @@ router.get('/quartz/article', (req,res)=>{
         con.query('SELECT id, context, url FROM quartz', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -462,8 +522,8 @@ router.get('/quartz/article', (req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            fetched++;
                             if (error || !body) {
+                                consoleFile(error);
                                 return;
                             }
                             let $ = cheerio.load(body);
@@ -494,9 +554,10 @@ router.get('/quartz/article', (req,res)=>{
                                               src_datetime = '${datetime}', 
                                               unixtime = ${unixtime} 
                                        WHERE id = ${article[i].id}`, function(err,result){
+                                fetched++;
                                 if (err){
-                                    res.send({err:'Database query error. here'+i});
-                                    throw err;
+                                    consoleFile(err);
+                                    // res.send({err:'Database query error. here'+i});
                                     return;
                                 }
                                 if (fetched === article.length){
@@ -548,15 +609,17 @@ router.get('/economist/list', (req, res) => {
                     if (j < array.length){
                         mysql.conPool.getConnection((err,con)=>{
                             if (err){
+                                consoleFile(err);
                                 res.send({err:'Database query error.'})
-                                throw err;
+                                return;
                             }
                             let checkIfTitleExist = `SELECT * FROM economist WHERE url = "${array[j].url}"`; // Must to use double quote because there are signle quotes in titles
                             con.query(checkIfTitleExist, function(err, rows){
                                 con.release();
                                 if (err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'})
-                                    throw err;
+                                    return;
                                 }
                                 if (rows.length === 0){
                                     let insertNewURL = `INSERT INTO economist SET ?`;
@@ -572,15 +635,18 @@ router.get('/economist/list', (req, res) => {
                                         unixtime: array[j].unixtime,
                                         context: array[j].context,
                                         translate: array[j].translate,
-                                        tag: array[j].tag
+                                        tag: array[j].tag,
+                                        main_img: array[j].main_img
                                     }
                                     con.query(insertNewURL, oneRow, function(err, result, fields){
                                         if(err){
+                                            consoleFile(err);
                                             res.send({err:'Database query error.'});
-                                            throw err;
+                                            return;
                                         }
                                         if (j==array.length-1){
                                             res.redirect('/economist/article');
+                                            return;
                                         }
                                         else{
                                             insert(array,j+1);
@@ -590,6 +656,7 @@ router.get('/economist/list', (req, res) => {
                                 else{
                                     if (j==array.length-1){
                                         res.redirect('/economist/article');
+                                        return;
                                     }
                                     else{
                                         insert(array,j+1);
@@ -602,7 +669,7 @@ router.get('/economist/list', (req, res) => {
                 insert(articleArray,0);
             })
             .catch(function(error){
-                console.log(error);
+                consoleFile(error);
                 res.end();
             })
 })
@@ -612,6 +679,7 @@ router.get('/economist/article',(req,res)=>{
         con.query('SELECT id, context, url FROM economist', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -624,8 +692,8 @@ router.get('/economist/article',(req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            
                             if (error || !body) {
+                                consoleFile(error);
                                 return;
                             }
                             let $ = cheerio.load(body);
@@ -652,9 +720,9 @@ router.get('/economist/article',(req,res)=>{
                                        WHERE id = ${article[i].id}`, function(err,result){
                                 if (err){
                                     fetched++;
-                                    console.log(err);
-                                    res.send({err:'Database query error. here'+i});
-                                    throw err;
+                                    consoleFile(err);
+                                    // res.send({err:'Database query error. here'+i});
+                                    return;
                                 }
                                 fetched++;
                                 if (fetched === article.length){
@@ -685,6 +753,7 @@ router.get('/guardian/list',(req,res)=>{
     }
     request(options, function(error, response, body){
         if (error || !body) {
+            consoleFile(error);
             return;
         }
         let $ = cheerio.load(body);
@@ -702,13 +771,17 @@ router.get('/guardian/list',(req,res)=>{
             if (j < array.length){
                 mysql.conPool.getConnection((err,con)=>{
                     if (err){
+                        consoleFile(err);
                         res.send({err:'Database query error.'})
+                        return;
                     }
                     let checkIfTitleExist = `SELECT * FROM guardian WHERE url = "${array[j].url}"`;
                     con.query(checkIfTitleExist, function(err, rows){
                         con.release();
                         if (err){
+                            consoleFile(err);
                             res.send({err:'Database query error.'})
+                            return;
                         }
                         if (rows.length === 0){
                             let insertNewURL = `INSERT INTO guardian SET ?`;
@@ -724,15 +797,18 @@ router.get('/guardian/list',(req,res)=>{
                                         unixtime: array[j].pubDatetime,
                                         context: array[j].context,
                                         translate: array[j].translate,
-                                        tag: array[j].tag
+                                        tag: array[j].tag,
+                                        main_img: array[j].main_img
                             }
                             con.query(insertNewURL, oneRow, function(err, result, fields){
                                 if(err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'});
-                                    throw err;
+                                    return;
                                 }
                                 if (j===array.length-1){
                                     res.redirect('/guardian/article');
+                                    return;
                                 }
                                 else{
                                     insert(array,j+1);
@@ -742,6 +818,7 @@ router.get('/guardian/list',(req,res)=>{
                         else{
                             if (j===array.length-1){
                                 res.redirect('/guardian/article');
+                                return;
                             }
                             else{
                                 insert(array,j+1);
@@ -760,6 +837,7 @@ router.get('/guardian/article',(req,res)=>{
         con.query('SELECT id, context, url FROM guardian', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -772,8 +850,8 @@ router.get('/guardian/article',(req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            fetched++;
                             if (error || !body) {
+                                consoleFile(error);
                                 return;
                             }
                             let $ = cheerio.load(body);
@@ -798,9 +876,10 @@ router.get('/guardian/article',(req,res)=>{
                                               src_datetime = '${datetime}', 
                                               unixtime = ${unixtime} 
                                        WHERE id = ${article[i].id}`, function(err,result){
+                                fetched++;
                                 if (err){
-                                    res.send({err:'Database query error. here'+i});
-                                    throw err;
+                                    consoleFile(err);
+                                    // res.send({err:'Database query error. here'+i});
                                     return;
                                 }
                                 if (fetched === article.length){
@@ -831,6 +910,7 @@ router.get('/aljazeera/list',(req,res)=>{
     }
     request(options, function(error, response, body){
         if (error || !body) {
+            consoleFile(error);
             return;
         }
         let apiList = JSON.parse(body).value;
@@ -852,13 +932,17 @@ router.get('/aljazeera/list',(req,res)=>{
             if (j < array.length){
                 mysql.conPool.getConnection((err,con)=>{
                     if (err){
-                        res.send({err:'Database query error.'})
+                        consoleFile(err);
+                        res.send({err:'Database query error.'});
+                        return;
                     }
                     let checkIfTitleExist = `SELECT * FROM aljazeera WHERE url = "${array[j].url}"`;
                     con.query(checkIfTitleExist, function(err, rows){
                         con.release();
                         if (err){
+                            consoleFile(err);
                             res.send({err:'Database query error.'})
+                            return;
                         }
                         if (rows.length === 0){
                             let insertNewURL = `INSERT INTO aljazeera SET ?`;
@@ -875,15 +959,18 @@ router.get('/aljazeera/list',(req,res)=>{
                                         unixtime: array[j].unixtime,
                                         context: array[j].context,
                                         translate: array[j].translate,
-                                        tag: array[j].tag
+                                        tag: array[j].tag,
+                                        main_img: array[j].main_img
                             }
                             con.query(insertNewURL, oneRow, function(err, result, fields){
                                 if(err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'});
-                                    throw err;
+                                    return;
                                 }
                                 if (j===array.length-1){
                                     res.redirect('/aljazeera/article');
+                                    return;
                                 }
                                 else{
                                     insert(array,j+1);
@@ -893,6 +980,7 @@ router.get('/aljazeera/list',(req,res)=>{
                         else{
                             if (j===array.length-1){
                                 res.redirect('/aljazeera/article');
+                                return;
                             }
                             else{
                                 insert(array,j+1);
@@ -911,6 +999,7 @@ router.get('/aljazeera/article',(req,res)=>{
         con.query('SELECT id, context, url FROM aljazeera', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -923,8 +1012,8 @@ router.get('/aljazeera/article',(req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            fetched++;
                             if (error || !body) {
+                                consoleFile(error);
                                 return;
                             }
                             let $ = cheerio.load(body);
@@ -944,9 +1033,10 @@ router.get('/aljazeera/article',(req,res)=>{
                             con.query(`UPDATE aljazeera SET  
                                               context = "${context}"
                                        WHERE id = ${article[i].id}`, function(err,result){
+                                fetched++;
                                 if (err){
-                                    res.send({err:'Database query error. here'+i});
-                                    throw err;
+                                    consoleFile(err);
+                                    // res.send({err:'Database query error. here'+i});
                                     return;
                                 }
                                 if (fetched === article.length){
@@ -977,6 +1067,7 @@ router.get('/nytimes/list',(req,res)=>{
     }
     request(options, function(error, response, body){
         if (error || !body) {
+            consoleFile(error);
             return;
         }
         let $ = cheerio.load(body);
@@ -992,20 +1083,23 @@ router.get('/nytimes/list',(req,res)=>{
             if (j < array.length){
                 mysql.conPool.getConnection((err,con)=>{
                     if (err){
+                        consoleFile(err);
                         res.send({err:'Database query error.'})
+                        return;
                     }
                     let checkIfTitleExist = `SELECT * FROM nytimes WHERE url = "${array[j].url}"`;
                     con.query(checkIfTitleExist, function(err, rows){
                         con.release();
                         if (err){
+                            consoleFile(err);
                             res.send({err:'Database query error.'})
+                            return;
                         }
                         if (rows.length === 0){
                             let insertNewURL = `INSERT INTO nytimes SET ?`;
                             let oneRow = {
                                         url: array[j].url,
-                                        source: array[j].source,
-                                        main_img: array[j].main_img,
+                                        source: array[j].source,                                      
                                         category: array[j].category,
                                         title: array[j].title,
                                         subtitle: array[j].subtitle, 
@@ -1015,15 +1109,18 @@ router.get('/nytimes/list',(req,res)=>{
                                         unixtime: array[j].unixtime,
                                         context: array[j].context,
                                         translate: array[j].translate,
-                                        tag: array[j].tag
+                                        tag: array[j].tag,
+                                        main_img: array[j].main_img
                             }
                             con.query(insertNewURL, oneRow, function(err, result, fields){
                                 if(err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'});
-                                    throw err;
+                                    return;
                                 }
                                 if (j===array.length-1){
                                     res.redirect('/nytimes/article');
+                                    return;
                                 }
                                 else{
                                     insert(array,j+1);
@@ -1033,6 +1130,7 @@ router.get('/nytimes/list',(req,res)=>{
                         else{
                             if (j===array.length-1){
                                 res.redirect('/nytimes/article');
+                                return;
                             }
                             else{
                                 insert(array,j+1);
@@ -1050,6 +1148,7 @@ router.get('/nytimes/article',(req,res)=>{
         con.query('SELECT id, context, url FROM nytimes', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -1062,8 +1161,8 @@ router.get('/nytimes/article',(req,res)=>{
                     }
                     if (article[i].context === null){
                         request(options, function(error, response, body){
-                            
                             if (error || !body) {
+                                consoleFile(error);
                                 return;
                             }
                             let $ = cheerio.load(body);
@@ -1083,7 +1182,17 @@ router.get('/nytimes/article',(req,res)=>{
                                 }                                 
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            con.query(`UPDATE nytimes SET 
+                            if( context===''|| title ==='' || src_datetime === undefined ){
+                                let deleteNull = `DELETE FROM nytimes WHERE id = ${article[i].id}`;
+                                con.query(deleteNull,function(error,result){
+                                    if(error){
+                                        consoleFile(error);
+                                        return;
+                                    }
+                                })
+                            }
+                            else{
+                                con.query(`UPDATE nytimes SET 
                                               title = "${title}",
                                               main_img = "${main_img}",
                                               author = "${author}",
@@ -1091,16 +1200,17 @@ router.get('/nytimes/article',(req,res)=>{
                                               unixtime = ${unixtime},
                                               context = "${context}"
                                        WHERE id = ${article[i].id}`, function(err,result){
-                                // if (err){ // The format of articles before 2011 is different!!
-                                //     res.send({err:`Database query error at ${i}`});
-                                //     throw err;
-                                // }
-                                fetched++;
-                                if (fetched === article.length){
-                                    res.send('ok');
-                                    return;
-                                }
-                            })
+                                    fetched++;
+                                    if (err){ // The format of articles before 2011 is different!!
+                                        consoleFile(err);
+                                        return;
+                                    }
+                                    if (fetched === article.length){
+                                        res.send('ok');
+                                        return;
+                                    }
+                                })
+                            }
                         })
                     } 
                     else{
@@ -1124,6 +1234,7 @@ router.get('/cnn/list',(req,res)=>{
     }
     request(options, function(error, response, body){
         if (error || !body) {
+            consoleFile(error);
             return;
         }
         let apiList = JSON.parse(body).result;
@@ -1136,26 +1247,41 @@ router.get('/cnn/list',(req,res)=>{
             let author = apiList[i].byLine;
             let src_datetime = apiList[i].lastModifiedDate;
             let unixtime = Date.parse(src_datetime);
+            // let imgToS3 ={
+            //     url: main_img,
+            //     encoding: null
+            // }
+            // request(imgToS3,function(error,response,body){
+            //     if(error||response.statusCode !== 200){
+            //         consoleFile(error);
+            //     }
+            //     else{
+
+            //     }
+            // })
             articleArray.push((Object.assign({url, source, main_img, title, author, src_datetime, unixtime})));
         }
         function insert(array, j){ // this function should recompose in DAO.
             if (j < array.length){
                 mysql.conPool.getConnection((err,con)=>{
                     if (err){
-                        res.send({err:'Database query error.'})
+                        consoleFile(err);
+                        res.send({err:'Database query error.'});
+                        return;
                     }
                     let checkIfTitleExist = `SELECT * FROM cnn WHERE url = "${array[j].url}"`;
                     con.query(checkIfTitleExist, function(err, rows){
                         con.release();
                         if (err){
-                            res.send({err:'Database query error.'})
+                            consoleFile(err);
+                            res.send({err:'Database query error.'});
+                            return;
                         }
                         if (rows.length === 0){
                             let insertNewURL = `INSERT INTO cnn SET ?`;
                             let oneRow = {
                                         url: array[j].url,
                                         source: array[j].source,
-                                        main_img: array[j].main_img,
                                         category: array[j].category,
                                         title: array[j].title,
                                         subtitle: array[j].subtitle, 
@@ -1165,15 +1291,18 @@ router.get('/cnn/list',(req,res)=>{
                                         unixtime: array[j].unixtime,
                                         context: array[j].context,
                                         translate: array[j].translate,
-                                        tag: array[j].tag
+                                        tag: array[j].tag,
+                                        main_img: array[j].main_img
                             }
                             con.query(insertNewURL, oneRow, function(err, result, fields){
                                 if(err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'});
-                                    throw err;
+                                    return;
                                 }
                                 if (j===array.length-1){
                                     res.redirect('/cnn/article');
+                                    return;
                                 }
                                 else{
                                     insert(array,j+1);
@@ -1183,6 +1312,7 @@ router.get('/cnn/list',(req,res)=>{
                         else{
                             if (j===array.length-1){
                                 res.redirect('/cnn/article');
+                                return;
                             }
                             else{
                                 insert(array,j+1);
@@ -1200,6 +1330,7 @@ router.get('/cnn/article',(req,res)=>{
         con.query('SELECT id, context, url FROM cnn', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -1211,9 +1342,9 @@ router.get('/cnn/article',(req,res)=>{
                         method: "GET"
                     }
                     if (article[i].context === null){
-                        request(options, function(error, response, body){
-                            
+                        request(options, function(error, response, body){   
                             if (error || !body) {
+                                consoleFile(error);
                                 return;
                             }
                             let $ = cheerio.load(body);
@@ -1229,8 +1360,9 @@ router.get('/cnn/article',(req,res)=>{
                                        WHERE id = ${article[i].id}`, function(err,result){
                                 if (err){ 
                                     fetched++;
-                                    res.send({err:`Database query error at ${i}`});
-                                    throw err;
+                                    consoleFile(err);
+                                    // res.send({err:`Database query error at ${i}`});
+                                    return;
                                 }
                                 fetched++;
                                 if (fetched === article.length){
@@ -1261,6 +1393,7 @@ router.get('/bbc/list',(req,res)=>{
     }
     request(options, function(error, response, body){
         if (error || !body) {
+            consoleFile(error);
             return;
         }
         let $ = cheerio.load(body);
@@ -1278,12 +1411,14 @@ router.get('/bbc/list',(req,res)=>{
             if (j < array.length){
                 mysql.conPool.getConnection((err,con)=>{
                     if (err){
-                        res.send({err:'Database query error.'})
+                        consoleFile(err);
+                        res.send({err:'Database query error.'});
                     }
                     let checkIfTitleExist = `SELECT * FROM bbc WHERE url = "${array[j].url}"`;
                     con.query(checkIfTitleExist, function(err, rows){
                         con.release();
                         if (err){
+                            consoleFile(err);
                             res.send({err:'Database query error.'})
                         }
                         if (rows.length === 0){
@@ -1291,7 +1426,6 @@ router.get('/bbc/list',(req,res)=>{
                             let oneRow = {
                                         url: array[j].url,
                                         source: array[j].source,
-                                        main_img: array[j].main_img,
                                         category: array[j].category,
                                         title: array[j].title,
                                         subtitle: array[j].subtitle, 
@@ -1301,15 +1435,18 @@ router.get('/bbc/list',(req,res)=>{
                                         unixtime: array[j].unixtime,
                                         context: array[j].context,
                                         translate: array[j].translate,
-                                        tag: array[j].tag
+                                        tag: array[j].tag,
+                                        main_img: array[j].main_img
                             }
                             con.query(insertNewURL, oneRow, function(err, result, fields){
                                 if(err){
+                                    consoleFile(err);
                                     res.send({err:'Database query error.'});
-                                    throw err;
+                                    return;
                                 }
                                 if (j===array.length-1){
                                     res.redirect('/bbc/article');
+                                    return;
                                 }
                                 else{
                                     insert(array,j+1);
@@ -1319,6 +1456,7 @@ router.get('/bbc/list',(req,res)=>{
                         else{
                             if (j===array.length-1){
                                 res.redirect('/bbc/article');
+                                return;
                             }
                             else{
                                 insert(array,j+1);
@@ -1336,6 +1474,7 @@ router.get('/bbc/article',(req,res)=>{
         con.query('SELECT id, context, url FROM bbc', function(err, article){
             con.release();
             if(err){
+                consoleFile(err);
                 res.send({err:'Database query error.'});
                 return;
             }
@@ -1349,6 +1488,7 @@ router.get('/bbc/article',(req,res)=>{
                     if (article[i].context === null){
                         request(options, function(error, response, body){
                             if (error || !body) {
+                                consoleFile(error);
                                 return;
                             }
                             let $ = cheerio.load(body);
@@ -1369,11 +1509,12 @@ router.get('/bbc/article',(req,res)=>{
                                               unixtime = ${unixtime},
                                               context = "${context}"
                                        WHERE id = ${article[i].id}`, function(err,result){
-                                if (err){ 
-                                    res.send({err:`Database query error at ${i}`});
-                                    throw err;
-                                }
                                 fetched++;
+                                if (err){ 
+                                    consoleFile(err);
+                                    // res.send({err:`Database query error at ${i}`});
+                                    return;
+                                }
                                 if (fetched === article.length){
                                     res.send('ok');
                                     return;

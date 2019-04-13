@@ -1,4 +1,7 @@
 const request = require("request");
+const localHost = 'http://localhost:3000';
+const domainName = 'https://wheatxstone.com';
+const host = localHost;
 
 let routeList = ['/washingtonpost/list',
                  '/independent/list',
@@ -11,7 +14,7 @@ let routeList = ['/washingtonpost/list',
                  '/bbc/list'];
 
 let schedule = {
-    url: "https://wheatxstone.com/schedule/test",
+    url: host+"/schedule/test",
     method: "GET"
 }
 request(schedule, function(error, response, body){
@@ -22,7 +25,7 @@ if (error || !body) {
 
 for (let i=0; i< routeList.length ; i++){
     let options = {
-        url: "https://wheatxstone.com"+routeList[i],
+        url: host+routeList[i],
         method: "GET"
     }
     request(options, function(error, response, body){

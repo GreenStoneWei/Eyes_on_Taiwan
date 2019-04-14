@@ -1,7 +1,7 @@
 const request = require("request");
 const localHost = 'http://localhost:3000';
 const domainName = 'https://wheatxstone.com';
-const host = localHost;
+const host = domainName;
 
 let routeList = ['/washingtonpost/list',
                  '/independent/list',

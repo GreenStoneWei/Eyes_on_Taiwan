@@ -32,6 +32,13 @@ body{
     color: gray;
     padding-left: 10px;
 }
+.img{
+    display: flex;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    width: 600px;
+    height: auto;
+}
 .datetime{
     margin-right: 20px;
 }

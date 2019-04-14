@@ -1,5 +1,12 @@
 const container = document.querySelector('.container');
 
+const setAttr = function(obj,attributes){
+	for(let name in attributes){
+		obj[name]=attributes[name];
+	}
+	return obj;
+};
+
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
     let xhr = new XMLHttpRequest();
@@ -9,11 +16,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
         let source = createElement('div',['source'],false,container);
-        let img = createElement('img',[],false,container);
         let h1 = createElement('h1',['title'],false,container);
         let meta = createElement('div',['meta'],false,container);
         let datetime = createElement('div',['datetime'],false,meta);
         let subtitle = createElement('h3',['subtitle'],false,container);
+        let img = createElement('img',['img'],false,container);
+        setAttr(img,{src:article[0].main_img});
         let content = createElement('div',['content'],false,container);
         let origin = createElement('a',['btn','btn-info','btn-width'],{href:article[0].url,role:'button'},container); 
 

@@ -71,13 +71,13 @@ const insertUrlList = function(res ,array, j, newsname, identifier, redirect){
     // }) // end of Promise
 }
 
-const promiseInsert = function(array, j, newsname, identifier, redirect){
+const promiseInsert = function(array, j, newsname, identifier){
     return new Promise(function(resolve,reject){
         if (j < array.length){
             mysql.conPool.getConnection((err,con)=>{
                 if (err){
                     myLib.log(err);
-                    insertUrlList(res, array,j+1,newsname, identifier, redirect);
+                    promiseInsert(res, array,j+1,newsname, identifier);
                 }
                 let checkIfExist = `SELECT * FROM ${newsname} WHERE ${identifier} = ?`;
                 con.query(checkIfExist, array[j][identifier] ,function(err, rows){
@@ -85,7 +85,9 @@ const promiseInsert = function(array, j, newsname, identifier, redirect){
                     if (err){
                         console.log('aaa');
                         myLib.log(err);
-                        insertUrlList(array,j+1,newsname, identifier, redirect);
+                        promiseInsert(array,j+1,newsname, identifier).then(()=>{
+                            resolve('111');
+                        });
                     }
                     if (rows.length === 0){
                         let insertNewURL = `INSERT INTO ${newsname} SET ?`;
@@ -116,7 +118,9 @@ const promiseInsert = function(array, j, newsname, identifier, redirect){
                             }
                             else{
                                 console.log('running '+j);
-                                insertUrlList(array,j+1,newsname, identifier, redirect);
+                                promiseInsert(array,j+1,newsname, identifier).then(()=>{
+                                    resolve();
+                                });
                             }
                         })
                     }
@@ -127,7 +131,10 @@ const promiseInsert = function(array, j, newsname, identifier, redirect){
                         }
                         else{
                             console.log('ccc '+j);
-                            insertUrlList(array,j+1,newsname, identifier, redirect);
+                            promiseInsert(array,j+1,newsname, identifier).then(()=>{
+                                resolve();
+                            });
+                            
                         }
                     }
                 })

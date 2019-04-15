@@ -49,7 +49,13 @@ router.get('/washingtonpost/list', (req, res) => {
                 );
             }
         } // End of for loop
-        dao.insertUrlList(res, articleArray,0,'washingtonpost','title','/washingtonpost/article')
+        // dao.insertUrlList(res, articleArray,0,'washingtonpost','title','/washingtonpost/article');
+        dao.promiseInsert(articleArray,0,'washingtonpost','title').then((x)=>{
+            console.log(x);
+            res.redirect('/');
+        }).catch((error)=>{
+            console.log(error);
+        });
         //    .then(function(){
         //         // console.log(url);
         //         res.end();
@@ -138,8 +144,7 @@ router.get('/washingtonpost/article',(req,res)=>{
                 let fetched = 0;
                 for (let i = 0 ; i < article.length; i++){
                     let options = {
-                        url:'https://www.washingtonpost.com/business/why-might-china-want-to-steal-these-silicon-secrets/2019/04/11/55ebbdf4-5c56-11e9-98d4-844088d135f2_story.html?noredirect=on&utm_term=.0565bb763876',
-                        // url: article[i].url,
+                        url: article[i].url,
                         method: "GET"
                     }
                     if (article[i].context === null){
@@ -206,27 +211,49 @@ router.get('/washingtonpost/article',(req,res)=>{
 // Independent UK
 router.get('/independent/list', (req, res) => {
     let url= "https://cse.google.com/cse?oe=utf8&ie=utf8&source=uds&q=taiwan&safe=off&sort=&cx=006663403660930254993:oxhge2zf1ro&start=0";
-    puppeteer.launch()
-            .then(function(browser){
-                return browser.newPage();
-            })
-            .then(function(page){
-                return page.goto(url).then(function(){
-                    return page.content();
-                });
-            })
-            .then(function(html){
-                let $ = cheerio.load(html);
-                let resultArea = $('.gsc-expansionArea');
-                let articleArray = [];
-                for (let i=0; i<resultArea.find('.gs-per-result-labels').length;i++){
-                    let source = 'INDEPEDENT';
-                    let url = resultArea.find('.gs-per-result-labels').eq(i).attr('url');
-                    if(url!=="https://www.independent.co.uk/topic/Taiwan"){
-                        articleArray.push(Object.assign({source, url}));
-                    }
-                }
-                dao.insertUrlList(res, articleArray,0,'independent','url','/independent/article')
+    (async()=>{
+        let browser = await puppeteer.launch();
+        let page = await browser.newPage();
+        await page.goto(url);
+        let html = await page.content();
+        let $ = cheerio.load(html);
+        let resultArea = $('.gsc-expansionArea');
+        let articleArray = [];
+        for (let i=0; i<resultArea.find('.gs-per-result-labels').length;i++){
+            let source = 'INDEPEDENT';
+            let url = resultArea.find('.gs-per-result-labels').eq(i).attr('url');
+            if(url!=="https://www.independent.co.uk/topic/Taiwan"){
+                articleArray.push(Object.assign({source, url}));
+            }
+        }
+
+
+        console.log(articleArray);
+        await browser.close();
+        res.send('closed');
+
+    })();
+    // puppeteer.launch()
+    //         .then(function(browser){
+    //             return browser.newPage();
+    //         })
+    //         .then(function(page){
+    //             return page.goto(url).then(function(){
+    //                 return page.content();
+    //             });
+    //         })
+    //         .then(function(html){
+    //             let $ = cheerio.load(html);
+    //             let resultArea = $('.gsc-expansionArea');
+    //             let articleArray = [];
+    //             for (let i=0; i<resultArea.find('.gs-per-result-labels').length;i++){
+    //                 let source = 'INDEPEDENT';
+    //                 let url = resultArea.find('.gs-per-result-labels').eq(i).attr('url');
+    //                 if(url!=="https://www.independent.co.uk/topic/Taiwan"){
+    //                     articleArray.push(Object.assign({source, url}));
+    //                 }
+    //             }
+    //             dao.insertUrlList(res, articleArray,0,'independent','url','/independent/article')
                 
                 // function idinsert(array, j){ // this function should recompose in DAO.
                 //     if (j < array.length){
@@ -290,11 +317,14 @@ router.get('/independent/list', (req, res) => {
                 //     }
                 // }
                 // idinsert(list,0);
-            })
-            .catch(function(error){
-                myLib.log(error);
-                res.end();
-            })
+            // })
+            // .then(function(browser){
+            //     browser.close();
+            // })
+            // .catch(function(error){
+            //     myLib.log(error);
+            //     res.end();
+            // })
 })
 
 router.get('/independent/article', (req, res) => {

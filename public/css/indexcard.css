@@ -39,7 +39,7 @@ a{
 }
 
 .card-size{
-    width: 500px;
+    max-width: 500px;
     min-width: 375px;
     background-color: white;
 }

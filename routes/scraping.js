@@ -50,84 +50,13 @@ router.get('/washingtonpost/list', (req, res) => {
             }
         } // End of for loop
         // dao.insertUrlList(res, articleArray,0,'washingtonpost','title','/washingtonpost/article');
+
         dao.promiseInsert(articleArray,0,'washingtonpost','title').then((x)=>{
             console.log(x);
-            res.redirect('/');
+            res.redirect('/washingtonpost/article');
         }).catch((error)=>{
             console.log(error);
         });
-        //    .then(function(){
-        //         // console.log(url);
-        //         res.end();
-        //         // res.resdirect(url);
-        //    })
-        //    .catch((error)=>{
-        //        myLib.log(error)
-        //        res.end();
-        //    })
-
-        // function insert(array, j){ // this function should recompose in DAO.
-        //     if (j < array.length){
-        //         mysql.conPool.getConnection((err,con)=>{
-        //             if (err){
-        //                 myLib.log(err);
-        //                 res.send({err:'Database query error.'})
-        //                 return;
-        //             }
-        //             let checkIfTitleExist = `SELECT * FROM washingtonpost WHERE title = "${array[j].title}"`; // Must to use double quote because there are signle quotes in titles
-        //             con.query(checkIfTitleExist, function(err, rows){
-        //                 con.release();
-        //                 if (err){
-        //                     myLib.log(err);
-        //                     res.send({err:'Database query error.'})
-        //                     return;
-        //                 }
-        //                 if (rows.length === 0){
-        //                     let insertNewURL = `INSERT INTO washingtonpost SET ?`;
-        //                     let oneRow = {
-        //                         url: array[j].url,
-        //                         source: 'The Washington Post',
-        //                         category: array[j].category,
-        //                         title: array[j].title,
-        //                         subtitle: array[j].subtitle, 
-        //                         abstract: null,
-        //                         author: array[j].author, 
-        //                         src_datetime: array[j].src_datetime, 
-        //                         unixtime: array[j].unixtime,
-        //                         context: null,
-        //                         translate: null,
-        //                         tag: null,
-        //                         main_img: array[j].main_img
-        //                     }
-        //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-        //                         if(err){
-        //                             myLib.log(err);
-        //                             res.send({err:'Database query error.'});
-        //                             return;
-        //                         }
-        //                         if (j===array.length-1){
-        //                             res.redirect('/washingtonpost/article');
-        //                             return;
-        //                         }
-        //                         else{
-        //                             insert(array,j+1);
-        //                         }
-        //                     })
-        //                 }
-        //                 else{
-        //                     if (j===array.length-1){
-        //                         res.redirect('/washingtonpost/article');
-        //                         return;
-        //                     }
-        //                     else{
-        //                         insert(array,j+1);
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     }
-        // }
-        // insert(articleArray,0);
     }) // End of request
 })
 
@@ -144,6 +73,7 @@ router.get('/washingtonpost/article',(req,res)=>{
                 let fetched = 0;
                 for (let i = 0 ; i < article.length; i++){
                     let options = {
+                        // url: 'https://www.washingtonpost.com/business/why-might-china-want-to-steal-these-silicon-secrets/2019/04/11/55ebbdf4-5c56-11e9-98d4-844088d135f2_story.html?noredirect=on&utm_term=.e3b12dd1cc08',
                         url: article[i].url,
                         method: "GET"
                     }
@@ -172,14 +102,15 @@ router.get('/washingtonpost/article',(req,res)=>{
                                     context += '<h3>' + h3 + '</h3>';
                                 }
                                 // else if(paragraph.get(j).tagName == 'div'){
-                                //     if(paragraph.eq(j).has('img')){
+                                //     if(paragraph.eq(j).find('img').length > 0){
                                 //         let src = paragraph.eq(j).find('img').attr('src');
                                 //         console.log(src);
+                                //         console.log(j);
                                 //         context += `<img src="${src}">`;
                                 //     }
                                 // }
                             }
-                            context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");        
+                            context = context.replace(/"/g,'\\"').replace(/'/g,"\\'"); 
                             con.query(`UPDATE washingtonpost SET main_img = "${main_img}", context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
                                 if (err){
                                     fetched++;
@@ -212,120 +143,31 @@ router.get('/washingtonpost/article',(req,res)=>{
 router.get('/independent/list', (req, res) => {
     let url= "https://cse.google.com/cse?oe=utf8&ie=utf8&source=uds&q=taiwan&safe=off&sort=&cx=006663403660930254993:oxhge2zf1ro&start=0";
     (async()=>{
-        let browser = await puppeteer.launch();
-        let page = await browser.newPage();
-        await page.goto(url);
-        let html = await page.content();
-        let $ = cheerio.load(html);
-        let resultArea = $('.gsc-expansionArea');
-        let articleArray = [];
-        for (let i=0; i<resultArea.find('.gs-per-result-labels').length;i++){
-            let source = 'INDEPEDENT';
-            let url = resultArea.find('.gs-per-result-labels').eq(i).attr('url');
-            if(url!=="https://www.independent.co.uk/topic/Taiwan"){
-                articleArray.push(Object.assign({source, url}));
+        try{
+            let browser = await puppeteer.launch();
+            let page = await browser.newPage();
+            await page.goto(url);
+            let html = await page.content();
+            let $ = cheerio.load(html);
+            let resultArea = $('.gsc-expansionArea');
+            let articleArray = [];
+            for (let i=0; i<resultArea.find('.gs-per-result-labels').length;i++){
+                let source = 'INDEPEDENT';
+                let url = resultArea.find('.gs-per-result-labels').eq(i).attr('url');
+                if(url!=="https://www.independent.co.uk/topic/Taiwan"){
+                    articleArray.push(Object.assign({source, url}));
+                }
             }
+            await dao.promiseInsert(articleArray,0,'independent','url');
+            await browser.close();
+            res.redirect('/independent/article');
         }
-
-
-        console.log(articleArray);
-        await browser.close();
-        res.send('closed');
-
+        catch(error){
+            myLib.log(error);
+            res.end();
+        }
     })();
-    // puppeteer.launch()
-    //         .then(function(browser){
-    //             return browser.newPage();
-    //         })
-    //         .then(function(page){
-    //             return page.goto(url).then(function(){
-    //                 return page.content();
-    //             });
-    //         })
-    //         .then(function(html){
-    //             let $ = cheerio.load(html);
-    //             let resultArea = $('.gsc-expansionArea');
-    //             let articleArray = [];
-    //             for (let i=0; i<resultArea.find('.gs-per-result-labels').length;i++){
-    //                 let source = 'INDEPEDENT';
-    //                 let url = resultArea.find('.gs-per-result-labels').eq(i).attr('url');
-    //                 if(url!=="https://www.independent.co.uk/topic/Taiwan"){
-    //                     articleArray.push(Object.assign({source, url}));
-    //                 }
-    //             }
-    //             dao.insertUrlList(res, articleArray,0,'independent','url','/independent/article')
-                
-                // function idinsert(array, j){ // this function should recompose in DAO.
-                //     if (j < array.length){
-                //         mysql.conPool.getConnection((err,con)=>{
-                //             if (err){
-                //                 myLib.log(err);
-                //                 res.send({err:'Database query error.'})
-                //                 return;
-                //             }
-                //             let checkIfTitleExist = `SELECT * FROM independent WHERE url = "${array[j].url}"`; // Must to use double quote because there are signle quotes in titles
-                //             con.query(checkIfTitleExist, function(err, rows){
-                //                 con.release();
-                //                 if (err){
-                //                     myLib.log(err);
-                //                     res.send({err:'Database query error.'})
-                //                     return;
-                //                 }
-                //                 if (rows.length === 0){
-                //                     let insertNewURL = `INSERT INTO independent SET ?`;
-                //                     let oneRow = {
-                //                         url: array[j].url,
-                //                         source: array[j].source,
-                //                         category: array[j].category,
-                //                         title: array[j].title,
-                //                         subtitle: array[j].subtitle, 
-                //                         abstract: array[j].abstract,
-                //                         author: array[j].author, 
-                //                         src_datetime: array[j].pubDatetime, 
-                //                         unixtime: array[j].pubDatetime,
-                //                         context: array[j].context,
-                //                         translate: array[j].translate,
-                //                         tag: array[j].tag,
-                //                         main_img: array[j].main_img
-                //                     }
-                //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-                //                         if(err){
-                //                             myLib.log(err);
-                //                             res.send({err:'Database query error.'});
-                //                             return;
-                //                         }
-                //                         if (j==array.length-1){
-                //                             res.redirect('/independent/article');
-                //                             return;
-                //                         }
-                //                         else{
-                //                             idinsert(array,j+1);
-                //                         }
-                //                     })
-                //                 }
-                //                 else{
-                //                     if (j==array.length-1){
-                //                         res.redirect('/independent/article');
-                //                         return;
-                //                     }
-                //                     else{
-                //                         idinsert(array,j+1);
-                //                     }
-                //                 }
-                //             })
-                //         })
-                //     }
-                // }
-                // idinsert(list,0);
-            // })
-            // .then(function(browser){
-            //     browser.close();
-            // })
-            // .catch(function(error){
-            //     myLib.log(error);
-            //     res.end();
-            // })
-})
+});
 
 router.get('/independent/article', (req, res) => {
     mysql.conPool.getConnection((err,con)=>{

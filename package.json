@@ -13,6 +13,7 @@
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.4",
     "mysql": "^2.16.0",
+    "natural": "^0.6.3",
     "nodemailer": "^6.1.0",
     "nodemon": "^1.18.11",
     "puppeteer": "^1.14.0",

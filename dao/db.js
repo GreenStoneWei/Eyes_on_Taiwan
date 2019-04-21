@@ -44,7 +44,6 @@ const insertUrlList = function(res ,array, j, newsname, identifier, redirect){
                             if (j===array.length-1){
                                 console.log('last A');
                                 res.redirect(redirect);
-                                // resolve();
                                 return;
                             }
                             else{
@@ -57,7 +56,6 @@ const insertUrlList = function(res ,array, j, newsname, identifier, redirect){
                         if (j===array.length-1){
                             console.log('last '+j);
                             res.redirect(redirect);
-                            // resolve();
                             return;
                         }
                         else{
@@ -77,7 +75,7 @@ const promiseInsert = function(array, j, newsname, identifier){
             mysql.conPool.getConnection((err,con)=>{
                 if (err){
                     myLib.log(err);
-                    promiseInsert(res, array,j+1,newsname, identifier);
+                    promiseInsert(array,j+1,newsname, identifier);
                 }
                 let checkIfExist = `SELECT * FROM ${newsname} WHERE ${identifier} = ?`;
                 con.query(checkIfExist, array[j][identifier] ,function(err, rows){
@@ -142,8 +140,82 @@ const promiseInsert = function(array, j, newsname, identifier){
         }
     }) // end of Promise
 }
+
+const addToDB = function(array, j, news_id, identifier){
+    return new Promise(function(resolve,reject){
+        if (j < array.length){
+            mysql.conPool.getConnection((err,con)=>{
+                if (err){
+                    myLib.log(err);
+                    addToDB(array, j+1, news_id, identifier);
+                }
+                let checkIfExist = `SELECT * FROM article WHERE news_id = ${news_id} AND ${identifier} = ?`;
+                con.query(checkIfExist, array[j][identifier] ,function(err, rows){
+                    con.release();
+                    if (err){
+                        console.log('aaa'+err);
+                        myLib.log(err);
+                        addToDB(array, j+1, news_id, identifier).then(()=>{
+                            reject('111');
+                        });
+                    }
+                    if (rows.length === 0){
+                        let insertNewURL = `INSERT INTO article SET ?`;
+                        let oneRow = {
+                                    news_id: `${news_id}`,
+                                    url: array[j].url,
+                                    title: array[j].title,
+                                    subtitle: array[j].subtitle,
+                                    abstract: array[j].abstract,
+                                    author: array[j].author, 
+                                    src_datetime: array[j].src_datetime,
+                                    unixtime: array[j].unixtime,
+                                    content: array[j].content,
+                                    context: array[j].context,
+                                    main_img: array[j].main_img,
+                                    similar_article: array[j].similer_article
+                        }
+                        con.query(insertNewURL, oneRow, function(err, result, fields){
+                            if(err){
+                                console.log('bbb');
+                                myLib.log(err);
+                                addToDB(array, j+1, news_id, identifier).then(()=>{
+                                    reject('555');
+                                });
+                            }
+                            if (j===array.length-1){
+                                console.log('last A');
+                                resolve('last');
+                            }
+                            else{
+                                console.log('running '+j);
+                                addToDB(array, j+1, news_id, identifier).then(()=>{
+                                    resolve();
+                                });
+                            }
+                        })
+                    }
+                    else{
+                        if (j===array.length-1){
+                            console.log('last '+j);
+                            resolve();
+                        }
+                        else{
+                            console.log('ccc '+j);
+                            addToDB(array, j+1, news_id, identifier).then(()=>{
+                                resolve();
+                            });
+                            
+                        }
+                    }
+                })
+            })
+        }
+    }) // end of Promise
+}
 module.exports = {
     insertUrlList: insertUrlList,
-    promiseInsert: promiseInsert
+    promiseInsert: promiseInsert,
+    addToDB: addToDB
 };
     

@@ -65,4 +65,30 @@ router.get('/article',(req,res)=>{
     })
 })
 
+router.get('/migration',(req,res)=>{
+    let page = parseInt(req.query.page);
+    if (!Number.isInteger(page)){
+        page = 1;
+    }
+    let getAllArticle = '';
+    let newsCounter = 0;
+    for (let i = 0; i < Object.keys(newsDB).length; i++){
+        newsCounter ++;
+        if (newsCounter == Object.keys(newsDB).length){
+            getAllArticle += `SELECT id, url, source, unixtime, main_img, title, abstract, context FROM ${Object.keys(newsDB)[i]}`;
+        }
+        else{
+            getAllArticle += `SELECT id, url, source, unixtime, main_img, title, abstract, context FROM ${Object.keys(newsDB)[i]}` + ' UNION ';
+        }
+    }
+    mysql.conPool.query(getAllArticle+' ORDER BY unixtime DESC LIMIT 150',function(error, result){
+        if (error){
+            throw error;
+        }
+        result = result.filter(function(obj){
+            return obj.context !== '' && obj.title !== null;
+        })
+        res.send(result.slice((page-1)*10,page*10));
+    })
+})
 module.exports = router;

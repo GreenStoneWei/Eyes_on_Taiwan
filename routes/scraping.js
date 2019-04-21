@@ -4,10 +4,10 @@ const mysql   = require('../util/mysql.js');
 const dao     = require('../dao/db.js');
 const request = require("request");
 const cheerio = require("cheerio");
+const myLib   = require('../util/config.js');
 const puppeteer = require('puppeteer');
-const myLib = require('../util/config.js');
-const uploadImgToS3 = require('../controllers/s3.js')
-// const credential = require('../util/credentials.js');
+const abstractGen   = require('../util/abstract.js');
+const uploadImgToS3 = require('../controllers/s3.js');
 
 router.get('/send/email/if/error', (req,res) =>{
     mysql.conPool.query('SELECT * FROM DoesNotExist',function(error,result){
@@ -42,19 +42,24 @@ router.get('/aljazeera/list',(req,res)=>{
                 let author = apiList[i].Authors;
                 let src_datetime = apiList[i].LastModifiedDate;
                 let unixtime = Date.parse(src_datetime);
-                uploadImgToS3(main_img,'aljazeera', Date.now().toString(),(main_img)=>{
-                    articleArray.push((Object.assign({url, main_img, title, subtitle, author, src_datetime, unixtime})));
+                if (url.search('video') == -1){
+                    uploadImgToS3(main_img,'aljazeera', Date.now().toString(),(main_img)=>{
+                        articleArray.push((Object.assign({url, main_img, title, subtitle, author, src_datetime, unixtime})));
+                        fetched++;
+                        if(fetched == apiList.length){
+                            dao.addToDB(articleArray,0,1,'url').then((x)=>{
+                                console.log(x);
+                                res.send('OK');
+                                // res.redirect('/washingtonpost/article');
+                            }).catch((error)=>{
+                                myLib.log(error);
+                            });
+                        }
+                    })
+                }
+                else{
                     fetched++;
-                    if(fetched == apiList.length){
-                        dao.addToDB(articleArray,0,1,'url').then((x)=>{
-                            console.log(x);
-                            res.send('OK');
-                            // res.redirect('/washingtonpost/article');
-                        }).catch((error)=>{
-                            myLib.log(error);
-                        });
-                    }
-                })
+                }
             }
             else{
                 fetched++; // 因為要把 content type 不是 news 的也算進去
@@ -125,7 +130,6 @@ router.get('/aljazeera/list',(req,res)=>{
         // insert(articleArray,0);
     }) // End of request
 })
-
 router.get('/aljazeera/article',(req,res)=>{
     mysql.conPool.getConnection((err,con)=>{
         con.query('SELECT id, context, url FROM article WHERE news_id = 1', function(err, article){
@@ -167,13 +171,11 @@ router.get('/aljazeera/article',(req,res)=>{
 
                                 }                                            
                             }
+                            
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
                             content = JSON.stringify(content);
 
-                            con.query(`UPDATE article SET  
-                                              context = "${context}",
-                                              content = '${content}'
-                                       WHERE id = ${article[i].id}`, function(err,result){
+                            con.query(`UPDATE article SET context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
                                 fetched++;
                                 if (err){
                                     myLib.log(err);
@@ -325,8 +327,9 @@ router.get('/bbc/article',(req,res)=>{
                                 let p = paragraph.eq(j).text();
                                 let propertyName = j+'_p';
                                 context += '<p>' + p + '</p>';
-                                content[propertyName] = p;        
+                                content[propertyName] = p.replace(/"/g,'\\"').replace(/'/g,"\\'");       
                             }
+                            // let abstract = abstractGen.abstractGen(context);
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
                             content = JSON.stringify(content);
                             uploadImgToS3(main_img,'bbc', Date.now().toString(),(main_img)=>{
@@ -364,8 +367,6 @@ router.get('/bbc/article',(req,res)=>{
         }) // End of query
     })
 })
-
-
 
 
 // CNN: news_id = 3
@@ -503,7 +504,7 @@ router.get('/cnn/article',(req,res)=>{
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'"); //
                             content = JSON.stringify(content);
 
-                            if( context===''|| title ==='' || src_datetime === undefined ){
+                            if( context===''|| title ===''){
                                 let deleteNull = `DELETE FROM article WHERE id = ${article[i].id}`;
                                 con.query(deleteNull,function(error,result){
                                     if(error){
@@ -571,7 +572,6 @@ router.get('/economist/list', (req, res) => {
         }
     })();
 })
-
 router.get('/economist/article',(req,res)=>{
     mysql.conPool.getConnection((err,con)=>{
         con.query('SELECT id, context, url FROM article WHERE news_id = 4', function(err, article){
@@ -739,7 +739,6 @@ router.get('/guardian/list',(req,res)=>{
         // insert(articleArray,0);
     }) // End of request
 })
-
 router.get('/guardian/article',(req,res)=>{
     mysql.conPool.getConnection((err,con)=>{
         con.query('SELECT id, context, url FROM article WHERE news_id = 5', function(err, article){
@@ -756,7 +755,7 @@ router.get('/guardian/article',(req,res)=>{
                         url: article[i].url,
                         method: "GET"
                     }
-                    if (article[i].context === null){
+                    // if (article[i].context === null){
                         request(options, function(error, response, body){
                             if (error || !body) {
                                 myLib.log(error);
@@ -777,7 +776,7 @@ router.get('/guardian/article',(req,res)=>{
                                 context += '<p>' + p + '</p>';                      
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            if( context===''|| title ==='' || src_datetime === undefined ){
+                            if( context===''|| title ==='' || unixtime === undefined ){
                                 let deleteNull = `DELETE FROM article WHERE id = ${article[i].id}`;
                                 con.query(deleteNull,function(error,result){
                                     if(error){
@@ -789,13 +788,13 @@ router.get('/guardian/article',(req,res)=>{
                             else{
                                 uploadImgToS3(main_img,'guardian', Date.now().toString(),(main_img)=>{
                                     con.query(`UPDATE article SET  
-                                                  title = "${title}",
-                                                  subtitle = "${subtitle}",
-                                                  author = "${author}", 
-                                                  context = "${context}",
-                                                  src_datetime = '${datetime}', 
-                                                  unixtime = ${unixtime},
-                                                  main_img = "${main_img}" 
+                                                title = "${title}",
+                                                subtitle = "${subtitle}",
+                                                author = "${author}", 
+                                                context = "${context}",
+                                                src_datetime = '${datetime}', 
+                                                unixtime = ${unixtime},
+                                                main_img = "${main_img}" 
                                            WHERE id = ${article[i].id}`, function(err,result){
                                         fetched++;
                                         if (err){
@@ -811,14 +810,14 @@ router.get('/guardian/article',(req,res)=>{
                                 })
                             }
                         })
-                    }
-                    else{
-                        fetched++;
-                        if (fetched === article.length){
-                            res.send('All fetched');
-                            return;
-                        }
-                    }
+                    // }
+                    // else{
+                    //     fetched++;
+                    //     if (fetched === article.length){
+                    //         res.send('All fetched');
+                    //         return;
+                    //     }
+                    // }
                 } // End of for loop
             }
         }) // End of query
@@ -1111,7 +1110,7 @@ router.get('/nytimes/article',(req,res)=>{
     })
 })
 
-// QUARTZ: news_id = 8 (static html. LOVE YOU!!)
+// QUARTZ: news_id = 8
 router.get('/quartz/list',(req,res)=>{
     let options = {
         url: "https://qz.com/search/taiwan/",
@@ -1202,7 +1201,6 @@ router.get('/quartz/list',(req,res)=>{
         // insert(articleArray,0);
     }) // End of request
 })
-
 router.get('/quartz/article', (req,res)=>{
     mysql.conPool.getConnection((err,con)=>{
         con.query('SELECT id, context, url FROM article WHERE news_id = 8', function(err, article){

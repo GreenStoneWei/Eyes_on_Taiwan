@@ -51,15 +51,23 @@ router.get('/showindex',(req,res)=>{
     // })();
 })
 
+// router.get('/article_old_ver',(req,res)=>{
+//     let source = '';
+//     let {id} = req.query;
+//     for (let name in newsDB){
+//         if(req.query.source == newsDB[name]){
+//             source = name;
+//         }
+//     }
+//     let getArticle = `SELECT * FROM ${source} WHERE id = ${id}`;
+//     mysql.conPool.query(getArticle,function(error,result){
+//         res.send(result);
+//     })
+// })
+
 router.get('/article',(req,res)=>{
-    let source = '';
     let {id} = req.query;
-    for (let name in newsDB){
-        if(req.query.source == newsDB[name]){
-            source = name;
-        }
-    }
-    let getArticle = `SELECT * FROM ${source} WHERE id = ${id}`;
+    let getArticle = `SELECT * FROM article INNER JOIN news ON article.news_id = news.id WHERE article.id = ${id}`;
     mysql.conPool.query(getArticle,function(error,result){
         res.send(result);
     })
@@ -70,18 +78,9 @@ router.get('/migration',(req,res)=>{
     if (!Number.isInteger(page)){
         page = 1;
     }
-    let getAllArticle = '';
-    let newsCounter = 0;
-    for (let i = 0; i < Object.keys(newsDB).length; i++){
-        newsCounter ++;
-        if (newsCounter == Object.keys(newsDB).length){
-            getAllArticle += `SELECT id, url, source, unixtime, main_img, title, abstract, context FROM ${Object.keys(newsDB)[i]}`;
-        }
-        else{
-            getAllArticle += `SELECT id, url, source, unixtime, main_img, title, abstract, context FROM ${Object.keys(newsDB)[i]}` + ' UNION ';
-        }
-    }
-    mysql.conPool.query(getAllArticle+' ORDER BY unixtime DESC LIMIT 150',function(error, result){
+    let getIndexArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url FROM article INNER JOIN news ON article.news_id = news.id';
+    let filter = 'WHERE ';
+    mysql.conPool.query(getIndexArticle+' ORDER BY unixtime DESC LIMIT 150',function(error, result){
         if (error){
             throw error;
         }

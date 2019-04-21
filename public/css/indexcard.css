@@ -53,6 +53,11 @@ a{
     margin-bottom: 15px;
 }
 
+.abstract{
+    border-left: 3px solid #00cccc;
+    color: gray;
+    padding-left: 10px;
+}
 .pagination{
     justify-content: center;
     margin-top: 50px;

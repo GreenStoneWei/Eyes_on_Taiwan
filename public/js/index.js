@@ -8,9 +8,9 @@ function createArticleCard(array,parentElement){
         let source     = createElement("span",["col-7"],false,headerRow);
         let time       = createElement("span",["col-5","text-right"],false,headerRow);
         let cardBody   = createElement("div",["card-body"],false,card);
-        if (array[i].main_img === null || array[i].main_img=== "undefined"){
+        if (array[i].main_img === "null" || array[i].main_img === "undefined"){
             let defaultImg;
-            switch (array[i].source){
+            switch (array[i].news){
                 case 'Aljazeera':
                     defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/aljazeera_default.png';
                     break;
@@ -26,10 +26,10 @@ function createArticleCard(array,parentElement){
                 case 'The Guardian':
                     defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/guardain_default.jpg';
                     break;
-                case 'INDEPEDENT':
+                case 'INDEPENDENT':
                     defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/independent_default.png';
                     break;
-                case 'NY Times':
+                case 'New York Times':
                     defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/nytimes_default.jpg';
                     break;
                 case 'QUARTZ':
@@ -45,9 +45,9 @@ function createArticleCard(array,parentElement){
             let mainImg = createElement("img",["card-img-top","main-img"],{src:array[i].main_img},cardBody);
         }
         let title      = createElement("h4",["card-title"],false,cardBody);
-        let abstract   = createElement("p",["card-text"],false,cardBody);
-        let readMore   = createElement("a",["card-link"],{href:`/article.html?source=${array[i].source}&id=${array[i].id}`},cardBody); // # to be replaced
-        source.innerHTML   = array[i].source;
+        let abstract   = createElement("p",["card-text","abstract"],false,cardBody);
+        let readMore   = createElement("a",["card-link"],{href:`/article.html?id=${array[i].id}`},cardBody); // # to be replaced
+        source.innerHTML   = array[i].news;
         time.innerHTML     = dateFormat(array[i].unixtime);
         title.innerHTML    = array[i].title;
         abstract.innerHTML = array[i].abstract;
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         createPagination(page);
       }
     };
-    xhr.open("GET", `/api/showindex?page=${page}`, true);
+    xhr.open("GET", `/api/migration?page=${page}`, true); // index
     xhr.send();
 }) // End of document.addEventListener
 

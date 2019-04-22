@@ -65,18 +65,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
 </div>
 <a href="#" class="btn btn-info btn-width" role="button">站外原文</a> */
 
-
-function getSimilarArticle(array){
-  let similarArticle = JSON.parse(array);
-  for(let i=0;i<similarArticle.length;i++){
-    let xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        let card = JSON.parse(this.responseText);
-        createArticleCard(card, recommender);
-      }
-    };
-    xhr.open("GET", `/api/article?id=${similarArticle[i]}`, true);
-    xhr.send();
-  }
-}
+// 好像不用 在後端做就可以
+// function getSimilarArticle(array){
+//   let similarArticle = JSON.parse(array);
+//   for(let i=0;i<similarArticle.length;i++){
+//     let xhr = new XMLHttpRequest();
+//     xhr.onreadystatechange = function() {
+//       if (this.readyState == 4 && this.status == 200) {
+//         let card = JSON.parse(this.responseText);
+//         createArticleCard(card, recommender);
+//       }
+//     };
+//     xhr.open("GET", `/api/article?id=${similarArticle[i]}`, true);
+//     xhr.send();
+//   }
+// }

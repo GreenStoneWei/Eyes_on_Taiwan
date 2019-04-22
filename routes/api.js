@@ -5,17 +5,6 @@ const myLib   = require('../util/config.js');
 const redis   = require('redis');
 const client  = redis.createClient();
 const cacheExpireTime = 60 * 60 * 24; // EX unit: sec
-// const newsDB = {
-//     aljazeera:'Aljazeera',
-//     bbc: 'BBC',
-//     cnn: 'CNN',
-//     economist: 'The Economist',
-//     guardian: 'The Guardian',
-//     independent: 'INDEPEDENT',
-//     nytimes: 'NY Times',
-//     quartz: 'QUARTZ',
-//     washingtonpost: 'The Washington Post'
-// }
 
 router.get('/showindex',(req,res)=>{
     let page = parseInt(req.query.page);
@@ -116,34 +105,42 @@ router.get('/article',(req,res)=>{
 
 router.get('/migration',(req,res)=>{
     let paging = parseInt(req.query.page);
+    if (!Number.isInteger(paging)){
+        paging = 1;
+    }
     let pageLimit = 10;
     let sort = req.query.sort;
     let orderBy = '';
     let offset = (paging-1) * pageLimit;
     let limiter = ` LIMIT ${offset}, ${pageLimit}`;
-    let filter  = ' WHERE title !== "null" AND context !== "null"';
-    if (!Number.isInteger(paging)){
-        paging = 1;
-    }
+    let filter  = ' WHERE title != "null" AND context != "null" AND context != ""';
     switch(sort){
         case 'date':
             orderBy = ' ORDER BY unixtime DESC';
             break;
         case 'most_viewed':
             orderBy = ' ORDER BY viewed_count DESC';
+            break;
+        default:
+            orderBy = ' ORDER BY unixtime DESC';
     }
     let getIndexArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count FROM article INNER JOIN news ON article.news_id = news.id';
-    
-    mysql.conPool.query(getIndexArticle+' ORDER BY unixtime DESC LIMIT 150',function(error, result){
+    mysql.conPool.query(getIndexArticle+filter+orderBy+limiter,function(error, result){
         if (error){
             throw error;
         }
-        result = result.filter(function(obj){
-            return obj.context !== '' && obj.title !== null;
-        })
-        console.log(result);
-
-        res.send(result.slice((paging-1)*10,paging*10));
+        // add viewed count in cached
+        let added = 0;
+        for(let i=0;i<result.length;i++){
+            let viewCountCache = 'view_count_'+ result[i].id;
+            client.get(viewCountCache,(err,cacheCount)=>{
+                added++;
+                result[i].viewed_count += parseInt(cacheCount);
+                if (added===result.length){
+                    res.send(result);
+                }
+            })
+        }
     })
 })
 

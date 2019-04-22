@@ -1,0 +1,55 @@
+
+.card{
+    margin: 10px;
+    box-shadow:1px 1px 3px rgba(20%,20%,20%,0.6);
+}
+
+.card-size{
+    max-width: 500px;
+    min-width: 375px;
+    background-color: white;
+}
+
+.card-hearder-row{
+    display: flex;
+    flex-direction: row;
+}
+
+.main-img{
+    margin-bottom: 15px;
+}
+
+.abstract{
+    border-left: 3px solid #00cccc;
+    color: gray;
+    padding-left: 10px;
+}
+/* .pagination{
+    justify-content: center;
+    margin-top: 50px;
+    margin-bottom: 50px;
+} */
+.page-link{
+    color: #00cccc;
+}
+.page-item.active .page-link{
+    background-color: #00cccc;
+    border-color: #00cccc;
+}
+.viewed{
+    margin-left:10px;
+    margin-right:10px;
+    width:24px;
+    height:24px;
+    filter: grayscale(70%);
+}
+.read-block{
+    display: flex;
+    flex-direction: row;
+    color:gray;
+    align-items: center;
+}
+.view-count{
+    font-size:12px;
+    margin: 0 0 0 0; /* bootstrap 對 p 有預設 margin bottom 1 rem */
+}

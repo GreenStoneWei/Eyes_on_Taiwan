@@ -956,7 +956,7 @@ router.get('/nytimes/list',(req,res)=>{
             let url = 'https://www.nytimes.com' + searchResult.eq(i).find('a').attr('href');
             articleArray.push(Object.assign({url}));
         }
-        dao.addToDB(articleArray,0,7,'url').then((x)=>{
+        dao.addToDB(articleArray,0,7,'title').then((x)=>{
             console.log(x);
             res.send('OK');
             // res.redirect('/bbc/article');

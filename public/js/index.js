@@ -1,59 +1,5 @@
 const container = document.querySelector('.wrap');
-
-function createArticleCard(array,parentElement){
-    for (let i=0 ; i<array.length ; i++){
-        let card       = createElement("div",["card","card-size"],false,parentElement);
-        let cardHeader = createElement("div",["card-header"],false,card);
-        let headerRow  = createElement("div",["row"],false,cardHeader);
-        let source     = createElement("span",["col-7"],false,headerRow);
-        let time       = createElement("span",["col-5","text-right"],false,headerRow);
-        let cardBody   = createElement("div",["card-body"],false,card);
-        if (array[i].main_img === "null" || array[i].main_img === "undefined"){
-            let defaultImg;
-            switch (array[i].news){
-                case 'Aljazeera':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/aljazeera_default.png';
-                    break;
-                case 'BBC':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/bbc_default.png';
-                    break;
-                case 'CNN':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/cnn_default.jpg';
-                    break;
-                case 'The Economist':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/economist_default.png';
-                    break;
-                case 'The Guardian':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/guardain_default.jpg';
-                    break;
-                case 'INDEPENDENT':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/independent_default.png';
-                    break;
-                case 'New York Times':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/nytimes_default.jpg';
-                    break;
-                case 'QUARTZ':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/quartz_default.jpg';
-                    break;
-                case 'The Washington Post':
-                    defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/wpost_default.jpg';
-                    break;
-            }
-            let mainImg = createElement("img",["card-img-top","main-img"],{src:defaultImg},cardBody);
-        }
-        else{
-            let mainImg = createElement("img",["card-img-top","main-img"],{src:array[i].main_img},cardBody);
-        }
-        let title      = createElement("h4",["card-title"],false,cardBody);
-        let abstract   = createElement("p",["card-text","abstract"],false,cardBody);
-        let readMore   = createElement("a",["card-link"],{href:`/article.html?id=${array[i].id}`},cardBody); // # to be replaced
-        source.innerHTML   = array[i].news;
-        time.innerHTML     = dateFormat(array[i].unixtime);
-        title.innerHTML    = array[i].title;
-        abstract.innerHTML = array[i].abstract;
-        readMore.innerHTML = "閱讀更多";
-    }
-}
+const pagination = document.querySelector('.pagination');
 
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
@@ -72,9 +18,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     xhr.open("GET", `/api/migration?page=${page}`, true); // index
     xhr.send();
 }) // End of document.addEventListener
-
-const pagination = document.querySelector('.pagination');
-
 
 function createPagination(page){
     let previous = createElement('li',['page-item'],false,pagination);

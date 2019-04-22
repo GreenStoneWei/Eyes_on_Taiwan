@@ -1,4 +1,5 @@
 const container = document.querySelector('.container');
+const recommenderBlock = document.querySelector('.recommender-block');
 
 const setAttr = function(obj,attributes){
 	for(let name in attributes){
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
-        console.log(article);
+        
         let source = createElement('div',['source'],false,container);
         let h1 = createElement('h1',['title'],false,container);
         let meta = createElement('div',['meta'],false,container);
@@ -40,9 +41,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         datetime.innerHTML = dateFormat(article[0].unixtime);
         content.innerHTML = article[0].context;
         origin.innerHTML = '站外原文';
-
-
-
+        let recommendTitle = createElement('h3',['recommend-title'],false, recommenderBlock);
+        recommendTitle.innerHTML = 'Recommend For You';
+        let recommendWrap = createElement('div',['recommend-wrap'],false, recommenderBlock);
+        createArticleCard(article[0].similar_article, recommendWrap);
 
       }
     };
@@ -71,44 +73,10 @@ function getSimilarArticle(array){
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         let card = JSON.parse(this.responseText);
-        
+        createArticleCard(card, recommender);
       }
     };
     xhr.open("GET", `/api/article?id=${similarArticle[i]}`, true);
     xhr.send();
   }
 }
-    
-   
-    xhr.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        let article = JSON.parse(this.responseText);
-        console.log(article);
-        let source = createElement('div',['source'],false,container);
-        let h1 = createElement('h1',['title'],false,container);
-        let meta = createElement('div',['meta'],false,container);
-        let datetime = createElement('div',['datetime'],false,meta);
-        // if there is no subtitle, don't create an element
-        if (article[0].subtitle !== "null" && article[0].subtitle !== ''){
-          let subtitle = createElement('h3',['subtitle'],false,container);
-          subtitle.innerHTML = article[0].subtitle;
-        }
-        if (article[0].main_img !== "undefined"){
-          let img = createElement('img',['img'],false,container);
-          setAttr(img,{src:article[0].main_img});
-        }        
-        let content = createElement('div',['content'],false,container);
-        let origin = createElement('a',['btn','btn-info','btn-width'],{href:article[0].url, role:'button'},container); 
-        source.innerHTML = article[0].news;
-        h1.innerHTML = article[0].title;
-        if (article[0].author !== null && article[0].author !== ''){
-            let author = createElement('div',['author'],false,meta);
-            author.innerHTML = article[0].author;
-        }
-        datetime.innerHTML = dateFormat(article[0].unixtime);
-        content.innerHTML = article[0].context;
-        origin.innerHTML = '站外原文';
-      }
-    };
-    xhr.open("GET", `/api/article?id=${qsID}`, true);
-    xhr.send();

@@ -3,29 +3,30 @@ const pagination = document.querySelector('.pagination');
 
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
-    let page =parseInt(getParameterByName('page'));
+    let page = parseInt(getParameterByName('page'));
     if (!Number.isInteger(page)){
         page = 1;
     }
+    let sort = getParameterByName('sort');
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         let articleList = JSON.parse(this.responseText);
         createArticleCard(articleList,container);
-        createPagination(page);
+        createPagination(sort,page);
       }
     };
-    xhr.open("GET", `/api/migration?page=${page}`, true); // index
+    xhr.open("GET", `/api/migration?sort=${sort}&page=${page}`, true); // index
     xhr.send();
 }) // End of document.addEventListener
 
-function createPagination(page){
+function createPagination(sort,page){
     let previous = createElement('li',['page-item'],false,pagination);
-    let prevLink = createElement('a',['page-link'],{href:`/?page=${page-1}`},previous);
+    let prevLink = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${page-1}`},previous);
     prevLink.innerHTML = '&laquo';
     for (let i=1; i<11 ;i++){
         let pageItem = createElement('li',['page-item'],false,pagination);
-        let pg = createElement('a',['page-link'],{href:`/?page=${i}`},pageItem);
+        let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${i}`},pageItem);
         pg.innerHTML = i;
         if(i===page){
             pageItem.classList.add('active');
@@ -33,7 +34,7 @@ function createPagination(page){
         }
     }
     let next = createElement('li',['page-item'],false,pagination);
-    let nextLink = createElement('a',['page-link'],{href:`/?page=${page+1}`},next);
+    let nextLink = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${page+1}`},next);
     nextLink.innerHTML ='&raquo;';
     if(page===1){
         previous.classList.add('disabled');

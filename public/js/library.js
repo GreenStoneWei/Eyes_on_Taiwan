@@ -11,6 +11,14 @@ function setAttributes(obj,attrs){
 	return obj;
 };
 
+function setFBmeta(metaObj, parentNode){
+    createElement('meta', false, {property: 'og:url', content: metaObj.url}, parentNode);
+    createElement('meta', false, {property: 'og:type', content: metaObj.type}, parentNode);
+    createElement('meta', false, {property: 'og:title', content: metaObj.title}, parentNode);
+    createElement('meta', false, {property: 'og:description', content: metaObj.description}, parentNode);
+    createElement('meta', false, {property: 'og:image', content: metaObj.image}, parentNode);
+}
+
 function createElement(tagName,addClass,attrs,parentElement){
     let obj = document.createElement(tagName);
     if(addClass){

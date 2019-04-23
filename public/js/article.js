@@ -1,12 +1,7 @@
 const container = document.querySelector('.container');
 const recommenderBlock = document.querySelector('.recommender-block');
+// const head = document.getElementsByTagName('head')[0];
 
-const setAttr = function(obj,attributes){
-	for(let name in attributes){
-		obj[name]=attributes[name];
-	}
-	return obj;
-};
 
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
@@ -16,10 +11,23 @@ document.addEventListener('DOMContentLoaded', (event) => {
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
-        
-        let source = createElement('div',['source'],false,container);
-        let h1 = createElement('h1',['title'],false,container);
-        let meta = createElement('div',['meta'],false,container);
+        //
+        let metaObj = {
+          url: window.location.href,
+          type: 'article',
+          title: article[0].title,
+          description: article[0].subtitle,
+          image: article[0].main_img
+        }
+        $('head').append(`<meta property="og:url" content=${metaObj.url}>`);
+        $('head').append(`<meta property="og:type" content=${metaObj.type}>`);
+        $('head').append(`<meta property="og:title" content=${metaObj.title}>`);
+        $('head').append(`<meta property="og:description" content=${metaObj.description}>`);
+        $('head').append(`<meta property="og:image" content=${metaObj.image}>`);
+        // setFBmeta(metaObj,head);
+        let source   = createElement('div',['source'],false,container);
+        let h1       = createElement('h1',['title'],false,container);
+        let meta     = createElement('div',['meta'],false,container);
         let datetime = createElement('div',['datetime'],false,meta);
         // if there is no subtitle, don't create an element
         if (article[0].subtitle !== "null" && article[0].subtitle !== ''){
@@ -27,11 +35,30 @@ document.addEventListener('DOMContentLoaded', (event) => {
           subtitle.innerHTML = article[0].subtitle;
         }
         if (article[0].main_img !== "undefined"){
-          let img = createElement('img',['img'],false,container);
-          setAttr(img,{src:article[0].main_img});
+          let img = createElement('img',['img'],{src:article[0].main_img},container);
+          // setAttr(img,{src:article[0].main_img});
         }        
         let content = createElement('div',['content'],false,container);
-        let origin = createElement('a',['btn','btn-info','btn-width'],{href:article[0].url, role:'button'},container); 
+        let btnContainer = createElement('div',['btn-container'],false,container);
+        let origin = createElement('a',['btn','btn-info','btn-width'],{href:article[0].url, role:'button'},btnContainer);
+        // add LINE share button
+        let lineBtn = createElement('div',['line-it-button','btn'],false,btnContainer);
+        lineBtn.dataset.lang  = 'zh_Hant';
+        lineBtn.dataset.type  = 'share-a';
+        lineBtn.dataset.ver   = '3';
+        lineBtn.dataset.url   = window.location.href;
+        lineBtn.dataset.color = 'defaulr';
+        lineBtn.dataset.size  = 'large';
+        lineBtn.dataset.count = 'true';
+        lineBtn.style.display = 'none';
+        // add FB share button
+        let shareFB = createElement('div',['fb-share-button','btn'],false,btnContainer);
+        shareFB.dataset.href = 'https://4e290507.ngrok.io/article.html?id='+qsID;
+        // shareFB.dataset.href = window.location.href;
+        // shareFB.setAttribute('data-href',window.location.href);
+        shareFB.dataset.layout = 'button_count';
+        shareFB.dataset.size = 'large';
+        //
         source.innerHTML = article[0].news;
         h1.innerHTML = article[0].title;
         if (article[0].author !== null && article[0].author !== ''){
@@ -39,13 +66,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
             author.innerHTML = article[0].author;
         }
         datetime.innerHTML = dateFormat(article[0].unixtime);
-        content.innerHTML = article[0].context;
-        origin.innerHTML = '站外原文';
+        content.innerHTML  = article[0].context;
+        origin.innerHTML   = '站外原文';
+        
         let recommendTitle = createElement('h3',['recommend-title'],false, recommenderBlock);
         recommendTitle.innerHTML = 'Recommend For You';
-        let recommendWrap = createElement('div',['recommend-wrap'],false, recommenderBlock);
+        let recommendWrap  = createElement('div',['recommend-wrap'],false, recommenderBlock);
         createArticleCard(article[0].similar_article, recommendWrap);
-
       }
     };
     xhr.open("GET", `/api/article?id=${qsID}`, true);

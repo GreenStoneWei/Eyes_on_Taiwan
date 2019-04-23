@@ -31,17 +31,6 @@ router.get('/showindex',(req,res)=>{
         })
         res.send(result.slice((page-1)*10,page*10));
     })
-    // (async function(){
-    //     await getArticleByNewsName('aljazeera', allArticleList);
-    //     await getArticleByNewsName('bbc', allArticleList);
-    //     await getArticleByNewsName('cnn', allArticleList);
-    //     await getArticleByNewsName('economist', allArticleList);
-    //     await getArticleByNewsName('guardian', allArticleList);
-    //     await getArticleByNewsName('indepedent', allArticleList);
-    //     await getArticleByNewsName('nytimes', allArticleList);
-        
-    //     res.send(allArticleList);
-    // })();
 })
 
 // router.get('/article_old_ver',(req,res)=>{
@@ -60,9 +49,13 @@ router.get('/showindex',(req,res)=>{
 
 router.get('/article',(req,res)=>{
     // client.flushdb();
-    let {id} = req.query;
+    let id = parseInt(req.query.id);
+    if (!Number.isInteger(id)){
+        res.send({error:"Invalid article ID"});
+        return;
+    }
     let viewCountCache = 'view_count_'+id;
-    client.incr(viewCountCache,()=>{ // view count + 1, if the article has not been viewed yet, redis generates a key and inits the value = 0
+    client.incr(viewCountCache,()=>{ // view count + 1, if the article has not been viewed yet, redis generates a key and sets the value = 0
         let articleCache = 'article_'+id;
         client.get(articleCache, function(err, reply){
             if (reply){
@@ -73,14 +66,14 @@ router.get('/article',(req,res)=>{
 
                 let similarCountAdded = 0;
                 for (let i=0;i<cacheSimilar.length;i++){
+                    // console.log(cacheSimilar[i].id);
                     let cachekey = 'view_count_'+cacheSimilar[i].id;
                     client.get(cachekey,(err,cacheCount)=>{
                         similarCountAdded ++;
-                        if(!Number.isInteger(cacheCount)){
-                            cachecount = 0;
+                        if(cacheCount == null){ // cacheCount 出來的計數會是字串，沒有的話是 null
+                            cacheCount = 0;
                         }
                         cacheSimilar[i].viewed_count += parseInt(cacheCount);
-
                         if(similarCountAdded==cacheSimilar.length){
                             client.get(viewCountCache,(err,cacheCount)=>{
                                 let originCount = parseInt(cacheReply[0].viewed_count);
@@ -98,6 +91,11 @@ router.get('/article',(req,res)=>{
                         con.release();
                         if (err) {
                             myLib.log(err);
+                            return;
+                        }
+                        if (article.length===0){
+                            res.send({error:"Article does not exist."});
+                            return;
                         }
                         let similarArticle = JSON.parse(article[0].similar_article);
                         let getArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count FROM article INNER JOIN news ON article.news_id = news.id ';
@@ -105,6 +103,7 @@ router.get('/article',(req,res)=>{
                         con.query(getArticle+articleID,(err,similarResult)=>{
                             if(err){
                                 myLib.log(err);
+                                return;
                             }
                             // similar article 的 view Count 也要加上 cache 的數字
                             let similarCountAdded = 0;
@@ -113,7 +112,7 @@ router.get('/article',(req,res)=>{
                                 let cacheKey = 'view_count_'+similarArticleID;
                                 client.get(cacheKey,(err,cacheCount)=>{
                                     similarCountAdded++;
-                                    if(!Number.isInteger(cacheCount)){
+                                    if(cacheCount == null){
                                         cacheCount=0;
                                     }
                                     similarResult[i].viewed_count += parseInt(cacheCount);

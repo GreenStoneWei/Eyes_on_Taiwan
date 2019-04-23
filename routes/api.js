@@ -66,13 +66,30 @@ router.get('/article',(req,res)=>{
         let articleCache = 'article_'+id;
         client.get(articleCache, function(err, reply){
             if (reply){
-                client.get(viewCountCache,(err,viewedCount)=>{
-                    let cacheReply = JSON.parse(reply);
-                    let originCount = parseInt(cacheReply[0].viewed_count);
-                    cacheReply[0].viewed_count = originCount + parseInt(viewedCount);
-                    // console.log(cacheReply[0].viewed_count);
-                    res.send(JSON.stringify(cacheReply));
-                })
+                // 更新 cache 中 similar article count
+                let cacheReply = JSON.parse(reply);
+
+                let cacheSimilar = cacheReply[0].similar_article;
+
+                let similarCountAdded = 0;
+                for (let i=0;i<cacheSimilar.length;i++){
+                    let cachekey = 'view_count_'+cacheSimilar[i].id;
+                    client.get(cachekey,(err,cacheCount)=>{
+                        similarCountAdded ++;
+                        if(!Number.isInteger(cacheCount)){
+                            cachecount = 0;
+                        }
+                        cacheSimilar[i].viewed_count += parseInt(cacheCount);
+
+                        if(similarCountAdded==cacheSimilar.length){
+                            client.get(viewCountCache,(err,cacheCount)=>{
+                                let originCount = parseInt(cacheReply[0].viewed_count);
+                                cacheReply[0].viewed_count = originCount + parseInt(cacheCount);
+                                res.send(JSON.stringify(cacheReply));
+                            })
+                        }
+                    })
+                }
             }
             else{
                 let getArticle = `SELECT * FROM article INNER JOIN news ON article.news_id = news.id WHERE article.id = ${id}`;
@@ -89,12 +106,29 @@ router.get('/article',(req,res)=>{
                             if(err){
                                 myLib.log(err);
                             }
-                            article[0].similar_article = similarResult; // similar article 的 view Count 也要加上 cache 的數字
-                            client.get(viewCountCache,(err,viewedCount)=>{
-                                article[0].viewed_count += parseInt(viewedCount);
-                                client.set(articleCache, JSON.stringify(article), 'EX', cacheExpireTime);
-                                res.send(JSON.stringify(article));
-                            })  
+                            // similar article 的 view Count 也要加上 cache 的數字
+                            let similarCountAdded = 0;
+                            for(let i=0;i<similarResult.length;i++){
+                                let similarArticleID = similarResult[i].id;
+                                let cacheKey = 'view_count_'+similarArticleID;
+                                client.get(cacheKey,(err,cacheCount)=>{
+                                    similarCountAdded++;
+                                    if(!Number.isInteger(cacheCount)){
+                                        cacheCount=0;
+                                    }
+                                    similarResult[i].viewed_count += parseInt(cacheCount);
+
+                                    if(similarCountAdded===similarResult.length){
+                                        // 把更新的 similar result 塞回 article 中
+                                        article[0].similar_article = similarResult; 
+                                        client.get(viewCountCache,(err,viewedCount)=>{
+                                            article[0].viewed_count += parseInt(viewedCount);
+                                            client.set(articleCache, JSON.stringify(article), 'EX', cacheExpireTime);
+                                            res.send(JSON.stringify(article));
+                                        })  
+                                    }
+                                })
+                            }
                         })
                     })
                 })
@@ -129,12 +163,16 @@ router.get('/migration',(req,res)=>{
         if (error){
             throw error;
         }
-        // add viewed count in cached
+        // add viewed count in cached. another solution is making the caching addition in another route. Front-end calls 2 api. 
         let added = 0;
         for(let i=0;i<result.length;i++){
             let viewCountCache = 'view_count_'+ result[i].id;
-            client.get(viewCountCache,(err,cacheCount)=>{
+            client.get(viewCountCache,(err,cacheCount)=>{ 
                 added++;
+                // 處理 cachecount = null 的情況
+                if(cacheCount==null){
+                    cacheCount=0;
+                }
                 result[i].viewed_count += parseInt(cacheCount);
                 if (added===result.length){
                     res.send(result);

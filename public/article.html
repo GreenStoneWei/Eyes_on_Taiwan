@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="../css/card.css">
         <script src="../js/fbsdk.js"></script>
         <script src="https://d.line-scdn.net/r/web/social-plugin/js/thirdparty/loader.min.js" async="async" defer="defer"></script>
+        
         <!-- <meta property="og:url"           content="https://wheatxstone.com/" />
         <meta property="og:type"          content="website" />
         <meta property="og:title"         content="Eyes on Taiwan" />
@@ -19,10 +20,16 @@
 
     </head>
     <body>
+        <div id="fb-root"></div>
+        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v3.2&appId=586639515140982&autoLogAppEvents=1"></script>
         <header>
             <div class="nav-container">
                 <nav class="navbar navbar-expand-lg">
-                    <a class="navbar-brand" href="/">Home</a>
+                    <div>
+                        <a class="navbar-brand" href="/">
+                            <img class="logo" src="https://s3.amazonaws.com/wheatxstone/news/eye_taiwan_3.png" >
+                        </a>
+                    </div>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -44,6 +51,9 @@
             </div>
         </div>
         <footer>
+            <div class="comment-container">
+                <div class="fb-comments" data-numposts="10"></div>
+            </div>
         </footer>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>

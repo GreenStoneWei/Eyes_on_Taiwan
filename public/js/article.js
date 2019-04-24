@@ -1,5 +1,6 @@
 const container = document.querySelector('.container');
 const recommenderBlock = document.querySelector('.recommender-block');
+const comment = document.querySelector('fb-comments');
 // const head = document.getElementsByTagName('head')[0];
 
 
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         lineBtn.dataset.type  = 'share-a';
         lineBtn.dataset.ver   = '3';
         lineBtn.dataset.url   = window.location.href;
-        lineBtn.dataset.color = 'defaulr';
+        lineBtn.dataset.color = 'default';
         lineBtn.dataset.size  = 'large';
         lineBtn.dataset.count = 'true';
         lineBtn.style.display = 'none';
@@ -73,6 +74,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         recommendTitle.innerHTML = 'Recommend For You';
         let recommendWrap  = createElement('div',['recommend-wrap'],false, recommenderBlock);
         createArticleCard(article[0].similar_article, recommendWrap);
+
+        comment.dataset.href = window.location.href;
       }
     };
     xhr.open("GET", `/api/article?id=${qsID}`, true);

@@ -213,9 +213,23 @@ const addToDB = function(array, j, news_id, identifier){
         }
     }) // end of Promise
 }
+
+const addTag = function(tagArray){
+    return new Promise ((resolve,reject)=>{
+        mysql.conPool.query('INSERT INTO tag (article_id,tag) VALUES ? ',[tagArray],(err,result)=>{
+            if (err){
+                reject(err);
+                return;
+            }
+            resolve('Tag added.');
+        })
+    })
+}
+
 module.exports = {
     insertUrlList: insertUrlList,
     promiseInsert: promiseInsert,
-    addToDB: addToDB
+    addToDB: addToDB,
+    addTag: addTag
 };
     

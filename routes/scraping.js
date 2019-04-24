@@ -6,13 +6,13 @@ const request = require("request");
 const cheerio = require("cheerio");
 const myLib   = require('../util/config.js');
 const puppeteer = require('puppeteer');
-const abstractGen   = require('../util/abstract.js');
+const textMining    = require('../util/abstract.js');
 const uploadImgToS3 = require('../controllers/s3.js');
 
 router.get('/send/email/if/error', (req,res) =>{
     mysql.conPool.query('SELECT * FROM DoesNotExist',function(error,result){
         if(error){
-            myLib.log({'database query error': error});
+            myLib.log(error);
             res.end();
             return;
         }
@@ -146,7 +146,7 @@ router.get('/aljazeera/article',(req,res)=>{
                         url: article[i].url,
                         method: "GET"
                     }
-                    if (article[i].context === null){
+                    if (article[i].context === ''){
                         request(options, function(error, response, body){
                             if (error || !body) {
                                 myLib.log(error);
@@ -156,36 +156,47 @@ router.get('/aljazeera/article',(req,res)=>{
                             let paragraph = $('.main-container .article-p-wrapper').children();
                             let context = '';
                             let content = {};
+                            let pureText = '';
                             for (let j = 0; j < paragraph.length; j++){                             
                                 if(paragraph.get(j).tagName == 'p'){
                                     let p = paragraph.eq(j).text();
                                     let propertyName = j+'_p';
                                     context += '<p>' + p + '</p>';
-                                    content[propertyName] = p;
+                                    // content[propertyName] = p.replace(/'/g,"\\'");
+                                    pureText += p;
                                 }
                                 else if (paragraph.get(j).tagName == 'h2'){
                                     let h2 = paragraph.eq(j).text();
                                     let propertyName = j+'_h2';
                                     context += '<h2>' + h2 + '</h2>';
-                                    content[propertyName] = h2;
-
+                                    // content[propertyName] = h2;
                                 }                                            
                             }
-                            
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            content = JSON.stringify(content);
+                            // content = JSON.stringify(content);
+                            let tagArray = textMining.tagGen(article[i].id, pureText);
+                            let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
 
-                            con.query(`UPDATE article SET context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
+                            con.query(`UPDATE article SET context = "${context}", abstract = "${abstract}" WHERE id = ${article[i].id}`, function(err,result){
                                 fetched++;
                                 if (err){
                                     myLib.log(err);
-                                    // res.send({err:'Database query error. here'+i});
                                     return;
                                 }
-                                if (fetched === article.length){
-                                    res.send('ok');
-                                    return;
-                                }
+                                // 沒有抓到 context 的話連上一個 query 都不會做，有 context 的話就能分析出 tag ，再把 tag 寫入
+                                else{
+                                    dao.addTag(tagArray)
+                                    .then((result)=>{
+                                        console.log(result);
+                                        if (fetched === article.length){
+                                            res.send('ok');
+                                            return;
+                                        }
+                                    })
+                                    .catch((error)=>{
+                                        myLib.log(error);
+                                    })
+                                }    
                             })
                         })
                     } 
@@ -321,24 +332,30 @@ router.get('/bbc/article',(req,res)=>{
                             let unixtime = storyBody.find('.mini-info-list .date').attr('data-seconds')*1000;
                             let paragraph = storyBody.find('.story-body__inner p');
                             let main_img = storyBody.find('.story-body__inner img').attr('src');
+                            let pureText = '';
                             let context = '';
                             let content = {};
                             for (let j = 0; j < paragraph.length; j++){                               
                                 let p = paragraph.eq(j).text();
                                 let propertyName = j+'_p';
                                 context += '<p>' + p + '</p>';
-                                content[propertyName] = p.replace(/"/g,'\\"').replace(/'/g,"\\'");       
+                                content[propertyName] = p.replace(/"/g,'\\"').replace(/'/g,"\\'");
+                                pureText += p;       
                             }
-                            // let abstract = abstractGen.abstractGen(context);
+
+                            let tagArray = textMining.tagGen(article[i].id, pureText);
+                            let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
+
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            content = JSON.stringify(content);
+                            // content = JSON.stringify(content);
+
                             uploadImgToS3(main_img,'bbc', Date.now().toString(),(main_img)=>{
                                 con.query(`UPDATE article SET 
                                               title = "${title}",
                                               author = "${author}",
                                               unixtime = ${unixtime},
                                               context = "${context}",
-
+                                              abstract = "${abstract}",
                                               main_img = "${main_img}"
                                        WHERE id = ${article[i].id}`, function(err,result){
                                     fetched++;
@@ -347,9 +364,18 @@ router.get('/bbc/article',(req,res)=>{
                                         // res.send({err:`Database query error at ${i}`});
                                         return;
                                     }
-                                    if (fetched === article.length){
-                                        res.send('ok');
-                                        return;
+                                    else{
+                                        dao.addTag(tagArray)
+                                        .then((result)=>{
+                                            console.log(result);
+                                            if (fetched === article.length){
+                                                res.send('ok');
+                                                return;
+                                            }
+                                        })
+                                        .catch((error)=>{
+                                            myLib.log(error);
+                                        })
                                     }
                                 })
                             })
@@ -492,19 +518,21 @@ router.get('/cnn/article',(req,res)=>{
                                 return;
                             }
                             let $ = cheerio.load(body);
-                            let paragraph = $('article > .l-container > .pg-rail-tall__wrapper').find('.zn-body__paragraph');
+                            let paragraph = $('article > .l-container > .pg-rail-tall__wrapper').find('.zn-body__paragraph'); // 這個 class 底下有直接是文字的，也有 h3 tag 的 
+                            let pureText = '';
                             let content = {};
                             let context = '';
                             for (let j = 0; j < paragraph.length; j++){                               
                                 let p = paragraph.eq(j).text();
                                 let propertyName = j+'_p';
                                 context += '<p>' + p + '</p>';
-                                content[propertyName]= p;               
+                                content[propertyName]= p;
+                                pureText += p;               
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'"); //
-                            content = JSON.stringify(content);
-
-                            if( context===''|| title ===''){
+                      
+                            // content = JSON.stringify(content);
+                            if(context===''){
                                 let deleteNull = `DELETE FROM article WHERE id = ${article[i].id}`;
                                 con.query(deleteNull,function(error,result){
                                     if(error){
@@ -514,17 +542,26 @@ router.get('/cnn/article',(req,res)=>{
                                 })
                             }
                             else{
-                                con.query(`UPDATE article SET context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
+                                let tagArray = textMining.tagGen(article[i].id, pureText);
+                                let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
+                                con.query(`UPDATE article SET context = "${context}", abstract = "${abstract}" WHERE id = ${article[i].id}`, function(err,result){
+                                    fetched++;
                                     if (err){ 
-                                        fetched++;
                                         myLib.log(err);
                                         // res.send({err:`Database query error at ${i}`});
                                         return;
                                     }
-                                    fetched++;
-                                    if (fetched === article.length){
-                                        res.send('ok');
-                                        return;
+                                    else{
+                                        dao.addTag(tagArray)
+                                        .then((result)=>{
+                                            if (fetched === article.length){
+                                                res.send('ok');
+                                                return;
+                                            }
+                                        })
+                                        .catch((error)=>{
+                                            myLib.log(error);
+                                        })
                                     }
                                 })
                             }
@@ -562,7 +599,7 @@ router.get('/economist/list', (req, res) => {
                     articleArray.push(Object.assign({url}));
                 }
             }
-            await dao.addToDB(articleArray,0,4,'url');
+            await dao.addToDB(articleArray,0,4,'url'); // 用 url 判斷會有重複，但是 request 的來源抓不到完整的 title
             await browser.close();
             res.redirect('/economist/article');
         }
@@ -603,16 +640,21 @@ router.get('/economist/article',(req,res)=>{
                             let unixtime = Date.parse(datetime);
                             let main_img = divMain.find('article').find('.blog-post__inner').find('.component-image img').attr('src');
                             let paragraph = divMain.find('article').find('.blog-post__inner .blog-post__text p');
+                            let pureText = '';
                             let context = '';
                             for (let j = 0; j < paragraph.length; j++){                             
                                 let p = paragraph.eq(j).text();
-                                context += '<p>' + p + '</p>';                      
+                                context += '<p>' + p + '</p>';
+                                pureText += p;                      
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
+                            let tagArray = textMining.tagGen(article[i].id, pureText);
+                            let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
                             uploadImgToS3(main_img,'economist', Date.now().toString(),(main_img)=>{
                                 con.query(`UPDATE article SET 
                                               title = "${title}",
                                               subtitle = "${subtitle}",
+                                              abstract = "${abstract}",
                                               author = "${author}", 
                                               context = "${context}",
                                               src_datetime = '${datetime}', 
@@ -625,9 +667,17 @@ router.get('/economist/article',(req,res)=>{
                                         // res.send({err:'Database query error. here'+i});
                                         return;
                                     }
-                                    if(fetched === article.length){
-                                        res.send('ok');
-                                        return;
+                                    else{
+                                        dao.addTag(tagArray)
+                                        .then((result)=>{
+                                            if (fetched === article.length){
+                                                res.send('ok');
+                                                return;
+                                            }
+                                        })
+                                        .catch((error)=>{
+                                            myLib.log(error);
+                                        })
                                     }
                                 })
                             })
@@ -755,7 +805,7 @@ router.get('/guardian/article',(req,res)=>{
                         url: article[i].url,
                         method: "GET"
                     }
-                    // if (article[i].context === null){
+                    if (article[i].context === null){
                         request(options, function(error, response, body){
                             if (error || !body) {
                                 myLib.log(error);
@@ -771,9 +821,11 @@ router.get('/guardian/article',(req,res)=>{
                             let main_img = divMain.find('.content__main-column').find('figure picture img').attr('src');
                             let paragraph = divMain.find('.content__article-body p');
                             let context = '';
+                            let pureText = '';
                             for (let j = 0; j < paragraph.length; j++){                             
                                 let p = paragraph.eq(j).text();
-                                context += '<p>' + p + '</p>';                      
+                                context += '<p>' + p + '</p>';
+                                pureText += p;                      
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
                             if( context===''|| title ==='' || unixtime === undefined ){
@@ -786,10 +838,13 @@ router.get('/guardian/article',(req,res)=>{
                                 })
                             }
                             else{
+                                let tagArray = textMining.tagGen(article[i].id, pureText);
+                                let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
                                 uploadImgToS3(main_img,'guardian', Date.now().toString(),(main_img)=>{
                                     con.query(`UPDATE article SET  
                                                 title = "${title}",
                                                 subtitle = "${subtitle}",
+                                                abstract = "${abstract}",
                                                 author = "${author}", 
                                                 context = "${context}",
                                                 src_datetime = '${datetime}', 
@@ -802,22 +857,30 @@ router.get('/guardian/article',(req,res)=>{
                                             // res.send({err:'Database query error. here'+i});
                                             return;
                                         }
-                                        if (fetched === article.length){
-                                            res.send('ok');
-                                            return;
+                                        else{
+                                            dao.addTag(tagArray)
+                                            .then((result)=>{
+                                                if (fetched === article.length){
+                                                    res.send('ok');
+                                                    return;
+                                                }
+                                            })
+                                            .catch((error)=>{
+                                                myLib.log(error);
+                                            })
                                         }
                                     })
                                 })
                             }
                         })
-                    // }
-                    // else{
-                    //     fetched++;
-                    //     if (fetched === article.length){
-                    //         res.send('All fetched');
-                    //         return;
-                    //     }
-                    // }
+                    }
+                    else{
+                        fetched++;
+                        if (fetched === article.length){
+                            res.send('All fetched');
+                            return;
+                        }
+                    }
                 } // End of for loop
             }
         }) // End of query
@@ -889,20 +952,25 @@ router.get('/independent/article', (req, res) => {
                             let main_img = topContainerWrapper.find('.hero-wrapper figure amp-img').attr('src');
                             let paragraph = $('.main-wrapper').find('.body-content').children();
                             let context = '';
+                            let pureText = '';
                             for (let j = 0; j < paragraph.length; j++){
                                 if(paragraph.get(j).tagName == 'p'){
                                     let p = paragraph.eq(j).text();
                                     context += '<p>' + p + '</p>';
+                                    pureText += p;
                                 }
                                 if(paragraph.get(j).tagName == 'hr'){
                                     break;
                                 }
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
+                            let tagArray = textMining.tagGen(article[i].id, pureText);
+                            let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
                             uploadImgToS3(main_img,'independent', Date.now().toString(),(main_img)=>{
                                 con.query(`UPDATE article SET  
                                               title = "${title}",
                                               subtitle = "${subtitle}",
+                                              abstract = "${abstract}",
                                               author = "${author}", 
                                               context = "${context}",
                                               src_datetime = '${datetime}', 
@@ -915,9 +983,17 @@ router.get('/independent/article', (req, res) => {
                                         // res.send({err:'Database query error. here'+i});
                                         return;
                                     }
-                                    if (fetched === article.length){
-                                        res.send('ok');
-                                        return;
+                                    else{
+                                        dao.addTag(tagArray)
+                                        .then((result)=>{
+                                            if (fetched === article.length){
+                                                res.send('ok');
+                                                return;
+                                            }
+                                        })
+                                        .catch((error)=>{
+                                            myLib.log(error);
+                                        })
                                     }
                                 })
                             });
@@ -940,7 +1016,8 @@ router.get('/independent/article', (req, res) => {
 // New York Times: news_id = 7;
 router.get('/nytimes/list',(req,res)=>{
     let options = {
-        url: "https://www.nytimes.com/search?query=Taiwan&sort=best",
+        // url: "https://www.nytimes.com/search?query=Taiwan&sort=best",
+        url:"https://www.nytimes.com/search?query=Taiwan&sort=newest",
         method: "GET"
     }
     request(options, function(error, response, body){
@@ -956,75 +1033,13 @@ router.get('/nytimes/list',(req,res)=>{
             let url = 'https://www.nytimes.com' + searchResult.eq(i).find('a').attr('href');
             articleArray.push(Object.assign({url}));
         }
-        dao.addToDB(articleArray,0,7,'title').then((x)=>{
+        dao.addToDB(articleArray,0,7,'url').then((x)=>{
             console.log(x);
-            res.send('OK');
-            // res.redirect('/bbc/article');
+            // res.send('OK');
+            res.redirect('/nytimes/article');
         }).catch((error)=>{
             myLib.log(error);
         });
-        // function insert(array, j){ // this function should recompose in DAO.
-        //     if (j < array.length){
-        //         mysql.conPool.getConnection((err,con)=>{
-        //             if (err){
-        //                 myLib.log(err);
-        //                 res.send({err:'Database query error.'})
-        //                 return;
-        //             }
-        //             let checkIfTitleExist = `SELECT * FROM nytimes WHERE url = "${array[j].url}"`;
-        //             con.query(checkIfTitleExist, function(err, rows){
-        //                 con.release();
-        //                 if (err){
-        //                     myLib.log(err);
-        //                     res.send({err:'Database query error.'})
-        //                     return;
-        //                 }
-        //                 if (rows.length === 0){
-        //                     let insertNewURL = `INSERT INTO nytimes SET ?`;
-        //                     let oneRow = {
-        //                                 url: array[j].url,
-        //                                 source: array[j].source,                                      
-        //                                 category: array[j].category,
-        //                                 title: array[j].title,
-        //                                 subtitle: array[j].subtitle, 
-        //                                 abstract: array[j].abstract,
-        //                                 author: array[j].author, 
-        //                                 src_datetime: array[j].src_datetime, 
-        //                                 unixtime: array[j].unixtime,
-        //                                 context: array[j].context,
-        //                                 translate: array[j].translate,
-        //                                 tag: array[j].tag,
-        //                                 main_img: array[j].main_img
-        //                     }
-        //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-        //                         if(err){
-        //                             myLib.log(err);
-        //                             res.send({err:'Database query error.'});
-        //                             return;
-        //                         }
-        //                         if (j===array.length-1){
-        //                             res.redirect('/nytimes/article');
-        //                             return;
-        //                         }
-        //                         else{
-        //                             insert(array,j+1);
-        //                         }
-        //                     })
-        //                 }
-        //                 else{
-        //                     if (j===array.length-1){
-        //                         res.redirect('/nytimes/article');
-        //                         return;
-        //                     }
-        //                     else{
-        //                         insert(array,j+1);
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     }
-        // }
-        // insert(articleArray,0);
     }) // End of request
 })
 router.get('/nytimes/article',(req,res)=>{
@@ -1058,11 +1073,13 @@ router.get('/nytimes/article',(req,res)=>{
                             let unixtime = Date.parse(src_datetime);
                             let storyBody = $('article').find('section .StoryBodyCompanionColumn');
                             let context = '';
+                            let pureText = '';
                             for (let j = 0; j < storyBody.length; j++){
                                 let paragraph = storyBody.eq(j).find('p');
                                 for (let k = 0; k < paragraph.length; k++){
                                     let p = paragraph.eq(k).text();
                                     context += '<p>' + p + '</p>';
+                                    pureText += p;
                                 }                                 
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
@@ -1076,9 +1093,12 @@ router.get('/nytimes/article',(req,res)=>{
                                 })
                             }
                             else{
+                                let tagArray = textMining.tagGen(article[i].id, pureText);
+                                let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
                                 uploadImgToS3(main_img,'nytimes', Date.now().toString(),(main_img)=>{
                                     con.query(`UPDATE article SET title = "${title}",
                                                                   main_img = "${main_img}",
+                                                                  abstract = "${abstract}",
                                                                   author = "${author}",
                                                                   src_datetime = "${src_datetime}",
                                                                   unixtime = ${unixtime},
@@ -1088,9 +1108,17 @@ router.get('/nytimes/article',(req,res)=>{
                                             myLib.log(err);
                                             return;
                                         }
-                                        if (fetched === article.length){
-                                            res.send('ok');
-                                            return;
+                                        else{
+                                            dao.addTag(tagArray)
+                                            .then((result)=>{
+                                                if (fetched === article.length){
+                                                    res.send('ok');
+                                                    return;
+                                                }
+                                            })
+                                            .catch((error)=>{
+                                                myLib.log(error);
+                                            })
                                         }
                                     })
                                 })
@@ -1130,75 +1158,11 @@ router.get('/quartz/list',(req,res)=>{
         }
         dao.addToDB(articleArray,0,8,'url').then((x)=>{
             console.log(x);
-            res.send('OK');
-            // res.redirect('/bbc/article');
+            // res.send('OK');
+            res.redirect('/quartz/article');
         }).catch((error)=>{
             myLib.log(error);
         });
-
-        // function insert(array, j){ // this function should recompose in DAO.
-        //     if (j < array.length){
-        //         mysql.conPool.getConnection((err,con)=>{
-        //             if (err){
-        //                 myLib.log(err);
-        //                 res.send({err:'Database query error.'})
-        //                 return;
-        //             }
-        //             let checkIfTitleExist = `SELECT * FROM quartz WHERE url = "${array[j].url}"`;
-        //             con.query(checkIfTitleExist, function(err, rows){
-        //                 con.release();
-        //                 if (err){
-        //                     myLib.log(err);
-        //                     res.send({err:'Database query error.'});
-        //                     return;
-        //                 }
-        //                 if (rows.length === 0){
-        //                     let insertNewURL = `INSERT INTO quartz SET ?`;
-        //                     let oneRow = {
-        //                                 url: array[j].url,
-        //                                 source: array[j].source,
-        //                                 category: array[j].category,
-        //                                 title: array[j].title,
-        //                                 subtitle: array[j].subtitle, 
-        //                                 abstract: array[j].abstract,
-        //                                 author: array[j].author, 
-        //                                 src_datetime: array[j].pubDatetime, 
-        //                                 unixtime: array[j].pubDatetime,
-        //                                 context: array[j].context,
-        //                                 translate: array[j].translate,
-        //                                 tag: array[j].tag,
-        //                                 main_img: array[j].main_img
-        //                     }
-        //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-        //                         if(err){
-        //                             myLib.log(err);
-        //                             res.send({err:'Database query error.'});
-        //                             return;
-        //                         }
-        //                         if (j===array.length-1){
-        //                             console.log('schedule test QUARTZ');
-        //                             res.redirect('/quartz/article');
-        //                             return;
-        //                         }
-        //                         else{
-        //                             insert(array,j+1);
-        //                         }
-        //                     })
-        //                 }
-        //                 else{
-        //                     if (j===array.length-1){
-        //                         res.redirect('/quartz/article');
-        //                         return;
-        //                     }
-        //                     else{
-        //                         insert(array,j+1);
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     }
-        // }
-        // insert(articleArray,0);
     }) // End of request
 })
 router.get('/quartz/article', (req,res)=>{
@@ -1232,11 +1196,13 @@ router.get('/quartz/article', (req,res)=>{
                             let unixtime = Date.parse(datetime);
                             let main_img = divMain.find('article ._83471 img').attr('src');
                             let paragraph = divMain.find('._61c55').children();
+                            let pureText = '';
                             let context = '';
                             for (let j = 0; j < paragraph.length; j++){
                                 if(paragraph.get(j).tagName == 'p'){
                                     let p = paragraph.eq(j).text();
                                     context += '<p>' + p + '</p>';
+                                    pureText += p;
                                 }
                                 else if (paragraph.get(j).tagName == 'h2'){
                                     let h2 = paragraph.eq(j).text();
@@ -1244,26 +1210,37 @@ router.get('/quartz/article', (req,res)=>{
                                 }                           
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
+                            let tagArray = textMining.tagGen(article[i].id, pureText);
+                            let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
                             uploadImgToS3(main_img,'quartz', Date.now().toString(),(main_img)=>{
                                 con.query(`UPDATE article SET  
                                               title = "${title}",
                                               subtitle = "${subtitle}",
+                                              abstract = "${abstract}",
                                               author = "${author}", 
                                               context = "${context}",
                                               src_datetime = '${datetime}', 
                                               unixtime = ${unixtime},
                                               main_img = "${main_img}"
                                        WHERE id = ${article[i].id}`, function(err,result){
-                                fetched++;
-                                if (err){
-                                    myLib.log(err);
-                                    // res.send({err:'Database query error. here'+i});
-                                    return;
-                                }
-                                if (fetched === article.length){
-                                    res.send('ok');
-                                    return;
-                                }
+                                    fetched++;
+                                    if (err){
+                                        myLib.log(err);
+                                        // res.send({err:'Database query error. here'+i});
+                                        return;
+                                    }
+                                    else{
+                                        dao.addTag(tagArray)
+                                        .then((result)=>{
+                                            if (fetched === article.length){
+                                                res.send('ok');
+                                                return;
+                                            }
+                                        })
+                                        .catch((error)=>{
+                                            myLib.log(error);
+                                        })
+                                    }
                                 })
                             });                            
                         })
@@ -1346,6 +1323,7 @@ router.get('/washingtonpost/article',(req,res)=>{
                             let main_img = $('#article-body article .inline-photo').find('img').attr('src');
                             let paragraph = $('article').children();
                             let context = '';
+                            let pureText = '';
                             for (let j = 0; j < paragraph.length; j++){
                                 if(paragraph.get(j).tagName == 'p'){
                                     let p = paragraph.eq(j).text();
@@ -1354,6 +1332,7 @@ router.get('/washingtonpost/article',(req,res)=>{
                                     }
                                     else{
                                         context += '<p>' + p + '</p>';
+                                        pureText += p;
                                     }
                                 }
                                 else if(paragraph.get(j).tagName == 'h3'){
@@ -1371,18 +1350,28 @@ router.get('/washingtonpost/article',(req,res)=>{
                                 // }
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'"); 
+                            let tagArray = textMining.tagGen(article[i].id, pureText);
+                            let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
                             uploadImgToS3(main_img,'washingtonpost', Date.now().toString(),(main_img)=>{
-                                con.query(`UPDATE article SET main_img = "${main_img}", context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
+                                con.query(`UPDATE article SET main_img = "${main_img}", abstract = "${abstract}", context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
+                                    fetched++;
                                     if (err){
-                                        fetched++;
+                                        
                                         myLib.log(err);
                                         // res.send({err:'Database query error.'});
                                         return;
                                     }
-                                    fetched++;
-                                    if (fetched === article.length){
-                                        res.send('ok');
-                                        return;
+                                    else{
+                                        dao.addTag(tagArray)
+                                        .then((result)=>{
+                                            if (fetched === article.length){
+                                                res.send('ok');
+                                                return;
+                                            }
+                                        })
+                                        .catch((error)=>{
+                                            myLib.log(error);
+                                        })
                                     }
                                 })
                             })

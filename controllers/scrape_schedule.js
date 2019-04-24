@@ -13,16 +13,6 @@ let routeList = ['/washingtonpost/list',
                  '/cnn/list',
                  '/bbc/list'];
 
-let schedule = {
-    url: host+"/schedule/test",
-    method: "GET"
-}
-request(schedule, function(error, response, body){
-if (error || !body) {
-    return;
-}
-})
-
 for (let i=0; i< routeList.length ; i++){
     let options = {
         url: host+routeList[i],
@@ -35,4 +25,12 @@ for (let i=0; i< routeList.length ; i++){
     })
 }
 
-//
+// let schedule = {
+//         url: host+"/schedule/test",
+//         method: "GET"
+//     }
+// request(schedule, function(error, response, body){
+//     if (error || !body) {
+//         return;
+//     }
+// })

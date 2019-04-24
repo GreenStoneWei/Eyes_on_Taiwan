@@ -101,6 +101,7 @@ router.get('/article',(req,res)=>{
                         let getArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count FROM article INNER JOIN news ON article.news_id = news.id ';
                         let articleID = `WHERE article.id = ${similarArticle[0]} OR article.id = ${similarArticle[1]} OR article.id = ${similarArticle[2]}`;
                         con.query(getArticle+articleID,(err,similarResult)=>{
+                            // 在更新文章後還沒有算出 similar article 前會出錯 cannot read property 0 of undefined.
                             if(err){
                                 myLib.log(err);
                                 return;

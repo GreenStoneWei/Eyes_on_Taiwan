@@ -27,7 +27,7 @@ module.exports = {
                         score += importanceOfContent[item.term];
                     }
                 });
-                indexPos.push(score); // 按照句子的順序把分數排進分數
+                indexPos.push(score); // 按照句子的順序把分數排進去
             }
             let indexOfMaxValue = indexPos.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0); // 找分數最高的位置
             return sentence[indexOfMaxValue];
@@ -36,5 +36,22 @@ module.exports = {
             return '';
         }
             
+    },
+    tagGen: function(id, content){
+        let tfidf = new TfIdf();
+        let tagFreq = {};
+        tfidf.addDocument(content);
+        tfidf.listTerms(0).forEach(function(item){
+            tagFreq[item.term] = item.tfidf;
+        })
+        let sortedFreq = Object.keys(tagFreq).sort(function(a,b){return tagFreq[b]-tagFreq[a]});
+        let tag = [];
+        for (let i=0; i< 10; i++){
+            if (sortedFreq[i].toLowerCase()!=='taiwan'){
+                let oneRow = [id, sortedFreq[i]];
+                tag.push(oneRow);
+            }
+        }
+        return tag;
     }
 }

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         page = 1;
     }
     let sort = getParameterByName('sort');
+    let tag = getParameterByName('tag');
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
@@ -16,7 +17,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         createPagination(sort,page);
       }
     };
-    xhr.open("GET", `/api/migration?sort=${sort}&page=${page}`, true); // index
+    xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag}`, true); // index
     xhr.send();
 }) // End of document.addEventListener
 

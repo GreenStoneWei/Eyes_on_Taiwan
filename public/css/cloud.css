@@ -1,0 +1,20 @@
+/* #wordcloud{
+    display: flex;
+    width: 800px;
+    height: 800px;
+    background-color: white; 
+} */
+.cloud-container{
+    height: 100vh;
+    width: 20vw;
+    position: fixed;
+    background: black;
+    top: 0;
+    left: -20vw;
+    opacity: 0.7;
+    z-index: 6;
+    transition: 0.4s;
+}
+.cloud-container-move{
+    transform: translate(20vw, 0px);
+}

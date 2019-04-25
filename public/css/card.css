@@ -53,3 +53,19 @@
     font-size:12px;
     margin: 0 0 0 0; /* bootstrap 對 p 有預設 margin bottom 1 rem */
 }
+.tag-space{
+    width: 10px;
+    height: 10px;
+}
+.card-tag{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+a.tag-link{
+    color: rgb(132, 165, 163) !important;
+}
+a.tag-link:hover{
+    color:#00cccc !important;
+}

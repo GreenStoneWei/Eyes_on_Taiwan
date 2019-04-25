@@ -137,17 +137,28 @@ router.get('/article',(req,res)=>{
     });
 })
 
-router.get('/migration',(req,res)=>{
+router.get('/index',(req,res)=>{
     let paging = parseInt(req.query.page);
     if (!Number.isInteger(paging)){
         paging = 1;
     }
     let pageLimit = 10;
     let sort = req.query.sort;
+    let tag  = req.query.tag;
     let orderBy = '';
-    let offset = (paging-1) * pageLimit;
+    let offset  = (paging-1) * pageLimit;
     let limiter = ` LIMIT ${offset}, ${pageLimit}`;
-    let filter  = ' WHERE title != "null" AND context != "null" AND context != ""';
+    let filter  = '';
+    let getIndexArticle = '';
+    switch(tag){
+        case 'null':
+            filter  = ` WHERE title != "null" AND context != "null" AND context != "" `;
+            getIndexArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count FROM article INNER JOIN news ON article.news_id = news.id';
+            break;
+        default:
+            filter  = ` WHERE title != "null" AND context != "null" AND context != "" AND tag = "${tag}"`;
+            getIndexArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count FROM article INNER JOIN news ON article.news_id = news.id INNER JOIN tag ON article.id = tag.article_id';
+    }
     switch(sort){
         case 'date':
             orderBy = ' ORDER BY unixtime DESC';
@@ -158,7 +169,7 @@ router.get('/migration',(req,res)=>{
         default:
             orderBy = ' ORDER BY unixtime DESC';
     }
-    let getIndexArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count FROM article INNER JOIN news ON article.news_id = news.id';
+    
     mysql.conPool.query(getIndexArticle+filter+orderBy+limiter,function(error, result){
         if (error){
             throw error;
@@ -181,6 +192,52 @@ router.get('/migration',(req,res)=>{
         }
     })
 })
+
+router.get('/card/tags',(req,res)=>{
+    let id = parseInt(req.query.id);
+    mysql.conPool.query(`SELECT t1.tag FROM tag AS t1 INNER JOIN article AS t2 ON t1.article_id = t2.id WHERE t2.id = ${id} LIMIT 3`, (err, tag)=>{
+        if (err){
+           myLib.log(err);
+           return; 
+        }
+        let tagArray = [];
+        for(let i = 0; i < tag.length; i++){
+            tagArray.push(tag[i].tag);
+        }
+        res.send(JSON.stringify(tagArray));
+    })
+})
+
+router.get('/word/cloud',(req,res)=>{
+    let tag = req.query.tag;
+    mysql.conPool.query('SELECT count(tag) AS count , tag FROM newscraping.tag GROUP BY tag ORDER BY count DESC limit 50', (err, result)=>{
+        let cloudList = [];
+        let score = [];
+        result.forEach(element => {
+            let eachTag = [element.tag, getBaseLog(1.5,element.count)];
+            score.push(element.count);
+            cloudList.push(eachTag);
+        });
+        //
+        // let sum = SumData(score);
+        // let avg = sum/score.length;
+        // let squareOfXiMinusXbar = 0
+        // for(let i =0; i<score.length; i++){
+        //     squareOfXiMinusXbar += Math.pow((score[i]-avg),2);
+        // }
+        // let sd = Math.sqrt(squareOfXiMinusXbar)/(score.length-1);
+        // for (let j=0; j<cloudList.length;j++){
+        //     cloudList[j][1] = (cloudList[j][1]-avg)/sd;
+        // }
+        res.send(JSON.stringify(cloudList));
+    })
+})
+function getBaseLog(x, y) {
+    return Math.log(y) / Math.log(x);
+  }
+function SumData(arr){
+    return arr.reduce((a,b)=>a+b);  
+}
 
 router.get('/update/redis/count/to/sql',(req,res)=>{
     client.keys('view_count*',(err,reply)=>{

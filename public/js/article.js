@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         //
         source.innerHTML = article[0].news;
         h1.innerHTML = article[0].title;
-        if (article[0].author !== null && article[0].author !== ''){
+        if (article[0].author !== null && article[0].author !== ''&& article[0].author !== 'null'){
             let author = createElement('div',['author'],false,meta);
             author.innerHTML = article[0].author;
         }

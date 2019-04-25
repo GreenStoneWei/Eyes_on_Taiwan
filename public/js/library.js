@@ -97,10 +97,12 @@ function createArticleCard(array,parentElement){
         }
         let title      = createElement("h4",["card-title"],false,cardBody);
         let abstract   = createElement("p",["card-text","abstract"],false,cardBody);
+        let tagContainer = createElement("div",["card-tag"],false,cardBody);
         let readBlock  = createElement("div",["read-block"],false,cardBody);
         let readMore   = createElement("a",["card-link"],{href:`/article.html?id=${array[i].id}`},readBlock); // # to be replaced
         let viewImage  = createElement("img",["viewed"],{src:'https://s3.amazonaws.com/wheatxstone/news/iconfinder_view_126581.png'},readBlock);
         let viewCount  = createElement("p",["view-count"],false,readBlock);
+        getTag(array[i].id,tagContainer);
         source.innerHTML   = array[i].news;
         time.innerHTML     = dateFormat(array[i].unixtime);
         title.innerHTML    = array[i].title;
@@ -109,4 +111,23 @@ function createArticleCard(array,parentElement){
         viewCount.innerHTML = 'Viewed '+ array[i].viewed_count + ' Times';
         // console.log(array[i]);
     }
+}
+
+function getTag(id, tagContainer){
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        let tagArray = JSON.parse(this.responseText);
+        let tagStarter = createElement("div",false,false,tagContainer);
+        let colonSpace = createElement("div",["tag-space"],false,tagContainer);
+        tagStarter.innerHTML = 'Tags: ';
+        for(let i=0; i<tagArray.length;i++){
+            let tagNode = createElement("a",["tag-link"],{href:`/?tag=${tagArray[i]}`},tagContainer);
+            tagNode.innerHTML = '#'+tagArray[i];
+            let tagSpace = createElement("div",["tag-space"],false,tagContainer);
+        }
+      }
+    };
+    xhr.open("GET", `/api/card/tags?id=${id}`, true); 
+    xhr.send();
 }

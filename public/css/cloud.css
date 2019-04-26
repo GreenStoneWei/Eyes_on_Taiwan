@@ -1,20 +1,30 @@
-/* #wordcloud{
-    display: flex;
-    width: 800px;
-    height: 800px;
-    background-color: white; 
-} */
 .cloud-container{
     height: 100vh;
     width: 20vw;
     position: fixed;
-    background: black;
     top: 0;
-    left: -20vw;
+    left: -30vw;
+    /* left:0; */
     opacity: 0.7;
     z-index: 6;
     transition: 0.4s;
 }
+#wordcloud{
+    display: flex;
+    width: 30vw;
+    height: 100vh;
+   
+}
+#nav-tag:hover{
+    color:#007bff;
+    cursor: pointer;
+}
 .cloud-container-move{
-    transform: translate(20vw, 0px);
+    transform: translate(30vw, 0px);
+}
+#wordcloud > span{
+    cursor: pointer;
+}
+#wordcloud > span:hover{
+    color:#00cccc !important;
 }

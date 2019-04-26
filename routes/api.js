@@ -169,7 +169,6 @@ router.get('/index',(req,res)=>{
         default:
             orderBy = ' ORDER BY unixtime DESC';
     }
-    
     mysql.conPool.query(getIndexArticle+filter+orderBy+limiter,function(error, result){
         if (error){
             throw error;
@@ -195,7 +194,7 @@ router.get('/index',(req,res)=>{
 
 router.get('/card/tags',(req,res)=>{
     let id = parseInt(req.query.id);
-    mysql.conPool.query(`SELECT t1.tag FROM tag AS t1 INNER JOIN article AS t2 ON t1.article_id = t2.id WHERE t2.id = ${id} LIMIT 3`, (err, tag)=>{
+    mysql.conPool.query(`SELECT t1.tag FROM tag AS t1 INNER JOIN article AS t2 ON t1.article_id = t2.id WHERE t2.id = ${id} LIMIT 5`, (err, tag)=>{
         if (err){
            myLib.log(err);
            return; 

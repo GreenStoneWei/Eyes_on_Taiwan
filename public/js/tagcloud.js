@@ -1,6 +1,7 @@
 const cloudContainer = document.querySelector('.cloud-container');
 const cloud = document.getElementById('wordcloud');
 const navTag = document.getElementById('nav-tag');
+
 let options = {
     list:[],
     gridSize: 6,
@@ -11,8 +12,25 @@ let options = {
     rotateRatio: 0.5,
     rotationSteps: 2,
     ellipticity: 1,
-    click: function(item) {
-      console.log(item[0]);
+    click: function(tag) {
+        let xhr = new XMLHttpRequest();
+        let page = parseInt(getParameterByName('page'));
+        if (!Number.isInteger(page)){
+            page = 1;
+        }
+        let sort = getParameterByName('sort');
+        xhr.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            let articleList = JSON.parse(this.responseText);
+            container.innerHTML = '';
+            pagination.innerHTML = '';
+            createArticleCard(articleList,container);
+            createPagination(sort,page);
+            console.log(page);
+          }
+        };
+        xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag[0]}`, true); // index
+        xhr.send();
     },
     shape: function(theta) {
       // Function for simple shapes can be generated manually with http://timdream.org/wordcloud2.js/shape-generator.html.
@@ -35,6 +53,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   xhr.open("GET", `/api/word/cloud`, true); // index
   xhr.send();
 })
+
 
 
 navTag.addEventListener('click',()=>{

@@ -4,7 +4,7 @@ const mysql   = require('../util/mysql.js');
 const myLib   = require('../util/config.js');
 const redis   = require('redis');
 const client  = redis.createClient();
-const cacheExpireTime = 60 * 60 * 24; // EX unit: sec
+const cacheExpireTime = 60 * 60 * 24; // EX unit: sec, this equals 1 day.
 
 router.get('/showindex',(req,res)=>{
     let page = parseInt(req.query.page);
@@ -149,15 +149,16 @@ router.get('/index',(req,res)=>{
     let offset  = (paging-1) * pageLimit;
     let limiter = ` LIMIT ${offset}, ${pageLimit}`;
     let filter  = '';
-    let getIndexArticle = '';
+    let getColumn = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count';
+    let selectFromJoin = '';
     switch(tag){
-        case 'null':
-            filter  = ` WHERE title != "null" AND context != "null" AND context != "" `;
-            getIndexArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count FROM article INNER JOIN news ON article.news_id = news.id';
+        case 'null': 
+            selectFromJoin = ' FROM article INNER JOIN news ON article.news_id = news.id';
+            filter = ` WHERE title != "null" AND context != "null" AND context != "" `;
             break;
         default:
-            filter  = ` WHERE title != "null" AND context != "null" AND context != "" AND tag = "${tag}"`;
-            getIndexArticle = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count FROM article INNER JOIN news ON article.news_id = news.id INNER JOIN tag ON article.id = tag.article_id';
+            selectFromJoin = ' FROM article INNER JOIN news ON article.news_id = news.id INNER JOIN tag ON article.id = tag.article_id';
+            filter = ` WHERE title != "null" AND context != "null" AND context != "" AND tag = "${tag}"`;
     }
     switch(sort){
         case 'date':
@@ -169,27 +170,35 @@ router.get('/index',(req,res)=>{
         default:
             orderBy = ' ORDER BY unixtime DESC';
     }
-    mysql.conPool.query(getIndexArticle+filter+orderBy+limiter,function(error, result){
-        if (error){
-            throw error;
-        }
-        // add viewed count in cached. another solution is making the caching addition in another route. Front-end calls 2 api. 
-        let added = 0;
-        for(let i=0;i<result.length;i++){
-            let viewCountCache = 'view_count_'+ result[i].id;
-            client.get(viewCountCache,(err,cacheCount)=>{ 
-                added++;
-                // 處理 cachecount = null 的情況
-                if(cacheCount==null){
-                    cacheCount=0;
+    mysql.conPool.getConnection((err,con)=>{
+        con.query('SELECT count(*) AS count'+selectFromJoin+filter+orderBy,(err,count)=>{
+            con.release();
+            let totalArticleCount = count[0].count*1; // *1 to convert into int
+            let totalPage = Math.ceil(totalArticleCount/pageLimit);
+            con.query(getColumn+selectFromJoin+filter+orderBy+limiter,function(error, result){
+                if (error){
+                    throw error;
                 }
-                result[i].viewed_count += parseInt(cacheCount);
-                if (added===result.length){
-                    res.send(result);
+                // add viewed count in cached. another solution is making the caching addition in another route. Front-end calls 2 api. 
+                let added = 0;
+                for(let i=0;i<result.length;i++){
+                    let viewCountCache = 'view_count_'+ result[i].id;
+                    client.get(viewCountCache,(err,cacheCount)=>{ 
+                        added++;
+                        // 處理 cachecount = null 的情況
+                        if(cacheCount==null){
+                            cacheCount=0;
+                        }
+                        result[i].viewed_count += parseInt(cacheCount);
+                        if (added===result.length){
+                            res.send(JSON.stringify({totalPage: totalPage, data: result}));
+                        }
+                    })
                 }
             })
-        }
+        })
     })
+    
 })
 
 router.get('/card/tags',(req,res)=>{

@@ -29,6 +29,7 @@ const uploadImgToS3 = function(url, newsBucket, fileName, callback){
                 if(error){
                     // console.log(error);
                     callback(url);
+                    return;
                 }
                 s3.putObject({
                     Body: data,
@@ -39,6 +40,7 @@ const uploadImgToS3 = function(url, newsBucket, fileName, callback){
                     if (error) {
                         // console.log("error downloading image to s3");
                         callback(url);
+                        return;
                     } else {
                         // console.log("success uploading to s3");
                         // console.log(awsS3+newsBucket+'/'+fileName);

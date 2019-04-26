@@ -21,12 +21,11 @@ let options = {
         let sort = getParameterByName('sort');
         xhr.onreadystatechange = function() {
           if (this.readyState == 4 && this.status == 200) {
-            let articleList = JSON.parse(this.responseText);
+            let articleList = JSON.parse(this.responseText).data;
             container.innerHTML = '';
             pagination.innerHTML = '';
             createArticleCard(articleList,container);
-            createPagination(sort,page);
-            console.log(page);
+            createPagination(sort,page,totalPage);
           }
         };
         xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag[0]}`, true); // index
@@ -53,8 +52,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
   xhr.open("GET", `/api/word/cloud`, true); // index
   xhr.send();
 })
-
-
 
 navTag.addEventListener('click',()=>{
     cloudContainer.classList.toggle('cloud-container-move');

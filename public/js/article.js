@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
           let subtitle = createElement('h3',['subtitle'],false,container);
           subtitle.innerHTML = article[0].subtitle;
         }
+        console.log(article[0].main_img);
         if (article[0].main_img !== "undefined"){
           let img = createElement('img',['img'],{src:article[0].main_img},container);
           // setAttr(img,{src:article[0].main_img});

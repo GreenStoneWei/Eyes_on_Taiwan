@@ -12,26 +12,39 @@ document.addEventListener('DOMContentLoaded', (event) => {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        let articleList = JSON.parse(this.responseText);
+        let articleList = JSON.parse(this.responseText).data;
+        let totalPage = JSON.parse(this.responseText).totalPage;
         createArticleCard(articleList,container);
-        createPagination(sort,page);
+        createPagination(sort, page, totalPage);
       }
     };
     xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag}`, true); // index
     xhr.send();
 }) // End of document.addEventListener
 
-function createPagination(sort,page){
+function createPagination(sort, page, totalPage){
     let previous = createElement('li',['page-item'],false,pagination);
     let prevLink = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${page-1}`},previous);
     prevLink.innerHTML = '&laquo';
-    for (let i=1; i<11 ;i++){
-        let pageItem = createElement('li',['page-item'],false,pagination);
-        let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${i}`},pageItem);
-        pg.innerHTML = i;
-        if(i===page){
-            pageItem.classList.add('active');
-            // pageItem.classList.add('disabled');
+
+    if(totalPage<11){
+        for (let i=1; i<(totalPage+1); i++){
+            let pageItem = createElement('li',['page-item'],false,pagination);
+            let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${i}`},pageItem);
+            pg.innerHTML = i;
+            if(i===page){
+                pageItem.classList.add('active');
+            }
+        }
+    }
+    else{
+        for (let i=1; i<11; i++){
+            let pageItem = createElement('li',['page-item'],false,pagination);
+            let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${i}`},pageItem);
+            pg.innerHTML = i;
+            if(i===page){
+                pageItem.classList.add('active');
+            }
         }
     }
     let next = createElement('li',['page-item'],false,pagination);
@@ -40,7 +53,7 @@ function createPagination(sort,page){
     if(page===1){
         previous.classList.add('disabled');
     }
-    if(page===10){
+    if(page===totalPage){
         next.classList.add('disabled');
     }
 

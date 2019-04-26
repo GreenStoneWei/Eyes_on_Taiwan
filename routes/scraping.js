@@ -48,9 +48,8 @@ router.get('/aljazeera/list',(req,res)=>{
                         fetched++;
                         if(fetched == apiList.length){
                             dao.addToDB(articleArray,0,1,'url').then((x)=>{
-                                console.log(x);
-                                res.send('OK');
-                                // res.redirect('/washingtonpost/article');
+                                // res.send('OK');
+                                res.redirect('/aljazeera/article');
                             }).catch((error)=>{
                                 myLib.log(error);
                             });
@@ -65,69 +64,6 @@ router.get('/aljazeera/list',(req,res)=>{
                 fetched++; // 因為要把 content type 不是 news 的也算進去
             }
         }
-        // function insert(array, j){ // this function should recompose in DAO.
-        //     if (j < array.length){
-        //         mysql.conPool.getConnection((err,con)=>{
-        //             if (err){
-        //                 myLib.log(err);
-        //                 res.send({err:'Database query error.'});
-        //                 return;
-        //             }
-        //             let checkIfTitleExist = `SELECT * FROM aljazeera WHERE url = "${array[j].url}"`;
-        //             con.query(checkIfTitleExist, function(err, rows){
-        //                 con.release();
-        //                 if (err){
-        //                     myLib.log(err);
-        //                     res.send({err:'Database query error.'})
-        //                     return;
-        //                 }
-        //                 if (rows.length === 0){
-        //                     let insertNewURL = `INSERT INTO aljazeera SET ?`;
-        //                     let oneRow = {
-        //                                 url: array[j].url,
-        //                                 source: array[j].source,
-        //                                 main_img: array[j].main_img,
-        //                                 category: array[j].category,
-        //                                 title: array[j].title,
-        //                                 subtitle: array[j].subtitle, 
-        //                                 abstract: array[j].abstract,
-        //                                 author: array[j].author, 
-        //                                 src_datetime: array[j].src_datetime, 
-        //                                 unixtime: array[j].unixtime,
-        //                                 context: array[j].context,
-        //                                 translate: array[j].translate,
-        //                                 tag: array[j].tag,
-        //                                 main_img: array[j].main_img
-        //                     }
-        //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-        //                         if(err){
-        //                             myLib.log(err);
-        //                             res.send({err:'Database query error.'});
-        //                             return;
-        //                         }
-        //                         if (j===array.length-1){
-        //                             res.redirect('/aljazeera/article');
-        //                             return;
-        //                         }
-        //                         else{
-        //                             insert(array,j+1);
-        //                         }
-        //                     })
-        //                 }
-        //                 else{
-        //                     if (j===array.length-1){
-        //                         res.redirect('/aljazeera/article');
-        //                         return;
-        //                     }
-        //                     else{
-        //                         insert(array,j+1);
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     }
-        // }
-        // insert(articleArray,0);
     }) // End of request
 })
 router.get('/aljazeera/article',(req,res)=>{
@@ -185,7 +121,7 @@ router.get('/aljazeera/article',(req,res)=>{
                                 }
                                 // 沒有抓到 context 的話連上一個 query 都不會做，有 context 的話就能分析出 tag ，再把 tag 寫入
                                 else{
-                                    dao.addTag(tagArray)
+                                    dao.addTag(article[i].id, tagArray)
                                     .then((result)=>{
                                         console.log(result);
                                         if (fetched === article.length){
@@ -235,72 +171,11 @@ router.get('/bbc/list',(req,res)=>{
             }
         }
         dao.addToDB(articleArray,0,2,'url').then((x)=>{
-            console.log(x);
-            res.send('OK');
-            // res.redirect('/bbc/article');
+            // res.send('OK');
+            res.redirect('/bbc/article');
         }).catch((error)=>{
             myLib.log(error);
         });
-        // function insert(array, j){ // this function should recompose in DAO.
-        //     if (j < array.length){
-        //         mysql.conPool.getConnection((err,con)=>{
-        //             if (err){
-        //                 myLib.log(err);
-        //                 res.send({err:'Database query error.'});
-        //             }
-        //             let checkIfTitleExist = `SELECT * FROM bbc WHERE url = "${array[j].url}"`;
-        //             con.query(checkIfTitleExist, function(err, rows){
-        //                 con.release();
-        //                 if (err){
-        //                     myLib.log(err);
-        //                     res.send({err:'Database query error.'})
-        //                 }
-        //                 if (rows.length === 0){
-        //                     let insertNewURL = `INSERT INTO bbc SET ?`;
-        //                     let oneRow = {
-        //                                 url: array[j].url,
-        //                                 source: array[j].source,
-        //                                 category: array[j].category,
-        //                                 title: array[j].title,
-        //                                 subtitle: array[j].subtitle, 
-        //                                 abstract: array[j].abstract,
-        //                                 author: array[j].author, 
-        //                                 src_datetime: array[j].src_datetime, 
-        //                                 unixtime: array[j].unixtime,
-        //                                 context: array[j].context,
-        //                                 translate: array[j].translate,
-        //                                 tag: array[j].tag,
-        //                                 main_img: array[j].main_img
-        //                     }
-        //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-        //                         if(err){
-        //                             myLib.log(err);
-        //                             res.send({err:'Database query error.'});
-        //                             return;
-        //                         }
-        //                         if (j===array.length-1){
-        //                             res.redirect('/bbc/article');
-        //                             return;
-        //                         }
-        //                         else{
-        //                             insert(array,j+1);
-        //                         }
-        //                     })
-        //                 }
-        //                 else{
-        //                     if (j===array.length-1){
-        //                         res.redirect('/bbc/article');
-        //                         return;
-        //                     }
-        //                     else{
-        //                         insert(array,j+1);
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     }
-        // }
-        // insert(articleArray,0);
     }) // End of request
 })
 router.get('/bbc/article',(req,res)=>{
@@ -345,9 +220,7 @@ router.get('/bbc/article',(req,res)=>{
 
                             let tagArray = textMining.tagGen(article[i].id, pureText);
                             let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
-
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            // content = JSON.stringify(content);
 
                             uploadImgToS3(main_img,'bbc', Date.now().toString(),(main_img)=>{
                                 con.query(`UPDATE article SET 
@@ -361,13 +234,11 @@ router.get('/bbc/article',(req,res)=>{
                                     fetched++;
                                     if (err){ 
                                         myLib.log(err);
-                                        // res.send({err:`Database query error at ${i}`});
                                         return;
                                     }
                                     else{
-                                        dao.addTag(tagArray)
+                                        dao.addTag(article[i].id, tagArray)
                                         .then((result)=>{
-                                            console.log(result);
                                             if (fetched === article.length){
                                                 res.send('ok');
                                                 return;
@@ -421,78 +292,13 @@ router.get('/cnn/list',(req,res)=>{
                 fetched++;
                 if(fetched == apiList.length){
                     dao.addToDB(articleArray,0,3,'url').then((x)=>{
-                        console.log(x);
-                        res.send('OK');
-                        // res.redirect('/washingtonpost/article');
+                        res.redirect('/cnn/article');
                     }).catch((error)=>{
                         myLib.log(error);
                     });
                 }
             })
         }
-        
-        // function insert(array, j){ // this function should recompose in DAO.
-        //     if (j < array.length){
-        //         mysql.conPool.getConnection((err,con)=>{
-        //             if (err){
-        //                 myLib.log(err);
-        //                 res.send({err:'Database query error.'});
-        //                 return;
-        //             }
-        //             let checkIfTitleExist = `SELECT * FROM cnn WHERE url = "${array[j].url}"`;
-        //             con.query(checkIfTitleExist, function(err, rows){
-        //                 con.release();
-        //                 if (err){
-        //                     myLib.log(err);
-        //                     res.send({err:'Database query error.'});
-        //                     return;
-        //                 }
-        //                 if (rows.length === 0){
-        //                     let insertNewURL = `INSERT INTO cnn SET ?`;
-        //                     let oneRow = {
-        //                                 url: array[j].url,
-        //                                 source: array[j].source,
-        //                                 category: array[j].category,
-        //                                 title: array[j].title,
-        //                                 subtitle: array[j].subtitle, 
-        //                                 abstract: array[j].abstract,
-        //                                 author: array[j].author, 
-        //                                 src_datetime: array[j].src_datetime, 
-        //                                 unixtime: array[j].unixtime,
-        //                                 context: array[j].context,
-        //                                 translate: array[j].translate,
-        //                                 tag: array[j].tag,
-        //                                 main_img: array[j].main_img
-        //                     }
-        //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-        //                         if(err){
-        //                             myLib.log(err);
-        //                             res.send({err:'Database query error.'});
-        //                             return;
-        //                         }
-        //                         if (j===array.length-1){
-        //                             res.redirect('/cnn/article');
-        //                             return;
-        //                         }
-        //                         else{
-        //                             insert(array,j+1);
-        //                         }
-        //                     })
-        //                 }
-        //                 else{
-        //                     if (j===array.length-1){
-        //                         res.redirect('/cnn/article');
-        //                         return;
-        //                     }
-        //                     else{
-        //                         insert(array,j+1);
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     }
-        // }
-        // insert(articleArray,0);
     }) // End of request
 })
 router.get('/cnn/article',(req,res)=>{
@@ -531,7 +337,6 @@ router.get('/cnn/article',(req,res)=>{
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'"); //
                       
-                            // content = JSON.stringify(content);
                             if(context===''){
                                 let deleteNull = `DELETE FROM article WHERE id = ${article[i].id}`;
                                 con.query(deleteNull,function(error,result){
@@ -548,11 +353,10 @@ router.get('/cnn/article',(req,res)=>{
                                     fetched++;
                                     if (err){ 
                                         myLib.log(err);
-                                        // res.send({err:`Database query error at ${i}`});
                                         return;
                                     }
                                     else{
-                                        dao.addTag(tagArray)
+                                        dao.addTag(article[i].id, tagArray)
                                         .then((result)=>{
                                             if (fetched === article.length){
                                                 res.send('ok');
@@ -580,7 +384,7 @@ router.get('/cnn/article',(req,res)=>{
     })
 })
 
-// The Economist news_id = 4 (require to subscribe or login) need filter out the /topic/taiwan url
+// The Economist: news_id = 4 (require to subscribe or login) need filter out the /topic/taiwan url
 router.get('/economist/list', (req, res) => {
     let url= "https://cse.google.com/cse?oe=utf8&ie=utf8&source=uds&q=taiwan&safe=off&sort=&cx=013751040265774567329:ylv-hrexwbc&start=0";
     (async()=>{
@@ -664,11 +468,10 @@ router.get('/economist/article',(req,res)=>{
                                     fetched++;
                                     if (err){                                        
                                         myLib.log(err);
-                                        // res.send({err:'Database query error. here'+i});
                                         return;
                                     }
                                     else{
-                                        dao.addTag(tagArray)
+                                        dao.addTag(article[i].id, tagArray)
                                         .then((result)=>{
                                             if (fetched === article.length){
                                                 res.send('ok');
@@ -718,75 +521,11 @@ router.get('/guardian/list',(req,res)=>{
             }
         }
         dao.addToDB(articleArray,0,5,'url').then((x)=>{
-            console.log(x);
-            res.send('OK');
-            // res.redirect('/bbc/article');
+            // res.send('OK');
+            res.redirect('/guardian/article');
         }).catch((error)=>{
             myLib.log(error);
         });
-
-        // function insert(array, j){ // this function should recompose in DAO.
-        //     if (j < array.length){
-        //         mysql.conPool.getConnection((err,con)=>{
-        //             if (err){
-        //                 myLib.log(err);
-        //                 res.send({err:'Database query error.'})
-        //                 return;
-        //             }
-        //             let checkIfTitleExist = `SELECT * FROM guardian WHERE url = "${array[j].url}"`;
-        //             con.query(checkIfTitleExist, function(err, rows){
-        //                 con.release();
-        //                 if (err){
-        //                     myLib.log(err);
-        //                     res.send({err:'Database query error.'})
-        //                     return;
-        //                 }
-        //                 if (rows.length === 0){
-        //                     let insertNewURL = `INSERT INTO guardian SET ?`;
-        //                     let oneRow = {
-        //                                 url: array[j].url,
-        //                                 source: array[j].source,
-        //                                 category: array[j].category,
-        //                                 title: array[j].title,
-        //                                 subtitle: array[j].subtitle, 
-        //                                 abstract: array[j].abstract,
-        //                                 author: array[j].author, 
-        //                                 src_datetime: array[j].pubDatetime, 
-        //                                 unixtime: array[j].pubDatetime,
-        //                                 context: array[j].context,
-        //                                 translate: array[j].translate,
-        //                                 tag: array[j].tag,
-        //                                 main_img: array[j].main_img
-        //                     }
-        //                     con.query(insertNewURL, oneRow, function(err, result, fields){
-        //                         if(err){
-        //                             myLib.log(err);
-        //                             res.send({err:'Database query error.'});
-        //                             return;
-        //                         }
-        //                         if (j===array.length-1){
-        //                             res.redirect('/guardian/article');
-        //                             return;
-        //                         }
-        //                         else{
-        //                             insert(array,j+1);
-        //                         }
-        //                     })
-        //                 }
-        //                 else{
-        //                     if (j===array.length-1){
-        //                         res.redirect('/guardian/article');
-        //                         return;
-        //                     }
-        //                     else{
-        //                         insert(array,j+1);
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     }
-        // }
-        // insert(articleArray,0);
     }) // End of request
 })
 router.get('/guardian/article',(req,res)=>{
@@ -858,7 +597,7 @@ router.get('/guardian/article',(req,res)=>{
                                             return;
                                         }
                                         else{
-                                            dao.addTag(tagArray)
+                                            dao.addTag(article[i].id, tagArray)
                                             .then((result)=>{
                                                 if (fetched === article.length){
                                                     res.send('ok');
@@ -886,7 +625,6 @@ router.get('/guardian/article',(req,res)=>{
         }) // End of query
     })
 })
-
 
 // Independent UK: news_id = 6;
 router.get('/independent/list', (req, res) => {
@@ -984,7 +722,7 @@ router.get('/independent/article', (req, res) => {
                                         return;
                                     }
                                     else{
-                                        dao.addTag(tagArray)
+                                        dao.addTag(article[i].id, tagArray)
                                         .then((result)=>{
                                             if (fetched === article.length){
                                                 res.send('ok');
@@ -1016,7 +754,6 @@ router.get('/independent/article', (req, res) => {
 // New York Times: news_id = 7;
 router.get('/nytimes/list',(req,res)=>{
     let options = {
-        // url: "https://www.nytimes.com/search?query=Taiwan&sort=best",
         url:"https://www.nytimes.com/search?query=Taiwan&sort=newest",
         method: "GET"
     }
@@ -1034,7 +771,6 @@ router.get('/nytimes/list',(req,res)=>{
             articleArray.push(Object.assign({url}));
         }
         dao.addToDB(articleArray,0,7,'url').then((x)=>{
-            console.log(x);
             // res.send('OK');
             res.redirect('/nytimes/article');
         }).catch((error)=>{
@@ -1109,7 +845,7 @@ router.get('/nytimes/article',(req,res)=>{
                                             return;
                                         }
                                         else{
-                                            dao.addTag(tagArray)
+                                            dao.addTag(article[i].id, tagArray)
                                             .then((result)=>{
                                                 if (fetched === article.length){
                                                     res.send('ok');
@@ -1157,8 +893,6 @@ router.get('/quartz/list',(req,res)=>{
             articleArray.push((Object.assign({url})));
         }
         dao.addToDB(articleArray,0,8,'url').then((x)=>{
-            console.log(x);
-            // res.send('OK');
             res.redirect('/quartz/article');
         }).catch((error)=>{
             myLib.log(error);
@@ -1230,7 +964,7 @@ router.get('/quartz/article', (req,res)=>{
                                         return;
                                     }
                                     else{
-                                        dao.addTag(tagArray)
+                                        dao.addTag(article[i].id, tagArray)
                                         .then((result)=>{
                                             if (fetched === article.length){
                                                 res.send('ok');
@@ -1257,7 +991,6 @@ router.get('/quartz/article', (req,res)=>{
         }) // End of query
     })
 })
-
 
 // The Washington Post: news_id = 9
 router.get('/washingtonpost/list', (req, res) => {
@@ -1289,7 +1022,6 @@ router.get('/washingtonpost/list', (req, res) => {
         } // End of for loop
 
         dao.addToDB(articleArray,0,9,'title').then((x)=>{
-            console.log(x);
             res.redirect('/washingtonpost/article');
         }).catch((error)=>{
             myLib.log(error);
@@ -1310,7 +1042,6 @@ router.get('/washingtonpost/article',(req,res)=>{
                 for (let i = 0 ; i < article.length; i++){
                     let options = {
                         url: article[i].url,
-                        // url: 'https://www.washingtonpost.com/world/asia_pacific/strong-quake-hits-east-taiwan-rattles-buildings-in-capital/2019/04/18/1fafdb54-619b-11e9-bf24-db4b9fb62aa2_story.html?noredirect=on&utm_term=.4d3687fefe20',
                         method: "GET"
                     }
                     if (article[i].context === null){
@@ -1356,13 +1087,11 @@ router.get('/washingtonpost/article',(req,res)=>{
                                 con.query(`UPDATE article SET main_img = "${main_img}", abstract = "${abstract}", context = "${context}" WHERE id = ${article[i].id}`, function(err,result){
                                     fetched++;
                                     if (err){
-                                        
                                         myLib.log(err);
-                                        // res.send({err:'Database query error.'});
                                         return;
                                     }
                                     else{
-                                        dao.addTag(tagArray)
+                                        dao.addTag(article[i].id, tagArray)
                                         .then((result)=>{
                                             if (fetched === article.length){
                                                 res.send('ok');

@@ -214,14 +214,28 @@ const addToDB = function(array, j, news_id, identifier){
     }) // end of Promise
 }
 
-const addTag = function(tagArray){
+const addTag = function(id, tagArray){
     return new Promise ((resolve,reject)=>{
-        mysql.conPool.query('INSERT INTO tag (article_id,tag) VALUES ? ',[tagArray],(err,result)=>{
-            if (err){
-                reject(err);
-                return;
-            }
-            resolve('Tag added.');
+        mysql.conPool.getConnection((err,con)=>{
+            con.query(`SELECT * FROM tag WHERE article_id = ${id}`,(err,result)=>{
+                con.release();
+                if (err){
+                    reject(err);
+                    return;
+                }
+                if (result.length == 0){
+                    con.query('INSERT INTO tag (article_id,tag) VALUES ? ',[tagArray],(err,result)=>{
+                        if (err){
+                            reject(err);
+                            return;
+                        }
+                        resolve('Tag added.');
+                    })
+                }
+                else{
+                    resolve('tags already generated.');
+                }
+            })
         })
     })
 }

@@ -6,7 +6,7 @@ const execFile = require('child_process').execFile;
 
 router.get('/webhook/fb/comment', (req,res) => {
     console.log('fb comment');
-    res.send('fb')
+    res.send('1158201444');
 })
 
 module.exports = router;

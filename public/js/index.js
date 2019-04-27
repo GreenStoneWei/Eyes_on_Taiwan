@@ -15,22 +15,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let articleList = JSON.parse(this.responseText).data;
         let totalPage = JSON.parse(this.responseText).totalPage;
         createArticleCard(articleList,container);
-        createPagination(sort, page, totalPage);
+        createPagination(sort, page, tag, totalPage);
       }
     };
     xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag}`, true); // index
     xhr.send();
 }) // End of document.addEventListener
 
-function createPagination(sort, page, totalPage){
+function createPagination(sort, page, tag, totalPage){
     let previous = createElement('li',['page-item'],false,pagination);
-    let prevLink = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${page-1}`},previous);
+    let prevLink = createElement('a',['page-link'],{href:`/?sort=${sort}&tag=${tag}&page=${page-1}`},previous);
     prevLink.innerHTML = '&laquo';
 
     if(totalPage<11){
         for (let i=1; i<(totalPage+1); i++){
             let pageItem = createElement('li',['page-item'],false,pagination);
-            let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${i}`},pageItem);
+            let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&tag=${tag}&page=${i}`},pageItem);
             pg.innerHTML = i;
             if(i===page){
                 pageItem.classList.add('active');
@@ -38,17 +38,40 @@ function createPagination(sort, page, totalPage){
         }
     }
     else{
-        for (let i=1; i<11; i++){
-            let pageItem = createElement('li',['page-item'],false,pagination);
-            let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${i}`},pageItem);
-            pg.innerHTML = i;
-            if(i===page){
-                pageItem.classList.add('active');
+        if(page<7){
+            for (let i=1; i<11; i++){
+                let pageItem = createElement('li',['page-item'],false,pagination);
+                let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&tag=${tag}&page=${i}`},pageItem);
+                pg.innerHTML = i;
+                if(i===page){
+                    pageItem.classList.add('active');
+                }
+            }
+        }
+        else if ((page+4)<totalPage){
+            let startPage = page-5;
+            for (let i=startPage; i<startPage+10; i++){
+                let pageItem = createElement('li',['page-item'],false,pagination);
+                let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&tag=${tag}&page=${i}`},pageItem);
+                pg.innerHTML = i;
+                if(i===page){
+                    pageItem.classList.add('active');
+                }
+            }
+        }
+        else{
+            for (let i=(totalPage-9); i<totalPage+1; i++){
+                let pageItem = createElement('li',['page-item'],false,pagination);
+                let pg = createElement('a',['page-link'],{href:`/?sort=${sort}&tag=${tag}&page=${i}`},pageItem);
+                pg.innerHTML = i;
+                if(i===page){
+                    pageItem.classList.add('active');
+                }
             }
         }
     }
     let next = createElement('li',['page-item'],false,pagination);
-    let nextLink = createElement('a',['page-link'],{href:`/?sort=${sort}&page=${page+1}`},next);
+    let nextLink = createElement('a',['page-link'],{href:`/?sort=${sort}&tag=${tag}&page=${page+1}`},next);
     nextLink.innerHTML ='&raquo;';
     if(page===1){
         previous.classList.add('disabled');

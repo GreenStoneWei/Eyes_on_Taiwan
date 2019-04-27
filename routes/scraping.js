@@ -768,9 +768,10 @@ router.get('/nytimes/list',(req,res)=>{
         let articleArray = [];
         for (let i = 0; i < searchResult.length ; i++){
             let url = 'https://www.nytimes.com' + searchResult.eq(i).find('a').attr('href');
-            articleArray.push(Object.assign({url}));
+            let title = searchResult.eq(i).find('a').find('.css-1lppelv').text();
+            articleArray.push(Object.assign({url, title}));
         }
-        dao.addToDB(articleArray,0,7,'url').then((x)=>{
+        dao.addToDB(articleArray,0,7,'title').then((x)=>{
             // res.send('OK');
             res.redirect('/nytimes/article');
         }).catch((error)=>{

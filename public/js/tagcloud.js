@@ -13,23 +13,28 @@ let options = {
     rotationSteps: 2,
     ellipticity: 1,
     click: function(tag) {
-        let xhr = new XMLHttpRequest();
         let page = parseInt(getParameterByName('page'));
         if (!Number.isInteger(page)){
             page = 1;
         }
         let sort = getParameterByName('sort');
-        xhr.onreadystatechange = function() {
-          if (this.readyState == 4 && this.status == 200) {
-            let articleList = JSON.parse(this.responseText).data;
-            container.innerHTML = '';
-            pagination.innerHTML = '';
-            createArticleCard(articleList,container);
-            createPagination(sort,page,totalPage);
-          }
-        };
-        xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag[0]}`, true); // index
-        xhr.send();
+        if (sort == 'null'){
+          sort = 'date';
+        }
+        window.location.replace(`/?sort=${sort}&tag=${tag[0]}`);
+        // let xhr = new XMLHttpRequest();
+        // xhr.onreadystatechange = function() {
+        //   if (this.readyState == 4 && this.status == 200) {
+        //     let articleList = JSON.parse(this.responseText).data;
+        //     let totalPage = JSON.parse(this.responseText).totalPage;
+        //     container.innerHTML = '';
+        //     pagination.innerHTML = '';
+        //     createArticleCard(articleList,container);
+        //     createPagination(sort,page,tag,totalPage);
+        //   }
+        // };
+        // xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag[0]}`, true); // index
+        // xhr.send();
     },
     shape: function(theta) {
       // Function for simple shapes can be generated manually with http://timdream.org/wordcloud2.js/shape-generator.html.

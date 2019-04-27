@@ -1,7 +1,8 @@
 const express = require('express');
 const app = express();
 const mysql = require('./util/mysql.js');
-const request = require("request");
+const request = require('request');
+const credentials = require('./util/credentials.js')
 app.use(express.static('public'));
 
 // CORS Control
@@ -12,6 +13,7 @@ app.use("/", function(req, res, next){
 	res.set("Access-Control-Allow-Credentials", "true");
 	next();
 });
+app.use(require('prerender-node').set('prerenderToken', credentials.myPreRenderToken));
 
 const scraping = require('./routes/scraping');
 app.use('/', scraping);

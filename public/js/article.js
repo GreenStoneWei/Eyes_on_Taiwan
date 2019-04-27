@@ -35,6 +35,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
           title: article[0].title,
           image: article[0].main_img
         }
+
+        $('meta[property=title]').attr('content', metaObj.title);
+        $('meta[property=url]').attr('content', metaObj.url);
+        $('meta[property=image]').attr('content', metaObj.image);
+        
         // FB.ui({
         //     method: 'share',
         //     href: metaObj.url,

@@ -1,6 +1,6 @@
 const container = document.querySelector('.container');
 const recommenderBlock = document.querySelector('.recommender-block');
-const comment = document.querySelector('fb-comments');
+const comment = document.querySelector('.fb-comments');
 // const head = document.getElementsByTagName('head')[0];
 
 
@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
           let subtitle = createElement('h3',['subtitle'],false,container);
           subtitle.innerHTML = article[0].subtitle;
         }
-        console.log(article[0].main_img);
         if (article[0].main_img !== "undefined"){
           let img = createElement('img',['img'],{src:article[0].main_img},container);
           // setAttr(img,{src:article[0].main_img});
@@ -55,9 +54,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         lineBtn.style.display = 'none';
         // add FB share button
         let shareFB = createElement('div',['fb-share-button','btn'],false,btnContainer);
-        shareFB.dataset.href = 'https://4e290507.ngrok.io/article.html?id='+qsID;
-        // shareFB.dataset.href = window.location.href;
-        // shareFB.setAttribute('data-href',window.location.href);
+        // shareFB.dataset.href = 'https://4e290507.ngrok.io/article.html?id='+qsID;
+        shareFB.dataset.href = window.location.href;
         shareFB.dataset.layout = 'button_count';
         shareFB.dataset.size = 'large';
         //
@@ -72,7 +70,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         origin.innerHTML   = '站外原文';
         
         let recommendTitle = createElement('h3',['recommend-title'],false, recommenderBlock);
-        recommendTitle.innerHTML = 'Recommend For You';
+        recommendTitle.innerHTML = 'Similar Articles Recommended';
         let recommendWrap  = createElement('div',['recommend-wrap'],false, recommenderBlock);
         createArticleCard(article[0].similar_article, recommendWrap);
 

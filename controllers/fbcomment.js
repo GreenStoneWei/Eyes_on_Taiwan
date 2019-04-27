@@ -2,11 +2,10 @@ const express = require('express');
 const router  = express.Router();
 const myLib   = require('../util/config.js');
 const mysql   = require('../util/mysql.js');
-const execFile = require('child_process').execFile;
 
 router.get('/webhook/fb/comment', (req,res) => {
-    console.log(req);
-    
+    let url = req.originalUrl;
+    console.log(url);
     res.send(req.query['hub.challenge']);
 })
 

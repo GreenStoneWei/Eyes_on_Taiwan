@@ -12,10 +12,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
         //
-        let subtitle = article[0].subtitle;
-        if(subtitle == 'null' || subtitle == null){
-          subtitle = '';
-        }
         console.log('subtitle= '+subtitle);
         let metaObj = {
           url: window.location.href,
@@ -35,8 +31,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             link: metaObj.url,
             type: metaObj.type,
             picture: metaObj.image,
-            title: metaObj.title,
-            description: metaObj.description,
+            title: metaObj.title
           },function(response){
             console.log(response);
           });

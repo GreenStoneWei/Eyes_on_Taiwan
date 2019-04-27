@@ -46,6 +46,8 @@ body{
     margin-bottom: 20px;
 }
 .btn{
+    height:38px;
+    width:100px;
     margin-right: 36px;
 }
 .btn-width{

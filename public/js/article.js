@@ -63,6 +63,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let content = createElement('div',['content'],false,container);
         let btnContainer = createElement('div',['btn-container'],false,container);
         let origin = createElement('a',['btn','btn-info','btn-width'],{href:article[0].url, role:'button'},btnContainer);
+        // add FB share button
+        let shareFB = createElement('div',['fb-share-button','btn'],false,btnContainer);
+        // shareFB.dataset.href = 'https://4e290507.ngrok.io/article.html?id='+qsID;
+        shareFB.dataset.href = window.location.href;
+        shareFB.dataset.layout = 'button_count';
+        shareFB.dataset.size = 'large';
+        // shareFB.addEventListener('click',()=>{
+        //   shareOverrideOGMeta(metaObj.url, metaObj.title, '',metaObj.title);
+        // })
+        //
         // add LINE share button
         let lineBtn = createElement('div',['line-it-button','btn'],false,btnContainer);
         lineBtn.dataset.lang  = 'zh_Hant';
@@ -73,16 +83,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         lineBtn.dataset.size  = 'large';
         lineBtn.dataset.count = 'true';
         lineBtn.style.display = 'none';
-        // add FB share button
-        let shareFB = createElement('div',['fb-share-button','btn'],false,btnContainer);
-        // shareFB.dataset.href = 'https://4e290507.ngrok.io/article.html?id='+qsID;
-        shareFB.dataset.href = window.location.href;
-        shareFB.dataset.layout = 'button_count';
-        shareFB.dataset.size = 'large';
-        shareFB.addEventListener('click',()=>{
-          shareOverrideOGMeta(metaObj.url, metaObj.title, '',metaObj.title);
-        })
-        //
+        
         source.innerHTML = article[0].news;
         h1.innerHTML = article[0].title;
         if (article[0].author !== null && article[0].author !== ''&& article[0].author !== 'null'){

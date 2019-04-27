@@ -2,7 +2,25 @@ const container = document.querySelector('.container');
 const recommenderBlock = document.querySelector('.recommender-block');
 const comment = document.querySelector('.fb-comments');
 // const head = document.getElementsByTagName('head')[0];
-
+function shareOverrideOGMeta(overrideLink, overrideTitle, overrideDescription, overrideImage)
+{
+	FB.ui({
+		method: 'share_open_graph',
+		action_type: 'og.likes',
+		action_properties: JSON.stringify({
+			object: {
+				'og:url': overrideLink,
+				'og:title': overrideTitle,
+				'og:description': overrideDescription,
+				'og:image': overrideImage
+			}
+		})
+	},
+	function (response) {
+	// Action after response
+	});
+}
+ 
 
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
@@ -19,15 +37,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
           image: article[0].main_img
         }
 
-        FB.ui({
-            method: 'share',
-            href: metaObj.url,
-            type: metaObj.type,
-            picture: metaObj.image,
-            title: metaObj.title
-          },function(response){
-            console.log(response);
-          });
+        shareOverrideOGMeta(metaObj.url, metaObj.title, '',metaObj.title);
+
+        // FB.ui({
+        //     method: 'share',
+        //     href: metaObj.url,
+        //     type: metaObj.type,
+        //     picture: metaObj.image,
+        //     title: metaObj.title
+        //   },function(response){
+        //     console.log(response);
+        //   });
 
 
         // setFBmeta(metaObj,head);

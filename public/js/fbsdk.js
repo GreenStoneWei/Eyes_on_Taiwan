@@ -5,7 +5,7 @@ window.fbAsyncInit = function() {
       xfbml      : true,
       version    : 'v3.2'
   });
-  // FB.AppEvents.logPageView();
+  FB.AppEvents.logPageView();
   // FB.getLoginStatus(function(response) {
   //   statusChangeCallback(response);
   // });

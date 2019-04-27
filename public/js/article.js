@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
 
         FB.ui({
-            method: 'feed',
-            link: metaObj.url,
+            method: 'share',
+            href: metaObj.url,
             type: metaObj.type,
             picture: metaObj.image,
             title: metaObj.title

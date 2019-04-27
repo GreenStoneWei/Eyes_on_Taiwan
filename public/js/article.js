@@ -11,20 +11,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
     xhr.onreadystatechange = function(){
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
-        //
-        console.log('subtitle= '+subtitle);
+
         let metaObj = {
           url: window.location.href,
           type: 'article',
           title: article[0].title,
-          description: subtitle,
           image: article[0].main_img
         }
-        // $('head').append(`<meta property="og:url" content="${metaObj.url}">`);
-        // $('head').append(`<meta property="og:type" content="${metaObj.type}">`);
-        // $('head').append(`<meta property="og:title" content="${metaObj.title}">`);
-        // $('head').append(`<meta property="og:description" content="${metaObj.description}">`);
-        // $('head').append(`<meta property="og:image" content="${metaObj.image}">`);
 
         FB.ui({
             method: 'feed',

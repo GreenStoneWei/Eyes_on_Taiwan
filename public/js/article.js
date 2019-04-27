@@ -13,10 +13,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let article = JSON.parse(this.responseText);
         //
         let subtitle = article[0].subtitle;
-        if(subtitle == 'null'){
+        if(subtitle == 'null' || subtitle == null){
           subtitle = '';
         }
-        console.log(subtitle);
+        console.log('subtitle= '+subtitle);
         let metaObj = {
           url: window.location.href,
           type: 'article',
@@ -24,11 +24,24 @@ document.addEventListener('DOMContentLoaded', (event) => {
           description: subtitle,
           image: article[0].main_img
         }
-        $('head').append(`<meta property="og:url" content="${metaObj.url}">`);
-        $('head').append(`<meta property="og:type" content="${metaObj.type}">`);
-        $('head').append(`<meta property="og:title" content="${metaObj.title}">`);
-        $('head').append(`<meta property="og:description" content="${metaObj.description}">`);
-        $('head').append(`<meta property="og:image" content="${metaObj.image}">`);
+        // $('head').append(`<meta property="og:url" content="${metaObj.url}">`);
+        // $('head').append(`<meta property="og:type" content="${metaObj.type}">`);
+        // $('head').append(`<meta property="og:title" content="${metaObj.title}">`);
+        // $('head').append(`<meta property="og:description" content="${metaObj.description}">`);
+        // $('head').append(`<meta property="og:image" content="${metaObj.image}">`);
+
+        FB.ui({
+            method: 'feed',
+            link: metaObj.url,
+            type: metaObj.type,
+            picture: metaObj.image,
+            title: metaObj.title,
+            description: metaObj.description,
+          },function(response){
+            console.log(response);
+          });
+
+
         // setFBmeta(metaObj,head);
         let source   = createElement('div',['source'],false,container);
         let h1       = createElement('h1',['title'],false,container);

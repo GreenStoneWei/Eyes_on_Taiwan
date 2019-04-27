@@ -13,11 +13,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
         //
+        let subtitle = article[0].subtitle;
+        if(subtitle == 'null'){
+          subtitle = '';
+        }
         let metaObj = {
           url: window.location.href,
           type: 'article',
           title: article[0].title,
-          description: article[0].subtitle,
+          description: subtitle,
           image: article[0].main_img
         }
         $('head').append(`<meta property="og:url" content="${metaObj.url}">`);

@@ -20,11 +20,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
           description: article[0].subtitle,
           image: article[0].main_img
         }
-        $('head').append(`<meta property="og:url" content=${metaObj.url}>`);
-        $('head').append(`<meta property="og:type" content=${metaObj.type}>`);
-        $('head').append(`<meta property="og:title" content=${metaObj.title}>`);
-        $('head').append(`<meta property="og:description" content=${metaObj.description}>`);
-        $('head').append(`<meta property="og:image" content=${metaObj.image}>`);
+        $('head').append(`<meta property="og:url" content="${metaObj.url}">`);
+        $('head').append(`<meta property="og:type" content="${metaObj.type}">`);
+        $('head').append(`<meta property="og:title" content="${metaObj.title}">`);
+        $('head').append(`<meta property="og:description" content="${metaObj.description}">`);
+        $('head').append(`<meta property="og:image" content="${metaObj.image}">`);
         // setFBmeta(metaObj,head);
         let source   = createElement('div',['source'],false,container);
         let h1       = createElement('h1',['title'],false,container);

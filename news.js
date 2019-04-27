@@ -22,12 +22,8 @@ app.use('/api', api)
 const autoDeploy = require('./controllers/autodeploy')
 app.use('/', autoDeploy);
 
-// app.get('/', (req, res) => {
-//   res.send('Hello My Server!');
-// })
-
-
-
+const fbcomment = require('./controllers/fbcomment')
+app.use('/', fbcomment);
 
 app.get('/singletest', (req, res) => {
     let options = {
@@ -56,13 +52,6 @@ app.get('/downloadtest', (req,res)=>{
     download('https://s3.amazonaws.com/wheatxstone/news/wpost_default.jpg', 'test.png', function(){
         console.log('done');
     });
-})
-
-
-
-app.get('/schedule/test',(req,res)=>{
-    console.log('schedule test!');
-    res.end();
 })
 
 app.listen(3000, () => {

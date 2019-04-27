@@ -32,13 +32,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
         let metaObj = {
           url: window.location.href,
-          type: 'article',
           title: article[0].title,
           image: article[0].main_img
         }
-
-        shareOverrideOGMeta(metaObj.url, metaObj.title, '',metaObj.title);
-
         // FB.ui({
         //     method: 'share',
         //     href: metaObj.url,
@@ -83,6 +79,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
         shareFB.dataset.href = window.location.href;
         shareFB.dataset.layout = 'button_count';
         shareFB.dataset.size = 'large';
+        shareFB.addEventListener('click',()=>{
+          shareOverrideOGMeta(metaObj.url, metaObj.title, '',metaObj.title);
+        })
         //
         source.innerHTML = article[0].news;
         h1.innerHTML = article[0].title;

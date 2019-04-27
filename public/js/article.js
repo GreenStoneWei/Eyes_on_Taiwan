@@ -8,8 +8,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
     let xhr = new XMLHttpRequest();
     let qsID = getParameterByName('id');
-    // let qsSRC = getParameterByName('source');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function(){
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
         //
@@ -17,6 +16,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         if(subtitle == 'null'){
           subtitle = '';
         }
+        console.log(subtitle);
         let metaObj = {
           url: window.location.href,
           type: 'article',

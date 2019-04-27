@@ -5,8 +5,8 @@ const mysql   = require('../util/mysql.js');
 const execFile = require('child_process').execFile;
 
 router.get('/webhook/fb/comment', (req,res) => {
-    console.log('fb comment');
-    res.send('521709635');
+    console.log(req.query);
+    res.send(req.query.hub.challenge);
 })
 
 module.exports = router;

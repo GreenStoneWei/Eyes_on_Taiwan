@@ -5,7 +5,7 @@ const request = require("request");
 const myLib   = require('../util/config.js');
 const localHost = 'http://localhost:3000';
 const domainName = 'https://wheatxstone.com';
-const host = localHost;
+const host = domainName;
 const updateSimilarArticle = require('./classifier_schedule.js')
 
 let routeList = ['/washingtonpost/list',
@@ -24,7 +24,6 @@ for (let i=0; i< routeList.length ; i++){
         method: "GET"
     }
     request(options, function(error, response, body){
-        
         if(error || !body) {
             fetched++;
             if(fetched === routeList.length){
@@ -39,13 +38,3 @@ for (let i=0; i< routeList.length ; i++){
         }
     })
 }
-
-// let schedule = {
-//         url: host+"/schedule/test",
-//         method: "GET"
-//     }
-// request(schedule, function(error, response, body){
-//     if (error || !body) {
-//         return;
-//     }
-// })

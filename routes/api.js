@@ -221,7 +221,7 @@ function getBaseLog(x, y){
     return Math.log(y) / Math.log(x);
 }
 
-router.get('/update/redis/count/to/sql',(req,res)=>{
+router.get('/rediscount2sql',(req,res)=>{
     client.keys('view_count*',(err,reply)=>{
         let updated = 0; 
         for(let i=0;i<reply.length;i++){

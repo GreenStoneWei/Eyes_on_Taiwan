@@ -39,14 +39,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let origin = createElement('a',['btn','btn-info','btn-width'],{href:article[0].url, role:'button'},btnContainer);
         // add FB share button
         let shareFB = createElement('div',['fb-share-button','btn'],false,btnContainer);
-        // shareFB.dataset.href = 'https://4e290507.ngrok.io/article.html?id='+qsID;
         shareFB.dataset.href = window.location.href;
         shareFB.dataset.layout = 'button_count';
         shareFB.dataset.size = 'large';
-        // shareFB.addEventListener('click',()=>{
-        //   shareOverrideOGMeta(metaObj.url, metaObj.title, '',metaObj.title);
-        // })
-        //
+        let shareFBaTag = createElement('div',['fb-xfbml-parse-ignore'],{target:'_blank',href:'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(window.location.href)+'&amp;src=sdkpreparse'},shareFB);
+        shareFBaTag.innerTEXT = '分享';
         // add LINE share button
         let lineBtn = createElement('div',['line-it-button','btn'],false,btnContainer);
         lineBtn.dataset.lang  = 'zh_Hant';

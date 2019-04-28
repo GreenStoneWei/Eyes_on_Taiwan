@@ -5,6 +5,7 @@ const logStdOut = process.stdout; // log to console as normal.
 const now = new Date().toLocaleString('en-US',{timeZone: 'Asia/Taipei'});
 const nodemailer = require('nodemailer');
 const credential = require('./credentials.js');
+const hostName = 'https://wheatxstone.com';
 
 const transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -50,5 +51,6 @@ return [this.getFullYear(),
 };
 
 module.exports = {
-	log: emailLog
+	log: emailLog,
+	hostName: hostName
 }

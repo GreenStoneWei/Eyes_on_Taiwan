@@ -6,46 +6,34 @@ const redis   = require('redis');
 const client  = redis.createClient();
 const cacheExpireTime = 60 * 60 * 24; // EX unit: sec, this equals 1 day.
 
-router.get('/showindex',(req,res)=>{
-    let page = parseInt(req.query.page);
-    if (!Number.isInteger(page)){
-        page = 1;
-    }
-    let getAllArticle = '';
-    let newsCounter = 0;
-    for (let i = 0; i < Object.keys(newsDB).length; i++){
-        newsCounter ++;
-        if (newsCounter == Object.keys(newsDB).length){
-            getAllArticle += `SELECT id, url, source, unixtime, main_img, title, abstract, context FROM ${Object.keys(newsDB)[i]}`;
-        }
-        else{
-            getAllArticle += `SELECT id, url, source, unixtime, main_img, title, abstract, context FROM ${Object.keys(newsDB)[i]}` + ' UNION ';
-        }
-    }
-    mysql.conPool.query(getAllArticle+' ORDER BY unixtime DESC LIMIT 150',function(error, result){
-        if (error){
-            throw error;
-        }
-        result = result.filter(function(obj){
-            return obj.context !== '' && obj.title !== null;
-        })
-        res.send(result.slice((page-1)*10,page*10));
-    })
-})
-
-// router.get('/article_old_ver',(req,res)=>{
-//     let source = '';
-//     let {id} = req.query;
-//     for (let name in newsDB){
-//         if(req.query.source == newsDB[name]){
-//             source = name;
+// router.get('/showindex',(req,res)=>{
+//     let page = parseInt(req.query.page);
+//     if (!Number.isInteger(page)){
+//         page = 1;
+//     }
+//     let getAllArticle = '';
+//     let newsCounter = 0;
+//     for (let i = 0; i < Object.keys(newsDB).length; i++){
+//         newsCounter ++;
+//         if (newsCounter == Object.keys(newsDB).length){
+//             getAllArticle += `SELECT id, url, source, unixtime, main_img, title, abstract, context FROM ${Object.keys(newsDB)[i]}`;
+//         }
+//         else{
+//             getAllArticle += `SELECT id, url, source, unixtime, main_img, title, abstract, context FROM ${Object.keys(newsDB)[i]}` + ' UNION ';
 //         }
 //     }
-//     let getArticle = `SELECT * FROM ${source} WHERE id = ${id}`;
-//     mysql.conPool.query(getArticle,function(error,result){
-//         res.send(result);
+//     mysql.conPool.query(getAllArticle+' ORDER BY unixtime DESC LIMIT 150',function(error, result){
+//         if (error){
+//             throw error;
+//         }
+//         result = result.filter(function(obj){
+//             return obj.context !== '' && obj.title !== null;
+//         })
+//         res.send(result.slice((page-1)*10,page*10));
 //     })
 // })
+
+
 
 router.get('/article',(req,res)=>{
     // client.flushdb();
@@ -226,25 +214,11 @@ router.get('/word/cloud',(req,res)=>{
             score.push(element.count);
             cloudList.push(eachTag);
         });
-        //
-        // let sum = SumData(score);
-        // let avg = sum/score.length;
-        // let squareOfXiMinusXbar = 0
-        // for(let i =0; i<score.length; i++){
-        //     squareOfXiMinusXbar += Math.pow((score[i]-avg),2);
-        // }
-        // let sd = Math.sqrt(squareOfXiMinusXbar)/(score.length-1);
-        // for (let j=0; j<cloudList.length;j++){
-        //     cloudList[j][1] = (cloudList[j][1]-avg)/sd;
-        // }
         res.send(JSON.stringify(cloudList));
     })
 })
-function getBaseLog(x, y) {
+function getBaseLog(x, y){
     return Math.log(y) / Math.log(x);
-  }
-function SumData(arr){
-    return arr.reduce((a,b)=>a+b);  
 }
 
 router.get('/update/redis/count/to/sql',(req,res)=>{
@@ -253,7 +227,7 @@ router.get('/update/redis/count/to/sql',(req,res)=>{
         for(let i=0;i<reply.length;i++){
             let countKey = reply[i];
             let cachedID = parseInt(reply[i].replace('view_count_',''));
-            client.getset(countKey,"0",(err,reply)=>{ // 改成 SETGET
+            client.getset(countKey,"0",(err,reply)=>{
                 mysql.conPool.query(`UPDATE article SET viewed_count = viewed_count + ${reply} WHERE id = ${cachedID}`,(err,result)=>{
                     updated ++;
                     if(err){

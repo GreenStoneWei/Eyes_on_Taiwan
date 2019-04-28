@@ -1,26 +1,6 @@
 const container = document.querySelector('.container');
 const recommenderBlock = document.querySelector('.recommender-block');
 const comment = document.querySelector('.fb-comments');
-// const head = document.getElementsByTagName('head')[0];
-function shareOverrideOGMeta(overrideLink, overrideTitle, overrideDescription, overrideImage)
-{
-	FB.ui({
-		method: 'share_open_graph',
-		action_type: 'og.likes',
-		action_properties: JSON.stringify({
-			object: {
-				'og:url': overrideLink,
-				'og:title': overrideTitle,
-				'og:description': overrideDescription,
-				'og:image': overrideImage
-			}
-		})
-	},
-	function (response) {
-	// Action after response
-	});
-}
- 
 
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
@@ -30,28 +10,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
 
-        let metaObj = {
-          url: window.location.href,
-          title: article[0].title,
-          image: article[0].main_img
-        }
+        // let metaObj = {
+        //   url: window.location.href,
+        //   title: article[0].title,
+        //   image: article[0].main_img
+        // }
 
-        $('meta[property="og:title"]').attr('content', metaObj.title);
-        $('meta[property="og:url"]').attr('content', metaObj.url);
-        $('meta[property="og:image"]').attr('content', metaObj.image);
-
-        // FB.ui({
-        //     method: 'share',
-        //     href: metaObj.url,
-        //     type: metaObj.type,
-        //     picture: metaObj.image,
-        //     title: metaObj.title
-        //   },function(response){
-        //     console.log(response);
-        //   });
-
-
+        // $('meta[property="og:title"]').attr('content', metaObj.title);
+        // $('meta[property="og:url"]').attr('content', metaObj.url);
+        // $('meta[property="og:image"]').attr('content', metaObj.image);
         // setFBmeta(metaObj,head);
+
         let source   = createElement('div',['source'],false,container);
         let h1       = createElement('h1',['title'],false,container);
         let meta     = createElement('div',['meta'],false,container);

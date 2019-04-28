@@ -99,7 +99,7 @@ function createArticleCard(array,parentElement){
         let abstract   = createElement("p",["card-text","abstract"],false,cardBody);
         let tagContainer = createElement("div",["card-tag"],false,cardBody);
         let readBlock  = createElement("div",["read-block"],false,cardBody);
-        let readMore   = createElement("a",["card-link"],{href:`/article.html?id=${array[i].id}`},readBlock);
+        let readMore   = createElement("a",["card-link"],{href:`/view/article?id=${array[i].id}`},readBlock);
         let viewImage  = createElement("img",["viewed"],{src:'https://s3.amazonaws.com/wheatxstone/news/iconfinder_view_126581.png'},readBlock);
         let viewCount  = createElement("p",["view-count"],false,readBlock);
         getTag(array[i].id,tagContainer);

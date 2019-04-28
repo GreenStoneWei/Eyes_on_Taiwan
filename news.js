@@ -13,10 +13,16 @@ app.use("/", function(req, res, next){
 	res.set("Access-Control-Allow-Credentials", "true");
 	next();
 });
+
 app.use(require('prerender-node').set('prerenderToken', credentials.myPreRenderToken));
+
+app.set('view engine', 'ejs');
 
 const scraping = require('./routes/scraping');
 app.use('/', scraping);
+
+const renderView = require('./routes/renderview/renderarticle')
+app.use('/', renderView);
 
 const api = require('./routes/api.js')
 app.use('/api', api)
@@ -26,6 +32,10 @@ app.use('/', autoDeploy);
 
 const fbcomment = require('./controllers/fbcomment')
 app.use('/', fbcomment);
+
+
+
+
 
 app.get('/singletest', (req, res) => {
     let options = {

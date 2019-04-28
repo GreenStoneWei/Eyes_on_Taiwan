@@ -702,39 +702,51 @@ router.get('/independent/article', (req, res) => {
                                 }
                             }
                             context = context.replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            let tagArray = textMining.tagGen(article[i].id, pureText);
-                            let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
-                            uploadImgToS3(main_img,'independent', Date.now().toString(),(main_img)=>{
-                                con.query(`UPDATE article SET  
-                                              title = "${title}",
-                                              subtitle = "${subtitle}",
-                                              abstract = "${abstract}",
-                                              author = "${author}", 
-                                              context = "${context}",
-                                              src_datetime = '${datetime}', 
-                                              unixtime = ${unixtime},
-                                              main_img = "${main_img}" 
-                                       WHERE id = ${article[i].id}`, function(err,result){
-                                    fetched++;
-                                    if (err){
-                                        myLib.log(err);
-                                        // res.send({err:'Database query error. here'+i});
+                            if( pureText===''|| title ==='' || src_datetime === undefined ){
+                                let deleteNull = `DELETE FROM article WHERE id = ${article[i].id}`;
+                                con.query(deleteNull,function(error,result){
+                                    if(error){
+                                        myLib.log(error);
                                         return;
                                     }
-                                    else{
-                                        dao.addTag(article[i].id, tagArray)
-                                        .then((result)=>{
-                                            if (fetched === article.length){
-                                                res.send('ok');
-                                                return;
-                                            }
-                                        })
-                                        .catch((error)=>{
-                                            myLib.log(error);
-                                        })
-                                    }
                                 })
-                            });
+                            }
+                            else{
+                                let tagArray = textMining.tagGen(article[i].id, pureText);
+                                let abstract = textMining.abstractGen(pureText).replace(/"/g,'\\"').replace(/'/g,"\\'");
+                                uploadImgToS3(main_img,'independent', Date.now().toString(),(main_img)=>{
+                                    con.query(`UPDATE article SET  
+                                                title = "${title}",
+                                                subtitle = "${subtitle}",
+                                                abstract = "${abstract}",
+                                                author = "${author}", 
+                                                context = "${context}",
+                                                src_datetime = '${datetime}', 
+                                                unixtime = ${unixtime},
+                                                main_img = "${main_img}" 
+                                        WHERE id = ${article[i].id}`, function(err,result){
+                                        fetched++;
+                                        if (err){
+                                            myLib.log(err);
+                                            // res.send({err:'Database query error. here'+i});
+                                            return;
+                                        }
+                                        else{
+                                            dao.addTag(article[i].id, tagArray)
+                                            .then((result)=>{
+                                                if (fetched === article.length){
+                                                    res.send('ok');
+                                                    return;
+                                                }
+                                            })
+                                            .catch((error)=>{
+                                                myLib.log(error);
+                                            })
+                                        }
+                                    })
+                                });
+                            }
+                            
                         })
                     }
                     else{

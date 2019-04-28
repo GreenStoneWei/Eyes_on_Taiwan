@@ -196,3 +196,31 @@ function findSimilarArticle (allArticle, corpusTF, returnN){
     return allArticle;
 }
 
+module.exports = {
+    updateSimilarArticle: function(){
+        mysql.conPool.query('SELECT id, context FROM article WHERE context != ""', (err,result)=>{
+        let articleList = [];
+        // 把所有文章撈出來
+        result.forEach(function(article){
+            articleList.push(Object.assign({id: article.id, text: article.context}));
+        });
+    
+        let corpus = calCorpusTF(articleList,dimensionN);    
+        let similarResult = findSimilarArticle(articleList,corpus,3);
+        // console.log(similarResult[0]);
+        let done = 0;
+        for(let i = 0; i<similarResult.length; i++){
+            let similarJSON = JSON.stringify(similarResult[i].similar);
+            mysql.conPool.query(`UPDATE article SET similar_article = '${similarJSON}' WHERE id = ${similarResult[i].id}`,(err,result)=>{
+                done ++;
+                console.log(done);
+                if (err){
+                    throw err;
+                }
+                if(done == similarResult.length){
+                    console.log('Done');
+                }
+            })
+        }
+    })}
+}

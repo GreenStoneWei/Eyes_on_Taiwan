@@ -24,7 +24,7 @@ const uploadImgToS3 = function(url, newsBucket, fileName, callback){
         } 
         else {
             sharp(body)
-            .resize({canvas: 'max', height: 360, width: 480, withoutEnlargement: true})
+            .resize({canvas: 'max', height: 630, width: 1200, withoutEnlargement: true})
             .toBuffer((error,data,info)=>{
                 if(error){
                     // console.log(error);

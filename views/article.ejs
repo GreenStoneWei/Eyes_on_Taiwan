@@ -37,20 +37,21 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                         <div class="navbar-nav">
-                        <a class="nav-item nav-link " href="./">Latest<span class="sr-only">(current)</span></a>
+                        <%# <a class="nav-item nav-link " href="./">Latest<span class="sr-only">(current)</span></a>
                         <a class="nav-item nav-link " href="./?sort=most_viewed">Most Viewed</a>
                         <a class="nav-item nav-link disabled" href="#">Most Commented</a>
-                        <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Statistics</a>
+                        <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Statistics</a> %>
                         </div>
                     </div>
                 </nav>
             </div>
         </header>
         <div>
-            <div class="container article">
-            </div>  <!--End of Container-->
-            <a class="button" href="https://www.facebook.com/sharer/sharer.php?app_id=2530555113837912&sdk=joey&u=<%=article.url%>&display=popup&ref=plugin&src=share_button" onclick="return !window.open(this.href, 'Facebook', 'width=640,height=580')"><i class="fab fa-facebook-f fa-2x" style="display: block; text-align: right;"></i></a>
-            <div class="fb-share-button" data-href="https://wheatxstone.com/view/article?id=272" data-layout="button_count" data-size="large"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwheatxstone.com%2Fview%2Farticle%3Fid%3D272&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">分享</a></div>
+            <div class="test-container">
+                <div class="container article"></div>
+                <div class="fb-share-button" data-href="https://wheatxstone.com/view/article?id=272" data-layout="button_count" data-size="large"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwheatxstone.com%2Fview%2Farticle%3Fid%3D272&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">分享</a></div>
+
+            </div>
             <div class="recommender-block">
             </div>
         </div>

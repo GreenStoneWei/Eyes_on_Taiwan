@@ -10,17 +10,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
 
-        // let metaObj = {
-        //   url: window.location.href,
-        //   title: article[0].title,
-        //   image: article[0].main_img
-        // }
-
-        // $('meta[property="og:title"]').attr('content', metaObj.title);
-        // $('meta[property="og:url"]').attr('content', metaObj.url);
-        // $('meta[property="og:image"]').attr('content', metaObj.image);
-        // setFBmeta(metaObj,head);
-
         let source   = createElement('div',['source'],false,container);
         let h1       = createElement('h1',['title'],false,container);
         let meta     = createElement('div',['meta'],false,container);

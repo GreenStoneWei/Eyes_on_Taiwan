@@ -8,8 +8,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
         page = 1;
     }
     let sort = getParameterByName('sort');
+    let keyword = getParameterByName('keyword');
     let tag = getParameterByName('tag');
     let xhr = new XMLHttpRequest();
+    
+    if(keyword !==null){
+        tag = null;
+    }
+    
+
+
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         let articleList = JSON.parse(this.responseText).data;
@@ -18,7 +26,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         createPagination(sort, page, tag, totalPage);
       }
     };
-    xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag}`, true); // index
+    xhr.open("GET", `/api/index?sort=${sort}&page=${page}&tag=${tag}`, true);
     xhr.send();
 }) // End of document.addEventListener
 

@@ -22,6 +22,9 @@ router.get('/view/article',(req,res)=>{
                 return;
             }
             result[0].url = myLib.hostName+'/view/article?id='+result[0].id;
+            if(result[0].abstract.length>150){
+                result[0].abstract = result[0].abstract.substring(0,147)+'...';
+            };
             res.render('article.ejs',{article: result[0]});               
         })
     })

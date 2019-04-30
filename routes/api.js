@@ -36,7 +36,7 @@ const cacheExpireTime = 60 * 60 * 24; // EX unit: sec, this equals 1 day.
 
 
 router.get('/article',(req,res)=>{
-    // client.flushdb();
+    client.flushdb();
     let id = parseInt(req.query.id);
     if (!Number.isInteger(id)){
         res.send({error:"Invalid article ID"});
@@ -133,36 +133,56 @@ router.get('/index',(req,res)=>{
     let pageLimit = 9;
     let sort = req.query.sort;
     let tag  = req.query.tag;
+    let keyword = req.query.keyword;
     let orderBy = '';
     let offset  = (paging-1) * pageLimit;
     let limiter = ` LIMIT ${offset}, ${pageLimit}`;
     let filter  = '';
     let getColumn = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count';
     let selectFromJoin = '';
-    switch(tag){
-        case 'null': 
-            selectFromJoin = ' FROM article INNER JOIN news ON article.news_id = news.id';
-            filter = ` WHERE title != "null" AND context != "null" AND context != "" `;
-            break;
-        default:
-            selectFromJoin = ' FROM article INNER JOIN news ON article.news_id = news.id INNER JOIN tag ON article.id = tag.article_id';
-            filter = ` WHERE title != "null" AND context != "null" AND context != "" AND tag = "${tag}"`;
+    console.log(keyword);
+    if (keyword !== undefined){
+        selectFromJoin = ' FROM article INNER JOIN news ON article.news_id = news.id';
+        filter = ` WHERE title != "null" AND context != "null" AND context != "" AND LOWER(title) LIKE "%${keyword.toLowerCase()}%"`;
+        switch(sort){
+            case 'date':
+                orderBy = ' ORDER BY unixtime DESC';
+                break;
+            case 'most_viewed':
+                orderBy = ' ORDER BY viewed_count DESC';
+                break;
+            default:
+                orderBy = ' ORDER BY unixtime DESC';
+        }
     }
-    switch(sort){
-        case 'date':
-            orderBy = ' ORDER BY unixtime DESC';
-            break;
-        case 'most_viewed':
-            orderBy = ' ORDER BY viewed_count DESC';
-            break;
-        default:
-            orderBy = ' ORDER BY unixtime DESC';
+    else{
+        switch(tag){
+            case 'null': 
+                selectFromJoin = ' FROM article INNER JOIN news ON article.news_id = news.id';
+                filter = ` WHERE title != "null" AND context != "null" AND context != "" `;
+                break;
+            default:
+                selectFromJoin = ' FROM article INNER JOIN news ON article.news_id = news.id INNER JOIN tag ON article.id = tag.article_id';
+                filter = ` WHERE title != "null" AND context != "null" AND context != "" AND tag = "${tag}"`;
+        }
+        switch(sort){
+            case 'date':
+                orderBy = ' ORDER BY unixtime DESC';
+                break;
+            case 'most_viewed':
+                orderBy = ' ORDER BY viewed_count DESC';
+                break;
+            default:
+                orderBy = ' ORDER BY unixtime DESC';
+        }
     }
     mysql.conPool.getConnection((err,con)=>{
         con.query('SELECT count(*) AS count'+selectFromJoin+filter+orderBy,(err,count)=>{
             con.release();
             let totalArticleCount = count[0].count*1; // *1 to convert into int
             let totalPage = Math.ceil(totalArticleCount/pageLimit);
+            // query
+            console.log(getColumn+selectFromJoin+filter+orderBy+limiter);
             con.query(getColumn+selectFromJoin+filter+orderBy+limiter,function(error, result){
                 if (error){
                     throw error;
@@ -179,6 +199,7 @@ router.get('/index',(req,res)=>{
                         }
                         result[i].viewed_count += parseInt(cacheCount);
                         if (added===result.length){
+                            console.log(result);
                             res.send(JSON.stringify({totalPage: totalPage, data: result}));
                         }
                     })

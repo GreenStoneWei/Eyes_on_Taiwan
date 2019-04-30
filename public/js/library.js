@@ -115,13 +115,13 @@ function createArticleCard(array,parentElement){
     }
     // 一列三個卡片，如果不足列，補齊
     let itemPerRow = 3;
-    let remainder = array.length/itemPerRow;
+    let remainder = array.length%itemPerRow;
     if (remainder==2){
-        let card       = createElement("div",["card","card-size","hidden-card"],false,parentElement);
+        createElement("div",["card","card-size","hidden-card"],false,parentElement);
     }
     if (remainder==1){
-        let remainder1 = createElement("div",["card","card-size","hidden-card"],false,parentElement);
-        let remainder2 = createElement("div",["card","card-size","hidden-card"],false,parentElement);
+        createElement("div",["card","card-size","hidden-card"],false,parentElement);
+        createElement("div",["card","card-size","hidden-card"],false,parentElement);
     }
 }
 

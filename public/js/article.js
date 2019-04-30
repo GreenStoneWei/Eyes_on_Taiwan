@@ -1,4 +1,4 @@
-const container = document.querySelector('.container');
+const container = document.querySelector('.article');
 const recommenderBlock = document.querySelector('.recommender-block');
 const comment = document.querySelector('.fb-comments');
 
@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     xhr.onreadystatechange = function(){
       if (this.readyState == 4 && this.status == 200) {
         let article = JSON.parse(this.responseText);
-
         let source   = createElement('div',['source'],false,container);
         let h1       = createElement('h1',['title'],false,container);
         let meta     = createElement('div',['meta'],false,container);
@@ -26,23 +25,24 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let content = createElement('div',['content'],false,container);
         let btnContainer = createElement('div',['btn-container'],false,container);
         let origin = createElement('a',['btn','btn-info','btn-width'],{href:article[0].url, role:'button'},btnContainer);
-        // add FB share button
-        let shareFB = createElement('div',['fb-share-button','btn'],false,btnContainer);
-        shareFB.dataset.href = window.location.href;
-        shareFB.dataset.layout = 'button_count';
-        shareFB.dataset.size = 'large';
-        let shareFBaTag = createElement('div',['fb-xfbml-parse-ignore'],{target:'_blank',href:'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(window.location.href)+'&amp;src=sdkpreparse'},shareFB);
-        shareFBaTag.innerTEXT = '分享';
+        // // add FB share button
+        // let shareFB = createElement('div',['fb-share-button','btn'],false,btnContainer);
+        // shareFB.dataset.href = window.location.href;
+        // shareFB.dataset.layout = 'button_count';
+        // shareFB.dataset.size = 'large';
+        // let shareFBaTag = createElement('div',['fb-xfbml-parse-ignore'],{target:'_blank',href:'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(window.location.href)+'&amp;src=sdkpreparse'},shareFB);
+        // shareFBaTag.innerTEXT = '分享';
+
         // add LINE share button
-        let lineBtn = createElement('div',['line-it-button','btn'],false,btnContainer);
-        lineBtn.dataset.lang  = 'zh_Hant';
-        lineBtn.dataset.type  = 'share-a';
-        lineBtn.dataset.ver   = '3';
-        lineBtn.dataset.url   = window.location.href;
-        lineBtn.dataset.color = 'default';
-        lineBtn.dataset.size  = 'large';
-        lineBtn.dataset.count = 'true';
-        lineBtn.style.display = 'none';
+        // let lineBtn = createElement('div',['line-it-button','btn'],false,btnContainer);
+        // lineBtn.dataset.lang  = 'zh_Hant';
+        // lineBtn.dataset.type  = 'share-a';
+        // lineBtn.dataset.ver   = '3';
+        // lineBtn.dataset.url   = window.location.href;
+        // lineBtn.dataset.color = 'default';
+        // lineBtn.dataset.size  = 'large';
+        // lineBtn.dataset.count = 'true';
+        // lineBtn.style.display = 'none';
         
         source.innerHTML = article[0].news;
         h1.innerHTML = article[0].title;
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
         datetime.innerHTML = dateFormat(article[0].unixtime);
         content.innerHTML  = article[0].context;
-        origin.innerHTML   = '站外原文';
+        origin.innerHTML   = 'See Origin';
         
         let recommendTitle = createElement('h3',['recommend-title'],false, recommenderBlock);
         recommendTitle.innerHTML = 'Similar Articles Recommended';

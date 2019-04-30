@@ -130,7 +130,7 @@ router.get('/index',(req,res)=>{
     if (!Number.isInteger(paging)){
         paging = 1;
     }
-    let pageLimit = 10;
+    let pageLimit = 9;
     let sort = req.query.sort;
     let tag  = req.query.tag;
     let orderBy = '';

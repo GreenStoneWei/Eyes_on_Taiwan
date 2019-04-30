@@ -1,57 +1,69 @@
 
 .card{
-    margin: 10px;
-    box-shadow:1px 1px 3px rgba(20%,20%,20%,0.6);
+    margin: 0px 2px 20px 2px;
+    box-shadow: 0px 1px 3px rgba(80%,80%,80%,0.2);
 }
 
 .card-size{
-    max-width: 500px;
-    min-width: 375px;
+    width: 360px;
     background-color: white;
+}
+
+.hidden-card{
+    visibility: hidden;
 }
 
 .card-hearder-row{
     display: flex;
     flex-direction: row;
+    font-size: 8px;
 }
-
+.padding-fix{
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 8px;
+}
+.card-body{
+    padding: 6px;
+}
 .main-img{
-    margin-bottom: 15px;
+    margin: 10px 0px;
 }
-
+.card-title{
+    font-size: 20px;
+    font-weight: bold;
+    color:black;
+    min-height: 48px;
+}
+a.card-title:hover{
+    text-decoration: none;
+    color:gray !important;
+}
 .abstract{
+    margin-left: 10px;
     border-left: 3px solid #00cccc;
     color: gray;
-    padding-left: 10px;
+    padding-left: 6px;
+    font-size: 14px;
 }
-/* .pagination{
-    justify-content: center;
-    margin-top: 50px;
-    margin-bottom: 50px;
-} */
-.page-link{
-    color: #00cccc;
-}
-.page-item.active .page-link{
-    background-color: #00cccc;
-    border-color: #00cccc;
-}
+
 .viewed{
     margin-left:10px;
     margin-right:10px;
-    width:24px;
-    height:24px;
+    width:18px;
+    height:18px;
     filter: grayscale(70%);
 }
 .read-block{
+    padding-left:10px;
     display: flex;
     flex-direction: row;
     color:gray;
     align-items: center;
+    margin-bottom: 10px;
 }
-.view-count{
-    font-size:12px;
-    margin: 0 0 0 0; /* bootstrap 對 p 有預設 margin bottom 1 rem */
+.read-more{
+    border-bottom: 1px dashed #00cccc;
 }
 .tag-space{
     width: 10px;
@@ -59,13 +71,30 @@
 }
 .card-tag{
     display: flex;
+    padding-left: 10px;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     margin-bottom: 10px;
+    font-size: 14px;
 }
 a.tag-link{
-    color: rgb(132, 165, 163) !important;
+    color: gray !important;
 }
 a.tag-link:hover{
     color:#00cccc !important;
+    text-decoration: none;
+}
+
+.view-count{
+    font-size:12px;
+    margin: 0 0 0 0; /* bootstrap 對 p 有預設 margin bottom 1 rem */
+}
+
+.page-link{
+    color: #00cccc;
+}
+.page-item.active .page-link{
+    background-color: #00cccc;
+    border-color: #00cccc;
 }

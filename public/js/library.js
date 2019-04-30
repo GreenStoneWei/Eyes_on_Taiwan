@@ -11,14 +11,6 @@ function setAttributes(obj,attrs){
 	return obj;
 };
 
-function setFBmeta(metaObj, parentNode){
-    createElement('meta', false, {property: 'og:url', content: metaObj.url}, parentNode);
-    createElement('meta', false, {property: 'og:type', content: metaObj.type}, parentNode);
-    createElement('meta', false, {property: 'og:title', content: metaObj.title}, parentNode);
-    createElement('meta', false, {property: 'og:description', content: metaObj.description}, parentNode);
-    createElement('meta', false, {property: 'og:image', content: metaObj.image}, parentNode);
-}
-
 function createElement(tagName,addClass,attrs,parentElement){
     let obj = document.createElement(tagName);
     if(addClass){
@@ -56,8 +48,8 @@ function createArticleCard(array,parentElement){
         let card       = createElement("div",["card","card-size"],false,parentElement);
         let cardHeader = createElement("div",["card-header"],false,card);
         let headerRow  = createElement("div",["row"],false,cardHeader);
-        let source     = createElement("span",["col-7"],false,headerRow);
-        let time       = createElement("span",["col-5","text-right"],false,headerRow);
+        let source     = createElement("span",["col-7","padding-fix"],false,headerRow);
+        let time       = createElement("span",["col-5","padding-fix","text-right"],false,headerRow);
         let cardBody   = createElement("div",["card-body"],false,card);
         if (array[i].main_img === "null" || array[i].main_img === "undefined"){
             let defaultImg;
@@ -90,26 +82,46 @@ function createArticleCard(array,parentElement){
                     defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/wpost_default.jpg';
                     break;
             }
-            let mainImg = createElement("img",["card-img-top","main-img"],{src:defaultImg},cardBody);
+            // let mainImg = createElement("img",["card-img-top","main-img"],{src:defaultImg},cardBody);
+            let mainImgLink = createElement("a",[],{href: defaultImg},cardBody);
+            let mainImg = createElement("div",["main-img"],{},mainImgLink);
+            mainImg.setAttribute("style",`width: 100%; height: 180px; background-image: url(${defaultImg}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
         }
         else{
-            let mainImg = createElement("img",["card-img-top","main-img"],{src:array[i].main_img},cardBody);
+            // let mainImg = createElement("img",["card-img-top","main-img"],{src:array[i].main_img},cardBody);
+            let mainImgLink = createElement("a",[],{href:`/view/article?id=${array[i].id}`},cardBody);
+            let mainImg = createElement("div",["main-img"],{},mainImgLink);
+            mainImg.setAttribute("style",`width: 100%; height: 180px; background-image: url(${array[i].main_img}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
         }
-        let title      = createElement("h4",["card-title"],false,cardBody);
+        let titleLink  = createElement("a",["card-title"],{href:`/view/article?id=${array[i].id}`},cardBody);
+        let title      = createElement("h4",["card-title","padding-fix"],false,titleLink);
+        
         let abstract   = createElement("p",["card-text","abstract"],false,cardBody);
         let tagContainer = createElement("div",["card-tag"],false,cardBody);
         let readBlock  = createElement("div",["read-block"],false,cardBody);
-        let readMore   = createElement("a",["card-link"],{href:`/view/article?id=${array[i].id}`},readBlock);
+        let readMore   = createElement("a",["card-link","read-more"],{href:`/view/article?id=${array[i].id}`},readBlock);
         let viewImage  = createElement("img",["viewed"],{src:'https://s3.amazonaws.com/wheatxstone/news/iconfinder_view_126581.png'},readBlock);
         let viewCount  = createElement("p",["view-count"],false,readBlock);
         getTag(array[i].id,tagContainer);
         source.innerHTML   = array[i].news;
         time.innerHTML     = dateFormat(array[i].unixtime);
         title.innerHTML    = array[i].title;
+        if(array[i].abstract.length>260){
+            array[i].abstract = array[i].abstract.substring(0, 260)+'...';
+        }
         abstract.innerHTML = array[i].abstract;
-        readMore.innerHTML = "閱讀更多";
+        readMore.innerHTML = "Read More";
         viewCount.innerHTML = 'Viewed '+ array[i].viewed_count + ' Times';
-        // console.log(array[i]);
+    }
+    // 一列三個卡片，如果不足列，補齊
+    let itemPerRow = 3;
+    let remainder = array.length/itemPerRow;
+    if (remainder==2){
+        let card       = createElement("div",["card","card-size","hidden-card"],false,parentElement);
+    }
+    if (remainder==1){
+        let remainder1 = createElement("div",["card","card-size","hidden-card"],false,parentElement);
+        let remainder2 = createElement("div",["card","card-size","hidden-card"],false,parentElement);
     }
 }
 

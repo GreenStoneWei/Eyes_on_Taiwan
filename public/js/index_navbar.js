@@ -6,8 +6,13 @@ const searchSubmitBtn = document.getElementById('search-icon');
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
     let tag = getParameterByName('tag');
-    setAttributes(navDate,{href:`./?sort=date&tag=${tag}`});
-    setAttributes(navViewed,{href:`./?sort=most_viewed&tag=${tag}`});
+    let keyword = getParameterByName('keyword');
+    let filter = '&tag='+tag;
+    if(keyword !== null){
+        filter = '&keyword='+keyword;
+    }
+    setAttributes(navDate,{href:`./?sort=date`+filter});
+    setAttributes(navViewed,{href:`./?sort=most_viewed`+filter});
 }) // End of document.addEventListener
 
 searchSubmitBtn.addEventListener('click',(event)=>{

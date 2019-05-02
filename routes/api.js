@@ -3,8 +3,25 @@ const router  = express.Router();
 const mysql   = require('../util/mysql.js');
 const myLib   = require('../util/config.js');
 const redis   = require('redis');
-const client  = redis.createClient();
+const client  = redis.createClient({
+    retry_strategy: function (options) {
+        if (options.error && options.error.code === 'ECONNREFUSED') {
+            return new Error('The server refused the connection'); // End reconnecting on a specific error and flush all commands with a individual error
+        }
+        if (options.total_retry_time > 1000 * 60 * 60) {
+            return new Error('Retry time exhausted'); // End reconnecting after a specific timeout and flush all commands with a individual error
+        }
+        if (options.attempt > 10) {
+            return undefined; // End reconnecting with built in error
+        }
+        return Math.min(options.attempt * 100, 3000); // reconnect after 3 secs
+    }
+});
 const cacheExpireTime = 60 * 60 * 24; // EX unit: sec, this equals 1 day.
+const {Translate} = require('@google-cloud/translate');
+const projectID = 'moonlit-vine-237907';
+const translate = new Translate({projectId: projectID});
+const translateTarget = 'zh-tw';
 
 // router.get('/showindex',(req,res)=>{
 //     let page = parseInt(req.query.page);
@@ -33,10 +50,8 @@ const cacheExpireTime = 60 * 60 * 24; // EX unit: sec, this equals 1 day.
 //     })
 // })
 
-
-
 router.get('/article',(req,res)=>{
-    client.flushdb();
+    // client.flushdb();
     let id = parseInt(req.query.id);
     if (!Number.isInteger(id)){
         res.send({error:"Invalid article ID"});
@@ -140,7 +155,6 @@ router.get('/index',(req,res)=>{
     let filter  = '';
     let getColumn = 'SELECT article.id, news.news, main_img, unixtime, title, abstract, url, viewed_count';
     let selectFromJoin = '';
-    console.log(keyword);
     if (keyword !== undefined){
         selectFromJoin = ' FROM article INNER JOIN news ON article.news_id = news.id';
         filter = ` WHERE title != "null" AND context != "null" AND context != "" AND LOWER(title) LIKE "%${keyword.toLowerCase()}%"`;
@@ -182,7 +196,6 @@ router.get('/index',(req,res)=>{
             let totalArticleCount = count[0].count*1; // *1 to convert into int
             let totalPage = Math.ceil(totalArticleCount/pageLimit);
             // query
-            console.log(getColumn+selectFromJoin+filter+orderBy+limiter);
             con.query(getColumn+selectFromJoin+filter+orderBy+limiter,function(error, result){
                 if (error){
                     throw error;
@@ -199,7 +212,7 @@ router.get('/index',(req,res)=>{
                         }
                         result[i].viewed_count += parseInt(cacheCount);
                         if (added===result.length){
-                            console.log(result);
+                            // console.log(result);
                             res.send(JSON.stringify({totalPage: totalPage, data: result}));
                         }
                     })

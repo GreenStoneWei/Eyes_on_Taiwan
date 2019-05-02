@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
       WordCloud(cloud, options);
     };
   }  
-  xhr.open("GET", `/api/word/cloud`, true); // index
+  xhr.open("GET", `/api/word/cloud`, true);
   xhr.send();
 })
 

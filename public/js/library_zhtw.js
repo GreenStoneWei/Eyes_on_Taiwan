@@ -1,5 +1,5 @@
 function getEndPoint (href){
-    if(href.indexOf('?')!== -1){
+    if((href.indexOf('?')!== -1)){
         return '?'+href.split('?')[1];
     }
     else{
@@ -98,17 +98,17 @@ function createArticleCard(array,parentElement){
         }
         else{
             // let mainImg = createElement("img",["card-img-top","main-img"],{src:array[i].main_img},cardBody);
-            let mainImgLink = createElement("a",[],{href:`/view/article?id=${array[i].id}`},cardBody);
+            let mainImgLink = createElement("a",[],{href:`/zh-tw/view/article?id=${array[i].id}`},cardBody);
             let mainImg = createElement("div",["main-img"],{},mainImgLink);
             mainImg.setAttribute("style",`width: 100%; height: 180px; background-image: url(${array[i].main_img}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
         }
-        let titleLink  = createElement("a",["card-title"],{href:`/view/article?id=${array[i].id}`},cardBody);
+        let titleLink  = createElement("a",["card-title"],{href:`/zh-tw/view/article?id=${array[i].id}`},cardBody);
         let title      = createElement("h4",["card-title","padding-fix"],false,titleLink);
         
         let abstract   = createElement("p",["card-text","abstract"],false,cardBody);
         let tagContainer = createElement("div",["card-tag"],false,cardBody);
         let readBlock  = createElement("div",["read-block"],false,cardBody);
-        let readMore   = createElement("a",["card-link","read-more"],{href:`/view/article?id=${array[i].id}`},readBlock);
+        let readMore   = createElement("a",["card-link","read-more"],{href:`/zh-tw/view/article?id=${array[i].id}`},readBlock);
         let viewImage  = createElement("img",["viewed"],{src:'https://s3.amazonaws.com/wheatxstone/news/iconfinder_view_126581.png'},readBlock);
         let viewCount  = createElement("p",["view-count"],false,readBlock);
         getTag(array[i].id,tagContainer);
@@ -119,8 +119,8 @@ function createArticleCard(array,parentElement){
             array[i].abstract = array[i].abstract.substring(0, 260)+'...';
         }
         abstract.innerHTML = array[i].abstract;
-        readMore.innerHTML = "Read More";
-        viewCount.innerHTML = 'Viewed '+ array[i].viewed_count + ' Times';
+        readMore.innerHTML = "詳讀全文";
+        viewCount.innerHTML = '觀看次數 '+ array[i].viewed_count + ' 次';
     }
     // 一列三個卡片，如果不足列，補齊
     let itemPerRow = 3;
@@ -141,14 +141,14 @@ function getTag(id, tagContainer){
         let tagArray = JSON.parse(this.responseText);
         let tagStarter = createElement("div",false,false,tagContainer);
         let colonSpace = createElement("div",["tag-space"],false,tagContainer);
-        tagStarter.innerHTML = 'Tags: ';
+        tagStarter.innerHTML = '重點標籤：';
         for(let i=0; i<tagArray.length;i++){
-            let tagNode = createElement("a",["tag-link"],{href:`/?tag=${tagArray[i]}`},tagContainer);
+            let tagNode = createElement("a",["tag-link"],{href:`/zh-tw/?tag=${tagArray[i]}`},tagContainer);
             tagNode.innerHTML = '#'+tagArray[i];
             let tagSpace = createElement("div",["tag-space"],false,tagContainer);
         }
       }
     };
-    xhr.open("GET", `/api/card/tags?id=${id}`, true); 
+    xhr.open("GET", `/api/zh-tw/card/tags?id=${id}`, true); 
     xhr.send();
 }

@@ -21,10 +21,10 @@
 
 .nav-link{
     color: #ffffff;
-    font-size: 1.25rem;
 }
 .nav-link:hover{
     color:#00cccc !important;
+    cursor: pointer;
 }
 .nav-item{
     font-size: 16px;
@@ -34,6 +34,10 @@
 .navbar-nav{
     display: flex !important; 
     align-items: center !important;
+}
+
+#translation{
+    margin-right: 24px;
 }
 
 .search-block{

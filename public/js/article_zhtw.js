@@ -6,7 +6,7 @@ const langSwitcher = document.getElementById('translation');
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
 
-    let endPoint = '/zh-tw/view/article/'+ getEndPoint(window.location.href);
+    let endPoint = '/view/article/'+ getEndPoint(window.location.href);
     setAttributes(langSwitcher,{href:endPoint});
 
     let xhr = new XMLHttpRequest();
@@ -39,16 +39,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
         datetime.innerHTML = dateFormat(article[0].unixtime);
         content.innerHTML  = article[0].context;
-        origin.innerHTML   = 'See Origin';
+        origin.innerHTML   = '站外原文';
         
         let recommendTitle = createElement('h3',['recommend-title'],false, recommenderBlock);
-        recommendTitle.innerHTML = 'Similar Articles Recommended';
+        recommendTitle.innerHTML = '閱讀相關文章';
         let recommendWrap  = createElement('div',['recommend-wrap'],false, recommenderBlock);
         createArticleCard(article[0].similar_article, recommendWrap);
 
         comment.dataset.href = window.location.href;
       }
     };
-    xhr.open("GET", `/api/article?id=${qsID}`, true);
+    xhr.open("GET", `/api/zh-tw/article?id=${qsID}`, true);
     xhr.send();
 }) 

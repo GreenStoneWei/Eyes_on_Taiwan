@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     if(keyword !== null){
         filter = '&keyword='+keyword;
     }
-    let endPoint = './zh-tw/'+ getEndPoint(window.location.href);
+    let endPoint = '/'+ getEndPoint(window.location.href);
     setAttributes(navDate,{href:`./?sort=date`+filter});
     setAttributes(navViewed,{href:`./?sort=most_viewed`+filter});
     setAttributes(languageSwitchBtn,{href:endPoint});
@@ -22,6 +22,6 @@ searchSubmitBtn.addEventListener('click',(event)=>{
     event.preventDefault();
     let sort = getParameterByName('sort');
     let keyword = search.value;
-    window.location.replace(`/?sort=${sort}&keyword=${keyword}`);
+    window.location.replace(`/zh-tw/?sort=${sort}&keyword=${keyword}`);
 })
 

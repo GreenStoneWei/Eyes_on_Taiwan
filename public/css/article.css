@@ -74,3 +74,18 @@ body{
     display: flex;
     justify-content: center;
 }
+
+@media only screen and (max-width: 380px) {
+    .container{
+        max-width: 95%;
+    }
+    .title{
+        font-size: 24px !important;
+    }
+    .article-nav-text{
+        display: none;
+    }
+    /* .share-btn{
+        justify-content: flex-start;
+    } */
+}

@@ -19,6 +19,13 @@ a{
 .recommend-wrap{
     max-width:100%;
     display: flex;
+    flex-wrap:wrap;
     flex-direction: row;
     justify-content: space-around;
+}
+
+@media only screen and (max-width: 380px) {
+    .recommender-block{
+        max-width: 95%;
+    }
 }

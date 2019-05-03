@@ -98,3 +98,39 @@ a.tag-link:hover{
     background-color: #00cccc;
     border-color: #00cccc;
 }
+
+@media only screen and (max-width: 380px) {
+    .mobile-card-body{
+        display: flex !important;
+        flex-direction: row !important;
+    }
+    .card-header{
+        display: none;
+    }
+    .text-block{
+        display: flex !important;
+        flex-direction: column !important;
+        /* align-items: center; */
+        justify-content: center;
+    }
+    .card-title{
+        font-size: 16px;
+        font-weight: normal;
+        margin: 0 0 0 0;
+    }
+    .main-img{
+        min-width: 120px;
+        max-width: 120px;
+        max-height: 120px !important;
+    }
+    .card-text, .abstract, .card-tag{
+        display: none;
+    }
+    .read-block{
+        margin-top: 8px;
+    }
+    .read-more{
+        font-size: 10px;
+    }
+    
+}

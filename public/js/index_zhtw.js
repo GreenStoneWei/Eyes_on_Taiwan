@@ -1,5 +1,6 @@
 const container = document.querySelector('.wrap');
 const pagination = document.querySelector('.pagination');
+const mobilePagination = document.querySelector('.m-pagination');
 
 document.addEventListener('DOMContentLoaded', (event) => {
     event.preventDefault();
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let totalPage = JSON.parse(this.responseText).totalPage;
         createArticleCard(articleList,container);
         createPagination(sort, page, filter, totalPage);
+        createMobilePagination(sort, page, filter, totalPage);
       }
     };
     xhr.open("GET", `/api/zh-tw/index?sort=${sort}`+filter+`&page=${page}`, true);
@@ -78,6 +80,27 @@ function createPagination(sort, page, filter, totalPage){
     }
     let next = createElement('li',['page-item'],false,pagination);
     let nextLink = createElement('a',['page-link'],{href:`/zh-tw/?sort=${sort}`+filter+`&page=${page+1}`},next);
+    nextLink.innerHTML ='&raquo;';
+    if(page===1){
+        previous.classList.add('disabled');
+    }
+    if(page===totalPage){
+        next.classList.add('disabled');
+    }
+}
+
+function createMobilePagination(sort, page, filter, totalPage){
+    let previous = createElement('li',['page-item'],false,mobilePagination);
+    let prevLink = createElement('a',['page-link'],{href:`/?sort=${sort}`+filter+`&page=${page-1}`},previous);
+    prevLink.innerHTML = '&laquo';
+
+    let pageItem = createElement('li',['page-item'],false,mobilePagination);
+    let pg = createElement('a',['page-link'],{href:`/?sort=${sort}`+filter+`&page=${page}`},pageItem);
+    pg.innerHTML = page;
+    pageItem.classList.add('active');
+
+    let next = createElement('li',['page-item'],false,mobilePagination);
+    let nextLink = createElement('a',['page-link'],{href:`/?sort=${sort}`+filter+`&page=${page+1}`},next);
     nextLink.innerHTML ='&raquo;';
     if(page===1){
         previous.classList.add('disabled');

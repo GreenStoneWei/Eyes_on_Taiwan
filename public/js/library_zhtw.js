@@ -54,12 +54,12 @@ function getParameterByName(name, url) {
 
 function createArticleCard(array,parentElement){
     for (let i=0 ; i<array.length ; i++){
-        let card       = createElement("div",["card","card-size"],false,parentElement);
+        let card       = createElement("div",["card","card-size","mobile-card"],false,parentElement);
         let cardHeader = createElement("div",["card-header"],false,card);
         let headerRow  = createElement("div",["row"],false,cardHeader);
         let source     = createElement("span",["col-7","padding-fix"],false,headerRow);
         let time       = createElement("span",["col-5","padding-fix","text-right"],false,headerRow);
-        let cardBody   = createElement("div",["card-body"],false,card);
+        let cardBody   = createElement("div",["card-body","mobile-card-body"],false,card);
         if (array[i].main_img === "null" || array[i].main_img === "undefined"){
             let defaultImg;
             switch (array[i].news){
@@ -92,22 +92,23 @@ function createArticleCard(array,parentElement){
                     break;
             }
             // let mainImg = createElement("img",["card-img-top","main-img"],{src:defaultImg},cardBody);
-            let mainImgLink = createElement("a",[],{href: defaultImg},cardBody);
+            let mainImgLink = createElement("a",["mobile-img"],{href: defaultImg},cardBody);
             let mainImg = createElement("div",["main-img"],{},mainImgLink);
             mainImg.setAttribute("style",`width: 100%; height: 180px; background-image: url(${defaultImg}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
         }
         else{
             // let mainImg = createElement("img",["card-img-top","main-img"],{src:array[i].main_img},cardBody);
-            let mainImgLink = createElement("a",[],{href:`/zh-tw/view/article?id=${array[i].id}`},cardBody);
+            let mainImgLink = createElement("a",["mobile-img"],{href:`/zh-tw/view/article?id=${array[i].id}`},cardBody);
             let mainImg = createElement("div",["main-img"],{},mainImgLink);
             mainImg.setAttribute("style",`width: 100%; height: 180px; background-image: url(${array[i].main_img}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
         }
-        let titleLink  = createElement("a",["card-title"],{href:`/zh-tw/view/article?id=${array[i].id}`},cardBody);
+        let textBlock  = createElement("div",["text-block"],false,cardBody);
+        let titleLink  = createElement("a",["card-title"],{href:`/zh-tw/view/article?id=${array[i].id}`},textBlock);
         let title      = createElement("h4",["card-title","padding-fix"],false,titleLink);
         
-        let abstract   = createElement("p",["card-text","abstract"],false,cardBody);
-        let tagContainer = createElement("div",["card-tag"],false,cardBody);
-        let readBlock  = createElement("div",["read-block"],false,cardBody);
+        let abstract   = createElement("p",["card-text","abstract"],false,textBlock);
+        let tagContainer = createElement("div",["card-tag"],false,textBlock);
+        let readBlock  = createElement("div",["read-block"],false,textBlock);
         let readMore   = createElement("a",["card-link","read-more"],{href:`/zh-tw/view/article?id=${array[i].id}`},readBlock);
         let viewImage  = createElement("img",["viewed"],{src:'https://s3.amazonaws.com/wheatxstone/news/iconfinder_view_126581.png'},readBlock);
         let viewCount  = createElement("p",["view-count"],false,readBlock);

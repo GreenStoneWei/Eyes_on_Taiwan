@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     let qsID = getParameterByName('id');
     xhr.onreadystatechange = function(){
       if (this.readyState == 4 && this.status == 200) {
+        
         let article = JSON.parse(this.responseText);
         let source   = createElement('div',['source'],false,container);
         let h1       = createElement('h1',['title'],false,container);
@@ -24,8 +25,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
           subtitle.innerHTML = article[0].subtitle;
         }
         if (article[0].main_img !== "undefined"){
-          let img = createElement('img',['img'],{src:article[0].main_img},container);
-          // setAttr(img,{src:article[0].main_img});
+          let img = createElement("div",["img"],{},container);
+          img.setAttribute("style",`width: 100%; background-image: url(${article[0].main_img}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
+          // let img = createElement('img',['img'],{src:article[0].main_img},container);
         }        
         let content = createElement('div',['content'],false,container);
         let btnContainer = createElement('div',['btn-container'],false,container);

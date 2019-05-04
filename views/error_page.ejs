@@ -2,17 +2,8 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <meta property="fb:app_id" content="2530555113837912">
-        <meta property="og:url" content="<%=article.url%>">
-        <meta property="og:type" content="article">
-        <meta property="og:title" content="<%=article.title%>">
-        <meta property="og:description" content="<%=article.abstract%>">
-        <meta property="og:image" content="<%=article.main_img%>">
-        <meta property="og:image:height" content="600">
-        <meta property="og:image:width" content="1024">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">   
         <title>Eyes on Taiwan</title>
-        <link rel="icon" href="/eyetaiwan.png" sizes="16x16" type="image/png">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <link rel="stylesheet" href="/../../css/navbar.css" type="text/css">
         <link rel="stylesheet" href="/../../css/recommender.css" type="text/css">
@@ -22,8 +13,6 @@
         <script src="https://d.line-scdn.net/r/web/social-plugin/js/thirdparty/loader.min.js" async="async" defer="defer"></script>
     </head>
     <body>
-        <div id="fb-root"></div>
-        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v3.2&appId=586639515140982&autoLogAppEvents=1"></script>
         <header>
             <div class="nav-container">
                 <nav class="navbar navbar-expand-lg">
@@ -33,25 +22,22 @@
                         </a>
                     </div>
                     <div class="article-nav-text col-10">Fight For Democracy — No One is an Outsider</div>
-                    <a id="translation" class="nav-link col-1">繁中</a>
                 </nav>
             </div>
         </header>
         <div>
             <div class="container">
                 <div class="article">
+                    <div class="error-msg">                
+                        <h3><%=error%></h3>
+                    </div>
                 </div>
                 <div class="share-btn">
-                    <div class="fb-share-button btn" data-href="<%=article.url%>" data-layout="button_count" data-size="large"><a target="_blank" href=" 'https://www.facebook.com/sharer/sharer.php?u='+<%=article.url%>+'&amp;src=sdkpreparse'" class="fb-xfbml-parse-ignore"></a></div>
-                    <div class="line-it-button btn" data-lang="zh_Hant" data-type="share-a" data-ver="3" data-url="<%=article.url%>" data-color="default" data-size="large" data-count="true" style="display: none;"></div>
-                    <script src="https://d.line-scdn.net/r/web/social-plugin/js/thirdparty/loader.min.js" async="async" defer="defer"></script>
                 </div>
             </div>
-            <div class="recommender-block"></div>
         </div>
         <footer>
             <div class="comment-container">
-                <div class="fb-comments" data-width="650" data-numposts="10"></div>
             </div>
         </footer>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

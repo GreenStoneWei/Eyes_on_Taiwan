@@ -1,3 +1,4 @@
+const errorBlock = document.querySelector('.error-msg');
 const container = document.querySelector('.wrap');
 const pagination = document.querySelector('.pagination');
 const mobilePagination = document.querySelector('.m-pagination')
@@ -19,6 +20,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
+        if (JSON.parse(this.responseText).error){
+            let error = JSON.parse(this.responseText).error;
+            let errorMsg = createElement('h3',["search-not-found"],false,errorBlock);
+            errorMsg.innerHTML = error;
+            let errorNote = createElement('h5',[],false,errorBlock);
+            errorNote.innerHTML = 'Please check the spelling or the language.';
+            let errorNote2 = createElement('h5',[],false,errorBlock);
+            errorNote2.innerHTML = 'Or click the top left icon to return home page. Thank you!'
+        }
         let articleList = JSON.parse(this.responseText).data;
         let totalPage = JSON.parse(this.responseText).totalPage;
         createArticleCard(articleList,container);

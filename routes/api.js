@@ -79,6 +79,12 @@ router.get('/index',(req,res)=>{
                 if (error){
                     throw error;
                 }
+                if(result.length ==0 && keyword !== undefined){
+                    res.send({error: `No Search Result for "${keyword}"`});
+                }
+                if(result.length ==0 && tag !== undefined){
+                    res.send({error: `Tag "${tag}" Not Found`});
+                }
                 // add viewed count in cached. another solution is making the caching addition in another route. Front-end calls 2 api. 
                 let added = 0;
                 for(let i=0;i<result.length;i++){
@@ -106,7 +112,7 @@ router.get('/article',(req,res)=>{
     // client.flushdb();
     let id = parseInt(req.query.id);
     if (!Number.isInteger(id)){
-        res.send({error:"Invalid article ID"});
+        res.send({error:"Invalid Article ID"});
         return;
     }
     let viewCountCache = 'view_count_'+id;
@@ -149,7 +155,7 @@ router.get('/article',(req,res)=>{
                             return;
                         }
                         if (article.length===0){
-                            res.send({error:"Article does not exist."});
+                            res.send({error:`Article ID ${id} Does Not Exist.`});
                             return;
                         }
                         let similarArticle = JSON.parse(article[0].similar_article);
@@ -288,6 +294,12 @@ router.get('/zh-tw/index',(req,res)=>{
                 if (error){
                     throw error;
                 }
+                if(result.length ==0 && keyword !== undefined){
+                    res.send({error: `沒有關鍵字 "${keyword}" 的搜尋結果`});
+                }
+                if(result.length ==0 && tag !== undefined){
+                    res.send({error: `查無此標籤： "${tag}" `});
+                }
                 // add viewed count in cached. another solution is making the caching addition in another route. Front-end calls 2 api. 
                 let added = 0;
                 for(let i=0;i<result.length;i++){
@@ -314,7 +326,7 @@ router.get('/zh-tw/article',(req,res)=>{
     // client.flushdb();
     let id = parseInt(req.query.id);
     if (!Number.isInteger(id)){
-        res.send({error:"Invalid article ID"});
+        res.send({error:"Invalid Article ID"});
         return;
     }
     let viewCountCache = 'view_count_'+id;
@@ -357,7 +369,7 @@ router.get('/zh-tw/article',(req,res)=>{
                             return;
                         }
                         if (article.length===0){
-                            res.send({error:"Article does not exist."});
+                            res.send({error:`Article ID ${id} Does Not Exist.`});
                             return;
                         }
                         let similarArticle = JSON.parse(article[0].similar_article);

@@ -33,6 +33,15 @@ a{
     justify-items: center;
     padding: 0px;
 }
+.error-msg{
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+.search-not-found{
+    color: crimson;
+}
 .wrap{
     margin: 0 auto;
     display: flex;

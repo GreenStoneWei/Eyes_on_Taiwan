@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
           subtitle.innerHTML = article[0].subtitle;
         }
         if (article[0].main_img !== "undefined"){
-          let img = createElement('img',['img'],{src:article[0].main_img},container);
-          // setAttr(img,{src:article[0].main_img});
+          let img = createElement("div",["img"],{},container);
+          img.setAttribute("style",`width: 100%; background-image: url(${article[0].main_img}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
         }        
         let content = createElement('div',['content'],false,container);
         let btnContainer = createElement('div',['btn-container'],false,container);

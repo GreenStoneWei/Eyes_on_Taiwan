@@ -6,7 +6,7 @@ const myLib   = require('../../util/config.js');
 router.get('/view/article',(req,res)=>{
     let id = parseInt(req.query.id);
     if (!Number.isInteger(id)){
-        res.send({error:"Invalid article ID"});
+        res.render('error_page.ejs',{error: "Invalid Article ID"});
         return;
     }
     let getArticle = `SELECT id, url, title, abstract, main_img FROM article WHERE id = ${id}`;
@@ -18,7 +18,7 @@ router.get('/view/article',(req,res)=>{
                 return;
             }
             if (result.length===0){
-                res.send({error:"Article does not exist."});
+                res.render('error_page.ejs',{error:`Article ID ${id} Does Not Exist`});
                 return;
             }
             result[0].url = myLib.hostName+'/view/article?id='+result[0].id;
@@ -33,7 +33,7 @@ router.get('/view/article',(req,res)=>{
 router.get('/zh-tw/view/article',(req,res)=>{
     let id = parseInt(req.query.id);
     if (!Number.isInteger(id)){
-        res.send({error:"Invalid article ID"});
+        res.render('error_page.ejs',{error: "錯誤的搜尋，不要玩網址！"});
         return;
     }
     let getArticle = `SELECT id, url, title_zhtw AS title, abstract_zhtw AS abstract, main_img FROM article WHERE id = ${id}`;
@@ -45,7 +45,7 @@ router.get('/zh-tw/view/article',(req,res)=>{
                 return;
             }
             if (result.length===0){
-                res.send({error:"Article does not exist."});
+                res.render('error_page.ejs',{error:`文章編號 ${id} 不存在`});
                 return;
             }
             result[0].url = myLib.hostName+'/zh-tw/view/article?id='+result[0].id;

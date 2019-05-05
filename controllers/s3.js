@@ -4,6 +4,7 @@ const s3 = new aws.S3();
 const sharp = require('sharp');
 const credential = require('../util/credentials.js');
 const awsS3 = 'https://s3.amazonaws.com/wheatxstone/news/';
+const cdn = 'https://d37273sceiavoe.cloudfront.net/news/';
 
 aws.config.update({
     secretAccessKey: credential.awsConfig.secretAccessKey,
@@ -44,7 +45,7 @@ const uploadImgToS3 = function(url, newsBucket, fileName, callback){
                     } else {
                         // console.log("success uploading to s3");
                         // console.log(awsS3+newsBucket+'/'+fileName);
-                        callback(awsS3+newsBucket+'/'+fileName);
+                        callback(cdn+newsBucket+'/'+fileName);
                     }
                 }); 
             })

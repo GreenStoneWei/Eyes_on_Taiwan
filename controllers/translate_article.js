@@ -7,7 +7,7 @@ const translateTarget = 'zh-tw';
 
 mysql.conPool.getConnection((err,connection)=>{
     if (err) throw err;
-    mysql.conPool.query('SELECT * FROM article WHERE id > 251', async (err,result)=>{
+    mysql.conPool.query('SELECT * FROM article WHERE id > 321', async (err,result)=>{
         connection.release();
         if (err) throw err;
         try{
@@ -21,21 +21,12 @@ mysql.conPool.getConnection((err,connection)=>{
                 let translatedabstract = await translate.translate(article.abstract, translateTarget);
                 let translatedContext = await translate.translate(article.context, translateTarget);
                 let oneRow = {
-                    id: article.id,
-                    news_id: article.news_id,
-                    url: article.url,
-                    title: translatedTitle[0],
-                    subtitle: article.subtitle,
-                    abstract: translatedabstract[0],
-                    author: article.author,
-                    src_datetime: article.src_datetime,
-                    unixtime: article.unixtime,
-                    context: translatedContext[0],
-                    content: article.content,
-                    main_img: article.main_img,
-                    similar_article: article.similar_article
+                    title_zhtw: translatedTitle[0],
+                    subtitle_zhtw: article.subtitle,
+                    abstract_zhtw: translatedabstract[0],
+                    context_zhtw: translatedContext[0]
                 }
-                connection.query('INSERT INTO article_zh_tw SET ?', oneRow, (err,result)=>{
+                connection.query(`UPDATE article SET ? WHERE id = ${article.id}`, oneRow, (err,result)=>{
                     if(err)throw err;
                     console.log(article.id+ ' done');
                 })

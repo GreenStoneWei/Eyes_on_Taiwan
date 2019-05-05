@@ -5,7 +5,7 @@ const request = require("request");
 const myLib   = require('../util/config.js');
 const localHost = 'http://localhost:3000';
 const domainName = 'https://wheatxstone.com';
-const host = domainName;
+const host = localHost;
 const updateSimilarArticle = require('./classifier_schedule.js')
 
 let routeList = ['/washingtonpost/list',
@@ -33,7 +33,8 @@ for (let i=0; i< routeList.length ; i++){
         else{
             fetched++;
             if(fetched === routeList.length){
-                updateSimilarArticle.updateSimilarArticle();
+                // updateSimilarArticle.updateSimilarArticle();
+                console.log(fetched);
             }
         }
     })

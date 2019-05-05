@@ -861,7 +861,7 @@ router.get('/nytimes/article',(req,res)=>{
                                             dao.addTag(article[i].id, tagArray)
                                             .then((result)=>{
                                                 if (fetched === article.length){
-                                                    res.send('ok');
+                                                    res.send('ok'); // here report cannot set headers again
                                                     return;
                                                 }
                                             })
@@ -1023,7 +1023,9 @@ router.get('/washingtonpost/list', (req, res) => {
                 let title  = articleList[i].headline;
                 title = title.replace(/"/g,'\"').replace(/'/g,"\'");
                 let subtitle = articleList[i].blurb;
-                subtitle = subtitle.replace(/"/g,'\"').replace(/'/g,"\'");
+                if (subtitle !== undefined){
+                    subtitle = subtitle.replace(/"/g,'\"').replace(/'/g,"\'");
+                }
                 let author = articleList[i].byline;
                 let src_datetime = articleList[i].pubdatetime;
                 let unixtime = articleList[i].pubdatetime;

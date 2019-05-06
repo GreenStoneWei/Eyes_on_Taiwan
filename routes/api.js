@@ -24,6 +24,10 @@ router.get('/index',(req,res)=>{
     if (!Number.isInteger(paging)){
         paging = 1;
     }
+    if (paging <= 0){
+        res.send(JSON.stringify({error: `Page ${paging} Not Found`}));
+        return;
+    }
     let pageLimit = 9;
     let sort = req.query.sort;
     let tag  = req.query.tag;
@@ -238,6 +242,10 @@ router.get('/zh-tw/index',(req,res)=>{
     let paging = parseInt(req.query.page);
     if (!Number.isInteger(paging)){
         paging = 1;
+    }
+    if (paging <= 0){
+        res.send(JSON.stringify({error: `Page ${paging} Not Found`}));
+        return;
     }
     let pageLimit = 9;
     let sort = req.query.sort;

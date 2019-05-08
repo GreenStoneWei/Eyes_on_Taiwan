@@ -1109,7 +1109,8 @@ router.get('/washingtonpost/article',(req,res)=>{
                                         dao.addTag(article[i].id, tagArray)
                                         .then((result)=>{
                                             if (fetched === article.length){
-                                                res.send('ok');
+                                                console.log('aaaaaa'+' ok');
+                                                res.send('okokok');
                                                 return;
                                             }
                                         })

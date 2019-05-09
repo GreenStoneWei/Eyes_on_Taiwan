@@ -1,7 +1,8 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "node": true
     },
     "extends": "eslint:recommended",
     "globals": {
@@ -189,8 +190,8 @@
         "no-ternary": "off",
         "no-throw-literal": "off",
         "no-trailing-spaces": "off",
-        "no-undef-init": "error",
-        "no-undefined": "off",
+        "no-undef-init": "off",
+        "no-undefined": "error",
         "no-underscore-dangle": "error",
         "no-unmodified-loop-condition": "error",
         "no-unneeded-ternary": "error",

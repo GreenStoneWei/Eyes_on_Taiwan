@@ -7,7 +7,6 @@ a{
     padding-left:1vw;
     display: flex;
     flex-direction: column;
-    /* background-color: white; */
     border-bottom: 1px solid gray;
 
 }

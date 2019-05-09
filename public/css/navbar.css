@@ -79,19 +79,6 @@
     .search-block, #search, #search-icon, #translation{
         display: none;
     }
-    /* .m-navbar{
-        width: 95%;
-        height: 50px;
-        display: flex;
-        flex-direction: row;
-        z-index: 5;
-        top:0;
-    }
-    .m-navbar-nav{
-        display: flex;
-        flex-direction: row;
-        color: red;
-    } */
     .navicon{
         position: fixed;
         top: 15px;

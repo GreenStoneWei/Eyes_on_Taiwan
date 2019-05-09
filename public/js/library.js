@@ -91,13 +91,11 @@ function createArticleCard(array,parentElement){
                     defaultImg = 'https://s3.amazonaws.com/wheatxstone/news/wpost_default.jpg';
                     break;
             }
-            // let mainImg = createElement("img",["card-img-top","main-img"],{src:defaultImg},cardBody);
             let mainImgLink = createElement("a",["mobile-img"],{href: defaultImg},cardBody);
             let mainImg = createElement("div",["main-img"],{},mainImgLink);
             mainImg.setAttribute("style",`width: 100%; height: 180px; background-image: url(${defaultImg}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
         }
         else{
-            // let mainImg = createElement("img",["card-img-top","main-img"],{src:array[i].main_img},cardBody);
             let mainImgLink = createElement("a",["mobile-img"],{href:`/view/article?id=${array[i].id}`},cardBody);
             let mainImg = createElement("div",["main-img"],{},mainImgLink);
             mainImg.setAttribute("style",`width: 100%; height: 180px; background-image: url(${array[i].main_img}); background-size: contain; background-repeat: no-repeat; background-position: center;`);

@@ -4,7 +4,7 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 
 ---
 
-##Features and Tech used
+## Features and Tech used
 
 - Linux Crontab: to assign schedule scrape task.
 - Article Recommender System: recommend similar article based on tf-idf.
@@ -12,7 +12,7 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 - Loading Speed Optimization:
     - Image compression
     - Upload images to Amazon S3
-    - build Amazon Cloudfront (CDN) for image loading
+    - Implement Amazon Cloudfront (CDN) for image loading
 - Performance Optimization:
     - Redis: article content cache and viewed count.
 - Error mailer: to have the server send email to notify when the application throws errors.
@@ -20,4 +20,4 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 
 ---
 
-###[Website link](https://wheatxstone.com)
+### [Website link](https://wheatxstone.com)

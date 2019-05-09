@@ -22,7 +22,6 @@ body{
 }
 .meta{
     display: flex;
-    /* flex-direction: column; */
     color: gray;
     border-top: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
@@ -40,7 +39,6 @@ body{
     display: flex;
     margin: 0 auto;
     margin-bottom: 10px;
-    /* width: 600px; */
     height: 360px;
 }
 .datetime{
@@ -95,7 +93,4 @@ body{
         max-height: none;
         height: 100%;
     }
-    /* .share-btn{
-        justify-content: flex-start;
-    } */
 }

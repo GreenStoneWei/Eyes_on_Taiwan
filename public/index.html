@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-139883073-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-139883073-1');
+        </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>Eyes on Taiwan</title>
-        <link rel="shortcut icon" href="https://s3.amazonaws.com/wheatxstone/news/favicon.ico" type="image/x-ico" />
+        <link rel="shortcut icon" href="https://d37273sceiavoe.cloudfront.net/news/favicon.ico" type="image/x-ico" />
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <link rel="stylesheet" href="../css/index.css">
         <link rel="stylesheet" href="../css/navbar.css">
@@ -17,18 +25,14 @@
                 <nav class="navbar navbar-expand-lg">
                     <div>
                         <a class="navbar-brand" href="/">
-                            <img class="logo" src="https://s3.amazonaws.com/wheatxstone/news/eye_taiwan_3.png" >
+                            <img class="logo" src="https://d37273sceiavoe.cloudfront.net/news/eye_taiwan_3.png" >
                         </a>
                     </div>
-                    <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button> -->
                     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                         <div class="navbar-nav">
                         <a id="nav-date" class="nav-item nav-link">Latest</a>
                         <a id="nav-viewed" class="nav-item nav-link" >Most Viewed</a>
                         <a id="nav-tag" class="nav-item nav-link">Hot Tags</a>
-                        <!-- <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Statistics</a> -->
                         </div>
                     </div>
                     <a id="translation" class="nav-link" href="/zh-tw/">繁體中文</a>
@@ -39,7 +43,6 @@
                 </nav>
                 
             </div>
-            <!--  -->
             <div class="navicon">
                 <div class="bar bar1"></div>
                 <div class="bar bar2"></div>
@@ -52,7 +55,6 @@
                 <a id="m-translation" class="nav-link" href="/zh-tw/">繁體中文</a>
                 </div>
             </div>
-            <!--  -->
             <div class="jumbotron text-banner">
                 <div class="banner-headline">Eyes on Taiwan</div>
                 <h3 class="banner-subtitle">As Taiwan's news is being interfered, let's look in different aspects</h3>
@@ -67,11 +69,6 @@
             </div>
             <nav>
                 <ul class="pagination">
-                    <!-- <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous">&laquo;</a></li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item active"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#" aria-label="Next">&raquo;</a></li> -->
                 </ul>
                 <ul class="m-pagination">
                 </ul>    
@@ -84,6 +81,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="../js/library.js"></script>
+    <script src="../js/card_tag.js"></script>
     <script src="../js/index.js"></script>
     <script src="../js/index_navbar.js"></script>
     <script src="../js/wordcloud2.js"></script>  

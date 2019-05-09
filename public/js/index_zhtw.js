@@ -4,117 +4,129 @@ const pagination = document.querySelector('.pagination');
 const mobilePagination = document.querySelector('.m-pagination');
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    event.preventDefault();
-    let page = parseInt(getParameterByName('page'));
-    let sort = getParameterByName('sort');
-    let keyword = getParameterByName('keyword');
-    let tag = getParameterByName('tag');
-    let filter = '&tag='+tag;
-    if (!Number.isInteger(page)){
-        page = 1;
-    }
-    if(keyword !== null){
-        tag = null;
-        filter = '&keyword='+keyword;
-    }
-    let xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        if (JSON.parse(this.responseText).error){
-            let error = JSON.parse(this.responseText).error;
-            let errorMsg = createElement('h3',["search-not-found"],false,errorBlock);
-            errorMsg.innerHTML = error;
-            let errorNote = createElement('h5',[],false,errorBlock);
-            errorNote.innerHTML = '請檢查錯字或當前閱讀的語言別，或點選左上角圖示回到首頁，謝謝。';
-        }
-        let articleList = JSON.parse(this.responseText).data;
-        let totalPage = JSON.parse(this.responseText).totalPage;
-        createArticleCard(articleList,container);
-        createPagination(sort, page, filter, totalPage);
-        createMobilePagination(sort, page, filter, totalPage);
-      }
-    };
-    xhr.open("GET", `/api/zh-tw/index?sort=${sort}`+filter+`&page=${page}`, true);
-    xhr.send();
-}) // End of document.addEventListener
+	event.preventDefault();
+	let page = parseInt(getParameterByName('page'));
+	const sort = getParameterByName('sort');
+	const keyword = getParameterByName('keyword');
+	let tag = getParameterByName('tag');
+	let filter = '&tag='+tag;
+	if (!Number.isInteger(page)) {
+		page = 1;
+	}
+	if (keyword !== null) {
+		tag = null;
+		filter = '&keyword='+keyword;
+	}
+	const xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			if (JSON.parse(this.responseText).error) {
+				const error = JSON.parse(this.responseText).error;
+				const errorMsg = createElement('h3', ['search-not-found'], false, errorBlock);
+				errorMsg.innerHTML = error;
+				const errorNote = createElement('h5', [], false, errorBlock);
+				errorNote.innerHTML = '請檢查錯字或當前閱讀的語言別，或點選左上角圖示回到首頁，謝謝。';
+			}
+			const articleList = JSON.parse(this.responseText).data;
+			const totalPage = JSON.parse(this.responseText).totalPage;
+			createArticleCard(articleList, container);
+			createPagination(sort, page, filter, totalPage);
+			createMobilePagination(sort, page, filter, totalPage);
+		}
+	};
+	xhr.open('GET', `/api/zh-tw/index?sort=${sort}`+filter+`&page=${page}`, true);
+	xhr.send();
+}); // End of document.addEventListener
 
-function createPagination(sort, page, filter, totalPage){
-    let previous = createElement('li',['page-item'],false,pagination);
-    let prevLink = createElement('a',['page-link'],{href:`/zh-tw/?sort=${sort}`+filter+`&page=${page-1}`},previous);
-    prevLink.innerHTML = '&laquo';
+/**
+ * Create pagination bar
+ * @param {string} sort sorting method [ date || viewed ]
+ * @param {int} page current page
+ * @param {string} filter how to filter the searching result [ by tag || by title keywords ]
+ * @param {obj} totalPage assign how many pages in total
+ * @return {undefined}
+ */
+function createPagination(sort, page, filter, totalPage) {
+	const previous = createElement('li', ['page-item'], false, pagination);
+	const prevLink = createElement('a', ['page-link'], {href: `/zh-tw/?sort=${sort}`+filter+`&page=${page-1}`}, previous);
+	prevLink.innerHTML = '&laquo';
 
-    if(totalPage<11){
-        for (let i=1; i<(totalPage+1); i++){
-            let pageItem = createElement('li',['page-item'],false,pagination);
-            let pg = createElement('a',['page-link'],{href:`/zh-tw/?sort=${sort}`+filter+`&page=${i}`},pageItem);
-            pg.innerHTML = i;
-            if(i===page){
-                pageItem.classList.add('active');
-            }
-        }
-    }
-    else{
-        if(page<7){
-            for (let i=1; i<11; i++){
-                let pageItem = createElement('li',['page-item'],false,pagination);
-                let pg = createElement('a',['page-link'],{href:`/zh-tw/?sort=${sort}`+filter+`&page=${i}`},pageItem);
-                pg.innerHTML = i;
-                if(i===page){
-                    pageItem.classList.add('active');
-                }
-            }
-        }
-        else if ((page+4)<totalPage){
-            let startPage = page-5;
-            for (let i=startPage; i<startPage+10; i++){
-                let pageItem = createElement('li',['page-item'],false,pagination);
-                let pg = createElement('a',['page-link'],{href:`/zh-tw/?sort=${sort}`+filter+`&page=${i}`},pageItem);
-                pg.innerHTML = i;
-                if(i===page){
-                    pageItem.classList.add('active');
-                }
-            }
-        }
-        else{
-            for (let i=(totalPage-9); i<totalPage+1; i++){
-                let pageItem = createElement('li',['page-item'],false,pagination);
-                let pg = createElement('a',['page-link'],{href:`/zh-tw/?sort=${sort}`+filter+`&page=${i}`},pageItem);
-                pg.innerHTML = i;
-                if(i===page){
-                    pageItem.classList.add('active');
-                }
-            }
-        }
-    }
-    let next = createElement('li',['page-item'],false,pagination);
-    let nextLink = createElement('a',['page-link'],{href:`/zh-tw/?sort=${sort}`+filter+`&page=${page+1}`},next);
-    nextLink.innerHTML ='&raquo;';
-    if(page===1){
-        previous.classList.add('disabled');
-    }
-    if(page===totalPage){
-        next.classList.add('disabled');
-    }
+	if (totalPage<11) {
+		for (let i=1; i<(totalPage+1); i++) {
+			const pageItem = createElement('li', ['page-item'], false, pagination);
+			const pg = createElement('a', ['page-link'], {href: `/zh-tw/?sort=${sort}`+filter+`&page=${i}`}, pageItem);
+			pg.innerHTML = i;
+			if (i===page) {
+				pageItem.classList.add('active');
+			}
+		}
+	} else {
+		if (page<7) {
+			for (let i=1; i<11; i++) {
+				const pageItem = createElement('li', ['page-item'], false, pagination);
+				const pg = createElement('a', ['page-link'], {href: `/zh-tw/?sort=${sort}`+filter+`&page=${i}`}, pageItem);
+				pg.innerHTML = i;
+				if (i===page) {
+					pageItem.classList.add('active');
+				}
+			}
+		} else if ((page+4)<totalPage) {
+			const startPage = page-5;
+			for (let i=startPage; i<startPage+10; i++) {
+				const pageItem = createElement('li', ['page-item'], false, pagination);
+				const pg = createElement('a', ['page-link'], {href: `/zh-tw/?sort=${sort}`+filter+`&page=${i}`}, pageItem);
+				pg.innerHTML = i;
+				if (i===page) {
+					pageItem.classList.add('active');
+				}
+			}
+		} else {
+			for (let i=(totalPage-9); i<totalPage+1; i++) {
+				const pageItem = createElement('li', ['page-item'], false, pagination);
+				const pg = createElement('a', ['page-link'], {href: `/zh-tw/?sort=${sort}`+filter+`&page=${i}`}, pageItem);
+				pg.innerHTML = i;
+				if (i===page) {
+					pageItem.classList.add('active');
+				}
+			}
+		}
+	}
+	const next = createElement('li', ['page-item'], false, pagination);
+	const nextLink = createElement('a', ['page-link'], {href: `/zh-tw/?sort=${sort}`+filter+`&page=${page+1}`}, next);
+	nextLink.innerHTML ='&raquo;';
+	if (page===1) {
+		previous.classList.add('disabled');
+	}
+	if (page===totalPage) {
+		next.classList.add('disabled');
+	}
 }
 
-function createMobilePagination(sort, page, filter, totalPage){
-    let previous = createElement('li',['page-item'],false,mobilePagination);
-    let prevLink = createElement('a',['page-link'],{href:`/?sort=${sort}`+filter+`&page=${page-1}`},previous);
-    prevLink.innerHTML = '&laquo';
+/**
+ * Create mobile pagination bar
+ * @param {string} sort sorting method [ date || viewed ]
+ * @param {int} page current page
+ * @param {string} filter how to filter the searching result [ by tag || by title keywords ]
+ * @param {obj} totalPage assign how many pages in total
+ * @return {undefined}
+ */
+function createMobilePagination(sort, page, filter, totalPage) {
+	const previous = createElement('li', ['page-item'], false, mobilePagination);
+	const prevLink = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${page-1}`}, previous);
+	prevLink.innerHTML = '&laquo';
 
-    let pageItem = createElement('li',['page-item'],false,mobilePagination);
-    let pg = createElement('a',['page-link'],{href:`/?sort=${sort}`+filter+`&page=${page}`},pageItem);
-    pg.innerHTML = page;
-    pageItem.classList.add('active');
+	const pageItem = createElement('li', ['page-item'], false, mobilePagination);
+	const pg = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${page}`}, pageItem);
+	pg.innerHTML = page;
+	pageItem.classList.add('active');
 
-    let next = createElement('li',['page-item'],false,mobilePagination);
-    let nextLink = createElement('a',['page-link'],{href:`/?sort=${sort}`+filter+`&page=${page+1}`},next);
-    nextLink.innerHTML ='&raquo;';
-    if(page===1){
-        previous.classList.add('disabled');
-    }
-    if(page===totalPage){
-        next.classList.add('disabled');
-    }
-
+	const next = createElement('li', ['page-item'], false, mobilePagination);
+	const nextLink = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${page+1}`}, next);
+	nextLink.innerHTML ='&raquo;';
+	if (page===1) {
+		previous.classList.add('disabled');
+	}
+	if (page===totalPage) {
+		next.classList.add('disabled');
+	}
 }

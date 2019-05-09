@@ -1,16 +1,16 @@
-const mysql = require("mysql");
-const credential = require("../util/credentials.js");
+const mysql = require('mysql');
+const credential = require('../util/credentials.js');
 
 const conPool = mysql.createPool({
-    connectionLimit: 20,
-    host:"localhost",
-	user:"root",
+	connectionLimit: 20,
+	host: 'localhost',
+	user: 'root',
 	password: credential.mysqlPWD,
-	database:"newscraping"
+	database: 'newscraping',
 	// debug: true
-})
+});
 
 module.exports = {
 	core: mysql,
-    conPool: conPool
+	conPool: conPool,
 };

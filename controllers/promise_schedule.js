@@ -8,7 +8,7 @@ const domainName = 'https://wheatxstone.com';
 const host = localHost;
 
 const fixImgs = require('./img_fixer.js');
-const findSimilarArticle = require('./similar_article_finder.js');
+const findSimilarArticle = require('./similar_article_finder.js').calSimilarArticle;
 const translator = require('./translator.js');
 
 const routeList = ['/washingtonpost/list',

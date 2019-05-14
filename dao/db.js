@@ -74,7 +74,7 @@ const addTag = function(id, tagArray) {
 					return;
 				}
 				if (result.length == 0) {
-					con.query('INSERT INTO tag (article_id,tag) VALUES ? ', [tagArray], (err, result)=>{
+					con.query('INSERT INTO tag (article_id, tag) VALUES ? ', [tagArray], (err)=>{
 						if (err) {
 							reject(err);
 							return;

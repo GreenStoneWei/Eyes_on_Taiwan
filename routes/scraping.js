@@ -48,8 +48,7 @@ router.get('/aljazeera/list', (req, res)=>{
 						articleArray.push((Object.assign({url, main_img, title, subtitle, author, src_datetime, unixtime})));
 						fetched++;
 						if (fetched == apiList.length) {
-							dao.addToDB(articleArray, 0, 1, 'url').then((x)=>{
-								// res.send('OK');
+							dao.addToDB(articleArray, 0, 1, 'url').then(()=>{
 								res.redirect('/aljazeera/article');
 							}).catch((error)=>{
 								myLib.log(error);
@@ -67,11 +66,14 @@ router.get('/aljazeera/list', (req, res)=>{
 });
 router.get('/aljazeera/article', (req, res)=>{
 	mysql.conPool.getConnection((err, con)=>{
-		con.query('SELECT id, context, url FROM article WHERE news_id = 1', function(err, article) {
+		con.query('SELECT id, context, url FROM article WHERE news_id = 1 AND context IS NULL', function(err, article) {
 			con.release();
 			if (err) {
 				myLib.log(err);
 				res.send({err: 'Database query error.'});
+				return;
+			} else if (article.length===0) {
+				res.send('Aljazeera up-to-date');
 				return;
 			} else {
 				let fetched = 0;
@@ -80,42 +82,48 @@ router.get('/aljazeera/article', (req, res)=>{
 						url: article[i].url,
 						method: 'GET',
 					};
-					if (article[i].context === '') {
-						request(options, function(error, response, body) {
-							if (error || !body) {
-								myLib.log(error);
-								return;
+					request(options, function(error, response, body) {
+						if (error || !body) {
+							myLib.log(error);
+							return;
+						}
+						const $ = cheerio.load(body);
+						const paragraph = $('.main-container .article-p-wrapper').children();
+						let context = '';
+						let pureText = '';
+						for (let j = 0; j < paragraph.length; j++) {
+							if (paragraph.get(j).tagName == 'p') {
+								const p = paragraph.eq(j).text();
+								context += '<p>' + p + '</p>';
+								pureText += p;
+							} else if (paragraph.get(j).tagName == 'h2') {
+								const h2 = paragraph.eq(j).text();
+								context += '<h2>' + h2 + '</h2>';
 							}
-							const $ = cheerio.load(body);
-							const paragraph = $('.main-container .article-p-wrapper').children();
-							let context = '';
-							const content = {};
-							let pureText = '';
-							for (let j = 0; j < paragraph.length; j++) {
-								if (paragraph.get(j).tagName == 'p') {
-									const p = paragraph.eq(j).text();
-									const propertyName = j+'_p';
-									context += '<p>' + p + '</p>';
-									pureText += p;
-								} else if (paragraph.get(j).tagName == 'h2') {
-									const h2 = paragraph.eq(j).text();
-									const propertyName = j+'_h2';
-									context += '<h2>' + h2 + '</h2>';
+						}
+						context = context.replace(/"/g, '\\"').replace(/'/g, '\\\'');
+						if (context==='') {
+							const deleteNull = `DELETE FROM article WHERE id = ${article[i].id}`;
+							con.query(deleteNull, function(error) {
+								fetched++;
+								if (error) {
+									myLib.log(error);
+									return;
 								}
-							}
-							context = context.replace(/"/g, '\\"').replace(/'/g, '\\\'');
-
+								if (fetched === article.length) {
+									res.send('aljazeera has new article but cannot scrape');
+									return;
+								}
+							});
+						} else {
 							const tagArray = textMining.tagGen(article[i].id, pureText);
 							const abstract = textMining.abstractGen(pureText).replace(/"/g, '\\"').replace(/'/g, '\\\'');
-
-							con.query(`UPDATE article SET context = "${context}", abstract = "${abstract}" WHERE id = ${article[i].id}`, function(err, result) {
+							con.query(`UPDATE article SET context = "${context}", abstract = "${abstract}" WHERE id = ${article[i].id}`, function(err) {
 								fetched++;
 								if (err) {
 									myLib.log(err);
 									return;
-								}
-								// 沒有抓到 context 的話連上一個 query 都不會做，有 context 的話就能分析出 tag ，再把 tag 寫入
-								else {
+								} else { // 沒有抓到 context 的話連上一個 query 都不會做，有 context 的話就能分析出 tag ，再把 tag 寫入
 									dao.addTag(article[i].id, tagArray)
 										.then(()=>{
 											if (fetched === article.length) {
@@ -128,15 +136,8 @@ router.get('/aljazeera/article', (req, res)=>{
 										});
 								}
 							});
-						});
-					}
-					else {
-						fetched++;
-						if (fetched === article.length) {
-							res.send('aljazeera up-to-date');
-							return;
 						}
-					}
+					});
 				} // End of for loop
 			}
 		}); // End of query
@@ -164,8 +165,7 @@ router.get('/bbc/list', (req, res)=>{
 				articleArray.push((Object.assign({url})));
 			}
 		}
-		dao.addToDB(articleArray, 0, 2, 'url').then((x)=>{
-			// res.send('OK');
+		dao.addToDB(articleArray, 0, 2, 'url').then(()=>{
 			res.redirect('/bbc/article');
 		}).catch((error)=>{
 			myLib.log(error);
@@ -174,11 +174,14 @@ router.get('/bbc/list', (req, res)=>{
 });
 router.get('/bbc/article', (req, res)=>{
 	mysql.conPool.getConnection((err, con)=>{
-		con.query('SELECT id, context, url FROM article WHERE news_id = 2', function(err, article) {
+		con.query('SELECT id, context, url FROM article WHERE news_id = 2 AND context IS NULL', function(err, article) {
 			con.release();
 			if (err) {
 				myLib.log(err);
 				res.send({err: 'Database query error.'});
+				return;
+			} else if (article.length===0) {
+				res.send('BBC up-to-date');
 				return;
 			} else {
 				let fetched = 0;
@@ -187,43 +190,55 @@ router.get('/bbc/article', (req, res)=>{
 						url: article[i].url,
 						method: 'GET',
 					};
-					if (article[i].context === null) {
-						request(options, function(error, response, body) {
-							if (error || !body) {
-								myLib.log(error);
-								return;
-							}
-							const $ = cheerio.load(body);
-							const storyBody = $('#page .story-body');
-							const title = storyBody.find('h1').text();
-							const author = storyBody.find('.byline .byline__name').text();
-							const unixtime = storyBody.find('.mini-info-list .date').attr('data-seconds')*1000;
-							const paragraph = storyBody.find('.story-body__inner p');
-							const main_img = storyBody.find('.story-body__inner img').attr('src');
-							let pureText = '';
-							let context = '';
-							const content = {};
-							for (let j = 0; j < paragraph.length; j++) {
-								const p = paragraph.eq(j).text();
-								const propertyName = j+'_p';
-								context += '<p>' + p + '</p>';
-								content[propertyName] = p.replace(/"/g, '\\"').replace(/'/g, '\\\'');
-								pureText += p;
-							}
-
+					request(options, function(error, response, body) {
+						if (error || !body) {
+							myLib.log(error);
+							return;
+						}
+						const $ = cheerio.load(body);
+						const storyBody = $('#page .story-body');
+						const title = storyBody.find('h1').text();
+						const author = storyBody.find('.byline .byline__name').text();
+						const unixtime = storyBody.find('.mini-info-list .date').attr('data-seconds')*1000;
+						const paragraph = storyBody.find('.story-body__inner p');
+						const main_img = storyBody.find('.story-body__inner img').attr('src');
+						let pureText = '';
+						let context = '';
+						const content = {};
+						for (let j = 0; j < paragraph.length; j++) {
+							const p = paragraph.eq(j).text();
+							const propertyName = j+'_p';
+							context += '<p>' + p + '</p>';
+							content[propertyName] = p.replace(/"/g, '\\"').replace(/'/g, '\\\'');
+							pureText += p;
+						}
+						if (pureText==='') {
+							const deleteNull = `DELETE FROM article WHERE id = ${article[i].id}`;
+							con.query(deleteNull, function(error) {
+								fetched++;
+								if (error) {
+									myLib.log(error);
+									return;
+								}
+								if (fetched === article.length) {
+									res.send('aljazeera has new article but cannot scrape');
+									return;
+								}
+							});
+						} else {
 							const tagArray = textMining.tagGen(article[i].id, pureText);
 							const abstract = textMining.abstractGen(pureText).replace(/"/g, '\\"').replace(/'/g, '\\\'');
 							context = context.replace(/"/g, '\\"').replace(/'/g, '\\\'');
 
 							uploadImgToS3(main_img, 'bbc', Date.now().toString(), (main_img)=>{
 								con.query(`UPDATE article SET 
-                                              title = "${title}",
-                                              author = "${author}",
-                                              unixtime = ${unixtime},
-                                              context = "${context}",
-                                              abstract = "${abstract}",
-                                              main_img = "${main_img}"
-                                       WHERE id = ${article[i].id}`, function(err) {
+												title = "${title}",
+												author = "${author}",
+												unixtime = ${unixtime},
+												context = "${context}",
+												abstract = "${abstract}",
+												main_img = "${main_img}"
+										WHERE id = ${article[i].id}`, function(err) {
 									fetched++;
 									if (err) {
 										myLib.log(err);
@@ -242,15 +257,8 @@ router.get('/bbc/article', (req, res)=>{
 									}
 								});
 							});
-						});
-					}
-					else {
-						fetched++;
-						if (fetched === article.length) {
-							res.send('BBC up-to-date');
-							return;
 						}
-					}
+					});
 				} // End of for loop
 			}
 		}); // End of query
@@ -505,8 +513,7 @@ router.get('/guardian/list', (req, res)=>{
 				articleArray.push((Object.assign({url})));
 			}
 		}
-		dao.addToDB(articleArray, 0, 5, 'url').then((x)=>{
-			// res.send('OK');
+		dao.addToDB(articleArray, 0, 5, 'url').then(()=>{
 			res.redirect('/guardian/article');
 		}).catch((error)=>{
 			myLib.log(error);
@@ -644,7 +651,6 @@ router.get('/independent/article', (req, res) => {
 				res.send({err: 'Database query error.'});
 				return;
 			}
-			console.log('article.length');
 			if (article.length===0) {
 				res.send('Independent up-to-date');
 				return;

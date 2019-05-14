@@ -97,6 +97,44 @@ function cosTheta(arr1, arr2) {
 	return sumOfArrayMultiply/(sqrtOfSumSq(arr1)*sqrtOfSumSq(arr2));
 }
 
+/**
+ * Add two float number precisely.
+ * @param {float} num1 Number 1.
+ * @param {float} num2 Number 2.
+ * @return {float} return precise result.
+ */
+function add(num1, num2) {
+	const num1Digit = (parseFloat(num1).toString().split('.')[1] || '').length;
+	const num2Digit = (parseFloat(num2).toString().split('.')[1] || '').length;
+	const baseNum = Math.pow(10, Math.max(num1Digit, num2Digit));
+	return (num1*baseNum + num2*baseNum) / baseNum;
+}
+
+/**
+ * Multiply two float number precisely.
+ * @param {float} num1 Number 1.
+ * @param {float} num2 Number 2.
+ * @return {float} return precise result.
+ */
+function multiply(num1, num2) {
+	const num1Digit = (parseFloat(num1).toString().split('.')[1] || '').length;
+	const num2Digit = (parseFloat(num2).toString().split('.')[1] || '').length;
+	const baseNum = Math.pow(10, Math.max(num1Digit, num2Digit));
+	return ((num1*baseNum) * (num2*baseNum)) / baseNum;
+}
+
+/**
+ * Divide two float number precisely.
+ * @param {float} num1 Number 1.
+ * @param {float} num2 Number 2.
+ * @return {float} return precise result.
+ */
+function divide(num1, num2) {
+	const num1Digit = (parseFloat(num1).toString().split('.')[1] || '').length;
+	const num2Digit = (parseFloat(num2).toString().split('.')[1] || '').length;
+	const baseNum = Math.pow(10, Math.max(num1Digit, num2Digit));
+	return ((num1*baseNum) / (num2*baseNum)) / baseNum;
+}
 
 /**
  * Find the most similar article for target article.
@@ -162,4 +200,4 @@ function calSimilarArticle() {
 		});
 	});
 }
-module.exports = calSimilarArticle;
+module.exports = {calWordVector, sqrtOfSumSq, cosTheta, calSimilarArticle};

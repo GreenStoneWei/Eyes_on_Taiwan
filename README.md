@@ -7,14 +7,14 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 ## Features and Tech used
 
 - Linux Crontab: to assign schedule scrape task.
-- Article Recommender System: recommend similar article based on tf-idf.
-- Abstract extraction model.
+- Article **Recommender System**: recommend similar article based on tf-idf.
+- Text Mining: Abstract extraction model.
 - Loading Speed Optimization:
     - Image compression
-    - Upload images to Amazon S3
-    - Implement Amazon Cloudfront (CDN) for image loading
+    - Upload images to Amazon **S3**
+    - Implement Amazon **Cloudfront** (CDN) for image loading
 - Performance Optimization:
-    - Redis: article content cache and viewed count.
+    - **Redis**: article content cache and viewed count.
 - Error mailer: to have the server send email to notify when the application throws errors.
 - Traditional Chineses supported (translated by Google translation API).
 

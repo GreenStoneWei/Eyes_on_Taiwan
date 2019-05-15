@@ -40,7 +40,7 @@ function calCorpusTF(allArticle, dimensionN) {
  */
 function calWordVector(content, corpusTF, dimensionN) {
 	// content 放進目標文字、corpusTF 放入所有文章總和的字頻 array
-	// 先不考慮 idf 的修正， idf 後推薦的結果反而比較不相關
+	// 最後不考慮 idf 的修正， idf 後推薦的結果反而比較不相關 2019/5/7
 	const textFeed = content.replace(/<p>/g, '').replace(/<\/p>/g, ' ');
 	const tfIDF = new TfIdf();
 	tfIDF.addDocument(textFeed);
@@ -58,11 +58,11 @@ function calWordVector(content, corpusTF, dimensionN) {
 	for (let i=0; i< tfSorted.length; i++) {
 		const termIndex = corpusTF.indexOf(tfSorted[i]);
 
-		// check if exist in corpus freq
+		// check if exist in corpus frequency
 		if (termIndex == -1) {
 			wordVector.push(0);
 		}
-		// 將頻率當作距離也考慮進去，因為只算夾角的話，如果朝同一個向量方向遠離，夾角不變但歐幾里德距離增加，不太合理
+		// 是否考慮歐幾里德距離？因為只算夾角的話，如果朝同一個向量方向遠離，夾角不變但歐幾里德距離增加，不太合理
 		if (termIndex !== -1) {
 			wordVector.push(articleFreq[tfSorted[i]]);
 		}
@@ -78,7 +78,8 @@ function calWordVector(content, corpusTF, dimensionN) {
 function sqrtOfSumSq(array) {
 	let sumSquare = 0;
 	for (let i=0; i< array.length; i++) {
-		sumSquare += Math.pow(array[i], 2);
+		sumSquare = add(sumSquare, multiply(array[i], array[i]));
+		// sumSquare += Math.pow(array[i], 2);
 	}
 	return Math.sqrt(sumSquare);
 }
@@ -90,11 +91,17 @@ function sqrtOfSumSq(array) {
  * @return {float} return value of cosine theta.
  */
 function cosTheta(arr1, arr2) {
-	let sumOfArrayMultiply = 0;
-	for (let i =0; i< arr1.length; i++) {
-		sumOfArrayMultiply += arr1[i]*arr2[i];
+	if (arr1.length === arr2.length) {
+		let sumOfArrayMultiply = 0;
+		for (let i =0; i< arr1.length; i++) {
+			sumOfArrayMultiply = add(sumOfArrayMultiply, multiply(arr1[i], arr2[i]));
+			// sumOfArrayMultiply += arr1[i]*arr2[i];
+		}
+		// return sumOfArrayMultiply/(sqrtOfSumSq(arr1)*sqrtOfSumSq(arr2));
+		return parseFloat(divide(sumOfArrayMultiply, multiply(sqrtOfSumSq(arr1), sqrtOfSumSq(arr2))).toPrecision(12));
+	} else {
+		return 0;
 	}
-	return sumOfArrayMultiply/(sqrtOfSumSq(arr1)*sqrtOfSumSq(arr2));
 }
 
 /**
@@ -120,11 +127,11 @@ function multiply(num1, num2) {
 	const num1Digit = (parseFloat(num1).toString().split('.')[1] || '').length;
 	const num2Digit = (parseFloat(num2).toString().split('.')[1] || '').length;
 	const baseNum = Math.pow(10, Math.max(num1Digit, num2Digit));
-	return ((num1*baseNum) * (num2*baseNum)) / baseNum;
+	return ((num1*baseNum) * (num2*baseNum)) / (baseNum*baseNum);
 }
 
 /**
- * Divide two float number precisely.
+ * Divide num1 by num2 float number precisely.
  * @param {float} num1 Number 1.
  * @param {float} num2 Number 2.
  * @return {float} return precise result.
@@ -133,7 +140,7 @@ function divide(num1, num2) {
 	const num1Digit = (parseFloat(num1).toString().split('.')[1] || '').length;
 	const num2Digit = (parseFloat(num2).toString().split('.')[1] || '').length;
 	const baseNum = Math.pow(10, Math.max(num1Digit, num2Digit));
-	return ((num1*baseNum) / (num2*baseNum)) / baseNum;
+	return (num1*baseNum) / (num2*baseNum);
 }
 
 /**
@@ -152,14 +159,14 @@ function findSimilarArticle(allArticle, corpusTF, returnN) {
 	}
 	// vector 間逐一計算餘弦相似度
 	for (let j=0; j<allArticle.length; j++) {
-		const cosDistObj = {};
+		const cosThetaObj = {};
 		for (let k=0; k<allArticle.length; k++) {
 			const cosD = cosTheta(allArticle[j].vector, allArticle[k].vector);
-			cosDistObj[allArticle[k].id] = cosD;
+			cosThetaObj[allArticle[k].id] = cosD;
 		}
 		// 排序後拿回前三個分數的 id
-		const result = Object.keys(cosDistObj).sort(function(a, b) {
-			return cosDistObj[b]-cosDistObj[a];
+		const result = Object.keys(cosThetaObj).sort(function(a, b) {
+			return cosThetaObj[b]-cosThetaObj[a];
 		}).slice(1, returnN+1); // 因為第一篇會是自己
 		allArticle[j].similar = result;
 	}

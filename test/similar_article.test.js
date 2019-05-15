@@ -15,16 +15,24 @@ describe('The calculator of square root of sum of square of an array.', function
 });
 // 測 cosTheta
 describe('The cosine theta calculator', function() {
-	it('should return 1', function() {
+	it('Two of same vectiors should return 1', function() {
 		assert.equal(recommender.cosTheta([1, 1, 1, 1, 1], [1, 1, 1, 1, 1]), 1);
 	});
-	it('should return 1', function() {
+	it('should return 1 with high dimension', function() {
 		assert.equal(recommender.cosTheta([1, 1, 1, 1, 1], [0.5, 0.5, 0.5, 0.5, 0.5]), 1);
 	});
 	it('90 degree should return 0', function() {
-		assert.equal(recommender.cosTheta([0, 1, 1], [1, 1, 0]), 0);
+		assert.equal(recommender.cosTheta([1, 0, 0], [0, 1, 0]), 0);
 	});
-	it('120 degree should return ?', function() {
-		assert.equal(recommender.cosTheta([-1, 1, 0], [1, 0, 0]), 1);
+	it('cosine value should between -1 and 1', function() {
+		const dimension = Math.ceil(Math.random()*10);
+		const arr1 = [];
+		const arr2 = [];
+		for (let i=0; i< dimension; i++) {
+			arr1[i] = Math.random();
+			arr2[i] = Math.random();
+		}
+		const expectedResult = recommender.cosTheta(arr1, arr2);
+		assert.ok(expectedResult >= -1 && expectedResult <=1);
 	});
 });

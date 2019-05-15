@@ -1,50 +1,50 @@
-const assert = require('assert');
+const supertest = require('supertest');
 const {expect} = require('chai');
+const api = supertest('https://wheatxstone.com/api');
+const assert = require('assert');
 const should = require('chai').should();
-const sinon = require('sinon');
-const {XMLHttpRequest} = require('xmlhttprequest');
 
-/**
- * @param {string} sort .
- * @param {function} callback .
- * @return {undefined} .
- */
-function getIndexAPI(sort, callback) {
-	const xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function() {
-		if (this.readyState == 4 && this.status == 200) {
-			// console.log(JSON.parse(this.responseText));
-			callback(null, JSON.parse(this.responseText));
-		} else {
-			callback(xhr.status);
-		}
-	};
-	xhr.open('GET', `https://wheatxstone.com/api/index?sort=${sort}&tag=null`, true);
-	xhr.send();
-}
-
-describe('Test Index API', function() {
-	beforeEach(function(done) {
-		this.xhr = sinon.useFakeXMLHttpRequest();
-		this.requests = [];
-		this.xhr.onCreate = function(xhr) {
-			this.requests.push(xhr);
-		}.bind(this);
-		done();
+describe('GET /index API', function() {
+	it('responds with json and sort by date', function(done) {
+		api.get('/index?sort=date&tag=null')
+			.expect(200)
+			.end((err, res) => {
+				if (err) {
+					done(err);
+				}
+				expect(res.text).to.be.a('string');
+				const response = JSON.parse(res.text);
+				const apiData = response.data;
+				const num1 = Math.ceil(Math.random()*9);
+				const num2 = Math.ceil(Math.random()*9);
+				if (num1> num2) {
+					assert.ok(apiData[num2].unixtime > apiData[num1].unixtime);
+				} else {
+					assert.ok(apiData[num1].unixtime > apiData[num2].unixtime);
+				}
+				expect(response).to.have.property('totalPage');
+				expect(response).to.have.property('data');
+				expect(apiData).to.have.lengthOf(9);
+				done();
+			});
 	});
-	afterEach(function(done) {
-		this.xhr.restore();
-		done();
-	});
-	// Tests etc. go here
-	it('should parse fetched data as JSON', function(done) {
-		getIndexAPI('date', function(err, result) {
-			console.log(result);
-			done();
-			// result.should.deep.equal(data);
-		});
-		// this.requests[0].respond(200, {'Content-Type': 'text/json'}, dataJson);
+	it('should sorted by viewed count', function(done) {
+		api.get('/index?sort=most_viewed&tag=null')
+			.expect(200)
+			.end((err, res) => {
+				if (err) {
+					done(err);
+				}
+				const response = JSON.parse(res.text);
+				const apiData = response.data;
+				const num1 = Math.ceil(Math.random()*9);
+				const num2 = Math.ceil(Math.random()*9);
+				if (num1> num2) {
+					assert.ok(apiData[num2].viewed_count > apiData[num1].viewed_count);
+				} else {
+					assert.ok(apiData[num1].viewed_count > apiData[num2].viewed_count);
+				}
+				done();
+			});
 	});
 });
-
-

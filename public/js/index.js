@@ -132,3 +132,4 @@ function createMobilePagination(sort, page, filter, totalPage) {
 		next.classList.add('disabled');
 	}
 }
+

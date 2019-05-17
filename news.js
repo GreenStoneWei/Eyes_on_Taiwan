@@ -26,6 +26,6 @@ const api = require('./routes/api.js');
 app.use('/api', api);
 
 
-app.listen(3000, () => {
-	console.log('The application is running on localhost:3000!');
+app.listen(8000, () => {
+	console.log('The application is running on localhost:8000!');
 });

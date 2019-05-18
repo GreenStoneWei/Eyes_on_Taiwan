@@ -12,7 +12,7 @@ const dimensionN = 50;
  * @return {array} return a freq-sorted term array.
  */
 function calCorpusTF(allArticle, dimensionN) {
-	// allArticle 是所有文章的 array
+	// allArticle 是所有文章的 array，有包含 id 和 text 兩個 property 的物件組成
 	let corpus='';
 	allArticle.forEach(function(item) {
 		corpus += item.text;
@@ -40,7 +40,6 @@ function calCorpusTF(allArticle, dimensionN) {
  */
 function calWordVector(content, corpusTF, dimensionN) {
 	// content 放進目標文字、corpusTF 放入所有文章總和的字頻 array
-	// 最後不考慮 idf 的修正， idf 後推薦的結果反而比較不相關 2019/5/7
 	const textFeed = content.replace(/<p>/g, '').replace(/<\/p>/g, ' ');
 	const tfIDF = new TfIdf();
 	tfIDF.addDocument(textFeed);

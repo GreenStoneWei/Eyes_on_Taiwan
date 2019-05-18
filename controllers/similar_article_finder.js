@@ -38,14 +38,15 @@ function calCorpusTF(allArticle, dimensionN) {
  * @param {int} dimensionN how many demensions are assigned to this model.
  * @return {array} return each article's vector.
  */
-function calWordVector(content, corpusTF, dimensionN) {
+function calWordVector(targetArticleID, allArticle, corpusTF, dimensionN) {
 	// content 放進目標文字、corpusTF 放入所有文章總和的字頻 array
-	const textFeed = content.replace(/<p>/g, '').replace(/<\/p>/g, ' ');
 	const tfIDF = new TfIdf();
-	tfIDF.addDocument(textFeed);
+	for (let j=0; j<allArticle.length; j++) {
+		tfIDF.addDocument(allArticle[j].text.replace(/<p>/g, '').replace(/<\/p>/g, ' '));
+	}
 
 	const articleFreq = {};
-	tfIDF.listTerms(0).forEach(function(item) {
+	tfIDF.listTerms(targetArticleID).forEach(function(item) {
 		articleFreq[item.term] = item.tfidf;
 	});
 

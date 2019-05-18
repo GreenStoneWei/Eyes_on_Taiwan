@@ -33,7 +33,8 @@ function calCorpusTF(allArticle, dimensionN) {
 
 /**
  * Calculate each article's vector.
- * @param {string} content content of target article.
+ * @param {number} targetArticleID .
+ * @param {string} allArticle all article content.
  * @param {array} corpusTF an array returned from function calCorpusTF.
  * @param {int} dimensionN how many demensions are assigned to this model.
  * @return {array} return each article's vector.
@@ -154,7 +155,7 @@ function findSimilarArticle(allArticle, corpusTF, returnN) {
 	// allArticle 參數應要 array，含有每篇 article 的 obj 其中至少有 article_id 和 content 兩個 property
 	// 計算每篇文章的 vector 存回 obj 裡
 	for (let i=0; i < allArticle.length; i++) {
-		const targetVector = calWordVector(allArticle[i].text, corpusTF, dimensionN); // allArticle[i].text 的 text 必須跟撈出文章後給的 property name 一樣
+		const targetVector = calWordVector(i, allArticle, corpusTF, dimensionN); // allArticle[i].text 的 text 必須跟撈出文章後給的 property name 一樣
 		allArticle[i].vector = targetVector;
 	}
 	// vector 間逐一計算餘弦相似度

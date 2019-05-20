@@ -20,11 +20,11 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 ## Features and Tech used
 
 - Linux Crontab: to assign scheduled scraping tasks.
-- Article **Recommender System**: recommend similar article based on [tf-idf](https://zh.wikipedia.org/wiki/Tf-idf) analysis method.
+- Article **Recommender System** - find similar articles based on [tf-idf](https://zh.wikipedia.org/wiki/Tf-idf) analysis method:
     1. Set up stemmers and stop words then slice each valid word.
     2. Calculate the term frequency of each article and all article corpus.
     3. Convert term frequency into a vector and map it on a 50 dimension vector space model.
-    4. Find similar articles by calculating cosine theta. The result closer to 1 stands for the two articles are similar. 
+    4. Find similar articles by calculating cosine theta of two article. The result closer to 1 stands for higher similarity. 
 - Text Mining: Abstract extraction model:
     1. Slice each sentence.
     2. Calculate the term frequency of the article. A word with higher frequency means that its more important to the article.

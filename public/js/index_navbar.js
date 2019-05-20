@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 	if (keyword !== null) {
 		filter = '&keyword='+keyword;
 	}
-	const endPoint = './zh-tw/'+ getEndPoint(window.location.href);
+	const endPoint = myDictionary[language].switch + getEndPoint(window.location.href);
 	setAttributes(navDate, {href: `./?sort=date`+filter});
 	setAttributes(navViewed, {href: `./?sort=most_viewed`+filter});
 	setAttributes(languageSwitchBtn, {href: endPoint});
@@ -23,7 +23,7 @@ searchSubmitBtn.addEventListener('click', (event)=>{
 	event.preventDefault();
 	const sort = getParameterByName('sort');
 	const keyword = search.value;
-	window.location.replace(`/?sort=${sort}&keyword=${keyword}`);
+	window.location.replace(myDictionary[language].href+`?sort=${sort}&keyword=${keyword}`);
 });
 
 navicon.addEventListener('click', (e)=>{

@@ -25,18 +25,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
 				const errorMsg = createElement('h3', ['search-not-found'], false, errorBlock);
 				errorMsg.innerHTML = error;
 				const errorNote = createElement('h5', [], false, errorBlock);
-				errorNote.innerHTML = 'Please check the spelling or the language.';
-				const errorNote2 = createElement('h5', [], false, errorBlock);
-				errorNote2.innerHTML = 'Or click the top left icon to return home page. Thank you!';
+				errorNote.innerHTML = myDictionary[language].indexErrorNote;
+			} else {
+				const articleList = JSON.parse(this.responseText).data;
+				const totalPage = JSON.parse(this.responseText).totalPage;
+				createArticleCard(articleList, container);
+				createPagination(sort, page, filter, totalPage);
+				createMobilePagination(sort, page, filter, totalPage);
 			}
-			const articleList = JSON.parse(this.responseText).data;
-			const totalPage = JSON.parse(this.responseText).totalPage;
-			createArticleCard(articleList, container);
-			createPagination(sort, page, filter, totalPage);
-			createMobilePagination(sort, page, filter, totalPage);
 		}
 	};
-	xhr.open('GET', `/api/index?sort=${sort}`+filter+`&page=${page}`, true);
+	xhr.open('GET', myDictionary[language].route+`/index?sort=${sort}`+filter+`&page=${page}`, true);
 	xhr.send();
 }); // End of document.addEventListener
 
@@ -50,13 +49,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
  */
 function createPagination(sort, page, filter, totalPage) {
 	const previous = createElement('li', ['page-item'], false, pagination);
-	const prevLink = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${page-1}`}, previous);
+	const prevLink = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${page-1}`}, previous);
 	prevLink.innerHTML = '&laquo';
 
 	if (totalPage<11) {
 		for (let i=1; i<(totalPage+1); i++) {
 			const pageItem = createElement('li', ['page-item'], false, pagination);
-			const pg = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${i}`}, pageItem);
+			const pg = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${i}`}, pageItem);
 			pg.innerHTML = i;
 			if (i===page) {
 				pageItem.classList.add('active');
@@ -66,7 +65,7 @@ function createPagination(sort, page, filter, totalPage) {
 		if (page<7) {
 			for (let i=1; i<11; i++) {
 				const pageItem = createElement('li', ['page-item'], false, pagination);
-				const pg = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${i}`}, pageItem);
+				const pg = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${i}`}, pageItem);
 				pg.innerHTML = i;
 				if (i===page) {
 					pageItem.classList.add('active');
@@ -76,7 +75,7 @@ function createPagination(sort, page, filter, totalPage) {
 			const startPage = page-5;
 			for (let i=startPage; i<startPage+10; i++) {
 				const pageItem = createElement('li', ['page-item'], false, pagination);
-				const pg = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${i}`}, pageItem);
+				const pg = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${i}`}, pageItem);
 				pg.innerHTML = i;
 				if (i===page) {
 					pageItem.classList.add('active');
@@ -85,7 +84,7 @@ function createPagination(sort, page, filter, totalPage) {
 		} else {
 			for (let i=(totalPage-9); i<totalPage+1; i++) {
 				const pageItem = createElement('li', ['page-item'], false, pagination);
-				const pg = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${i}`}, pageItem);
+				const pg = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${i}`}, pageItem);
 				pg.innerHTML = i;
 				if (i===page) {
 					pageItem.classList.add('active');
@@ -94,7 +93,7 @@ function createPagination(sort, page, filter, totalPage) {
 		}
 	}
 	const next = createElement('li', ['page-item'], false, pagination);
-	const nextLink = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${page+1}`}, next);
+	const nextLink = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${page+1}`}, next);
 	nextLink.innerHTML ='&raquo;';
 	if (page===1) {
 		previous.classList.add('disabled');
@@ -114,16 +113,16 @@ function createPagination(sort, page, filter, totalPage) {
  */
 function createMobilePagination(sort, page, filter, totalPage) {
 	const previous = createElement('li', ['page-item'], false, mobilePagination);
-	const prevLink = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${page-1}`}, previous);
+	const prevLink = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${page-1}`}, previous);
 	prevLink.innerHTML = '&laquo';
 
 	const pageItem = createElement('li', ['page-item'], false, mobilePagination);
-	const pg = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${page}`}, pageItem);
+	const pg = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${page}`}, pageItem);
 	pg.innerHTML = page;
 	pageItem.classList.add('active');
 
 	const next = createElement('li', ['page-item'], false, mobilePagination);
-	const nextLink = createElement('a', ['page-link'], {href: `/?sort=${sort}`+filter+`&page=${page+1}`}, next);
+	const nextLink = createElement('a', ['page-link'], {href: myDictionary[language].href+`?sort=${sort}`+filter+`&page=${page+1}`}, next);
 	nextLink.innerHTML ='&raquo;';
 	if (page===1) {
 		previous.classList.add('disabled');
@@ -132,4 +131,3 @@ function createMobilePagination(sort, page, filter, totalPage) {
 		next.classList.add('disabled');
 	}
 }
-

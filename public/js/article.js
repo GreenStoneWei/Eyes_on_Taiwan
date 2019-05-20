@@ -8,7 +8,7 @@ const langSwitcher = document.getElementById('translation');
 document.addEventListener('DOMContentLoaded', (event) => {
 	event.preventDefault();
 
-	const endPoint = '/zh-tw/view/article/'+ getEndPoint(window.location.href);
+	const endPoint = '/zh_tw/view/article/'+ getEndPoint(window.location.href);
 	setAttributes(langSwitcher, {href: endPoint});
 
 	const xhr = new XMLHttpRequest();

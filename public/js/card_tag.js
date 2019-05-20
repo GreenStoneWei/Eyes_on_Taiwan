@@ -51,18 +51,19 @@ function createArticleCard(array, parentElement) {
 			const mainImg = createElement('div', ['main-img'], {}, mainImgLink);
 			mainImg.setAttribute('style', `width: 100%; height: 180px; background-image: url(${defaultImg}); background-size:contain; background-repeat: no-repeat; background-position: center;`);
 		} else {
-			const mainImgLink = createElement('a', ['mobile-img'], {href: `/view/article?id=${array[i].id}`}, cardBody);
+			console.log(language);
+			const mainImgLink = createElement('a', ['mobile-img'], {href: myDictionary[language].href+`view/article?id=${array[i].id}`}, cardBody);
 			const mainImg = createElement('div', ['main-img'], {}, mainImgLink);
 			mainImg.setAttribute('style', `width: 100%; height: 180px; background-image: url(${array[i].main_img}); background-size: contain; background-repeat: no-repeat; background-position: center;`);
 		}
 		const textBlock = createElement('div', ['text-block'], false, cardBody);
-		const titleLink = createElement('a', ['card-title'], {href: `/view/article?id=${array[i].id}`}, textBlock);
+		const titleLink = createElement('a', ['card-title'], {href: myDictionary[language].href+`view/article?id=${array[i].id}`}, textBlock);
 		const title = createElement('h4', ['card-title', 'padding-fix'], false, titleLink);
 
 		const abstract = createElement('p', ['card-text', 'abstract'], false, textBlock);
 		const tagContainer = createElement('div', ['card-tag'], false, textBlock);
 		const readBlock = createElement('div', ['read-block'], false, textBlock);
-		const readMore = createElement('a', ['card-link', 'read-more'], {href: `/view/article?id=${array[i].id}`}, readBlock);
+		const readMore = createElement('a', ['card-link', 'read-more'], {href: myDictionary[language].href+`view/article?id=${array[i].id}`}, readBlock);
 		const viewImage = createElement('img', ['viewed'], {src: 'https://s3.amazonaws.com/wheatxstone/news/iconfinder_view_126581.png'}, readBlock);
 		const viewCount = createElement('p', ['view-count'], false, readBlock);
 		getTag(array[i].id, tagContainer);
@@ -73,8 +74,8 @@ function createArticleCard(array, parentElement) {
 			array[i].abstract = array[i].abstract.substring(0, 260)+'...';
 		}
 		abstract.innerHTML = array[i].abstract;
-		readMore.innerHTML = 'Read More';
-		viewCount.innerHTML = 'Viewed '+ array[i].viewed_count + ' Times';
+		readMore.innerHTML = myDictionary[language].cardReadMore;
+		viewCount.innerHTML = array[i].viewed_count + myDictionary[language].cardViewed;
 	}
 	// 一列三個卡片，如果不足列，補齊
 	const itemPerRow = 3;
@@ -101,14 +102,14 @@ function getTag(id, tagContainer) {
 			const tagArray = JSON.parse(this.responseText);
 			const tagStarter = createElement('div', false, false, tagContainer);
 			createElement('div', ['tag-space'], false, tagContainer);
-			tagStarter.innerHTML = 'Tags: ';
+			tagStarter.innerHTML = myDictionary[language].tagStarter;
 			for (let i=0; i<tagArray.length; i++) {
-				const tagNode = createElement('a', ['tag-link'], {href: `/?tag=${tagArray[i]}`}, tagContainer);
+				const tagNode = createElement('a', ['tag-link'], {href: myDictionary[language].href+`?tag=${tagArray[i]}`}, tagContainer);
 				tagNode.innerHTML = '#'+tagArray[i];
 				createElement('div', ['tag-space'], false, tagContainer);
 			}
 		}
 	};
-	xhr.open('GET', `/api/card/tags?id=${id}`, true);
+	xhr.open('GET', myDictionary[language].route+`/card/tags?id=${id}`, true);
 	xhr.send();
 }

@@ -21,7 +21,7 @@ const options = {
 		if (sort == 'null') {
 			sort = 'date';
 		}
-		window.location.replace(`/?sort=${sort}&tag=${tag[0]}`);
+		window.location.replace(myDictionary[language].href+`?sort=${sort}&tag=${tag[0]}`);
 	},
 	shape: function(theta) {
 		const max = 1026;
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			WordCloud(cloud, options);
 		};
 	};
-	xhr.open('GET', `/api/word/cloud`, true);
+	xhr.open('GET', myDictionary[language].route+`/word/cloud`, true);
 	xhr.send();
 });
 

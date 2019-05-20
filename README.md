@@ -3,6 +3,18 @@
 
 Eyes on Taiwan is a website gathering international news about Taiwan automatically. As Taiwan's medias are interfered, we all need to look at Taiwan-related events from different aspects.
 
+News Source
+
+- Aljazeera
+- The BBC
+- The CNN
+- The Economist
+- Guardian
+- Independent
+- New York Times
+- QUARTZ
+- Washington Post
+
 ---
 
 ## Features and Tech used
@@ -241,6 +253,9 @@ data            | Array     | contains an article object
     ...
 ]    
 ```    
+
+`Note: Response may return from cache.`
+
 
 - Error Response: 4xx
 

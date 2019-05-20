@@ -48,7 +48,7 @@ router.get('/zh_tw/view/article', (req, res)=>{
 				res.render('error_page.ejs', {error: `文章編號 ${id} 不存在`});
 				return;
 			}
-			result[0].url = myLib.hostName+'/zh-tw/view/article?id='+result[0].id;
+			result[0].url = myLib.hostName+'/zh_tw/view/article?id='+result[0].id;
 			if (result[0].abstract.length>150) {
 				result[0].abstract = result[0].abstract.substring(0, 147)+'...';
 			};

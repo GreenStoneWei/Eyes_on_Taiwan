@@ -25,7 +25,7 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
     2. Calculate the term frequency of each article and all article corpus.
     3. Convert term frequency into a vector and map it on a 50 dimension vector space model.
     4. Find similar articles by calculating cosine theta of two article. The result closer to 1 stands for higher similarity. 
-- Text Mining: Abstract extraction model:
+- Text Mining - Abstract and Tag extraction model:
     1. Slice each sentence.
     2. Calculate the term frequency of the article. A word with higher frequency means that its more important to the article.
     3. Find out which sentence contains the most important word. That sentence is supposed to be close to the article content.

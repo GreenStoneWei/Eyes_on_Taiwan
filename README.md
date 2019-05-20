@@ -3,7 +3,7 @@
 
 Eyes on Taiwan is a website gathering international news about Taiwan automatically. As Taiwan's medias are interfered, we all need to look at Taiwan-related events from different aspects.
 
-News Source
+**News Source:**
 
 - Aljazeera
 - The BBC
@@ -242,18 +242,32 @@ Field           |  Type     | Description
 :-------------- | :-------: | :------------------------------------------
 data            | Array     | contains an article object
 
+
+Object Properties |  Type     | Description
+:---------------- | :-------: | :------------------------------------------
+id                | number    | article ID
+new_id            | number    | news ID (foreign key to news table)
+url               | string    | url of the article
+title             | string    | article title
+subtitle          | string    | article subtitle (optional)
+abstract          | string    | article abstract
+author            | string    | article author
+unixtime          | number    | unixtime of published time
+context           | string    | article content
+
+
 - Success Response Example:
 
 ```
 [
     {
         "id":9,
-        "news_id":9,"url":"https://www.washingtonpost.com/world/asia_pacific/taiwan-becomes-first-country-in-asia-to-legalize-same-sex-marriage/2019/05/17/d60e511e-7893-11e9-bd25-c989555e7766_story.html",
+        "news_id":9,
+        "url":"https://www.washingtonpost.com/world/asia_pacific/taiwan-becomes-first-country-in-asia-to-legalize-same-sex-marriage/2019/05/17/d60e511e-7893-11e9-bd25-c989555e7766_story.html",
         "title":"Taiwan becomes first in Asia to legalize same-sex marriage",
         "subtitle":"Taiwan's legislature voted decisively to legalize \"exclusive permanent unions\" in a victory for the island's LGBT community.",
         "abstract":"Taiwan’s high court ruled on May 24, 2017, that barring same-sex couples from marrying violates the Taiwanese constitution and gave the legislature two years to pass a corresponding law or see same-sex marriage become legalized automatically.",
         "author":"Nick Aspinwall",
-        "src_datetime":"1558127450000",
         "unixtime":1558127450000,
         "context":"TAIPEI, Taiwan — Thousands of marriage-equality advocates celebrated Friday in the pouring rain outside Taiwan’s legislature as it voted to become the first in Asia to fully legalize same-sex unions...
     }

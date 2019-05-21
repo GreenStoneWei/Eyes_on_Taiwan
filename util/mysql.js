@@ -4,8 +4,8 @@ const credential = require('../util/credentials.js');
 const conPool = mysql.createPool({
 	connectionLimit: 20,
 	host: 'localhost',
-	user: 'root',
-	password: credential.mysqlPWD,
+	user: credential.mysql.user,
+	password: credential.mysql.password,
 	database: 'newscraping',
 	// debug: true
 });

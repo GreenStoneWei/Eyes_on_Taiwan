@@ -19,7 +19,11 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 
 ## Features and Tech used
 
-- Linux Crontab: to assign scheduled scraping tasks.
+- Linux Crontab: to assign scheduled scraping and computational tasks.
+    1. Crawl 9 source news.
+    2. Fix images that didn't scrape - call Google Image Search API under specific news domain.
+    3. Calculate and generate tags, abstracts and similar article
+    4. Call Google Cloud API to translate article content. 
 - Article **Recommender System** - find similar articles based on [tf-idf](https://zh.wikipedia.org/wiki/Tf-idf) analysis method:
     1. Set up stemmers and stop words then slice each valid word.
     2. Calculate the term frequency of each article and all article corpus.
@@ -40,6 +44,7 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 - Error mailer: send notifications by email when the application throws errors.
 - Google translation API to support Traditional Chinese.
 - Social Media Sharing: Facebook share, Facebook comment, LINE share
+- ESLint - follow Google Coding Style
 
 ---
 

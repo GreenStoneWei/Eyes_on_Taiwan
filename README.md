@@ -39,6 +39,7 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
     - Implement Amazon **CloudFront** (CDN) for image loading
 - Performance Optimization:
     - **Redis**: cache for article content and view counts.
+        - The reason to cache view counts is to reduce MySQL queries. If the application queries DB each time when a user reads one article, the server may become slow when traffic goes high. Therefore, this website is designed to cache all the view count in memory and regularly update to DB to reduce DB queries. 
     - MySQL: connection pool
 - Implement Data Access Object (DAO)
 - Error mailer: send notifications by email when the application throws errors.
@@ -52,11 +53,19 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 
 ![Imgur](https://i.imgur.com/DnWYacF.png)
 
+1. The images are uploaded to AWS S3, and CloudFront is used to establish CDN and reduce loading latency.
+2. When browser sends requests on 443 port to the server, first connect to reverse proxy server (by NGINX). Then NGINX redirect request to the port where the application runs.
+3. When browser requests the article content, the application first check if the content has been cached. If yes, response with cache.
+4. If the content hasn't been cached or cached content was expired, query database.
+
 ---
 
 ## Database Schema
 
 ![Imgur](https://i.imgur.com/fZ6oFJg.png)
+
+- Set primary key, foreign keys
+- Index improves query performance (use `EXPLAIN`)
 
 ---
 

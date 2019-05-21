@@ -19,12 +19,14 @@ const uploadImgToS3 = function(url, newsBucket, fileName, callback) {
 	};
 	request(options, function(error, response, body) {
 		if (error || response.statusCode !== 200) {
+			console.log('1/'+error);
 			callback(url);
 		} else {
 			sharp(body)
 				.resize({canvas: 'max', height: 630, width: 1200, withoutEnlargement: true})
 				.toBuffer((error, data, info)=>{
 					if (error) {
+						console.log('2/'+error);
 						callback(url);
 						return;
 					}
@@ -35,6 +37,7 @@ const uploadImgToS3 = function(url, newsBucket, fileName, callback) {
 						ACL: 'public-read',
 					}, function(error, data) {
 						if (error) {
+							console.log('3/'+error);
 							callback(url);
 							return;
 						} else {

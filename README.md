@@ -49,6 +49,17 @@
 
 ---
 
+## Front-End Features
+
+- Data visualization with most reported terms
+- Use Bootstrap and CSS flexbox to lay out pages
+
+![Imgur](https://i.imgur.com/IIwh1if.png)
+
+
+
+---
+
 ## Backend Architecture
 
 ![Imgur](https://i.imgur.com/TwbA681.png)
@@ -57,7 +68,7 @@
 2. When browser sends requests on 443 port to the server, first connect to reverse proxy server (by NGINX). Then NGINX redirect request to the port where the application runs.
 3. When browser requests the article content, the application first check if the content has been cached. If yes, response with cache.
 4. If the content hasn't been cached or cached content was expired, query database.
-5. The app crawls and scrape news content regularly.
+5. The app crawls and scrapes news content regularly.
 
 ---
 
@@ -65,10 +76,9 @@
 
 ![Imgur](https://i.imgur.com/fZ6oFJg.png)
 
-- Set primary key, foreign keys
+-  Set primary key, foreign keys to improve query performance (use `EXPLAIN`)
     - news.id PK -> FK article.news_id
     - article.id PK -> FK tag.article_id
-- Index improves query performance (use `EXPLAIN`)
 
 ---
 

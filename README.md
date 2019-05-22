@@ -1,7 +1,7 @@
 # Eyes on Taiwan 
 ## [Website link](https://wheatxstone.com)
 
-Eyes on Taiwan is a website gathering international news about Taiwan automatically. As Taiwan's medias are interfered, we all need to look at Taiwan-related events from different aspects.
+> Eyes on Taiwan is a website gathering international news about Taiwan automatically. As Taiwan's medias are interfered, we all need to look at Taiwan-related events from different aspects.
 
 **News Source:**
 
@@ -51,12 +51,13 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 
 ## Backend Architecture
 
-![Imgur](https://i.imgur.com/DnWYacF.png)
+![Imgur](https://i.imgur.com/fDFsrAK.png)
 
 1. The images are uploaded to AWS S3, and CloudFront is used to establish CDN and reduce loading latency.
 2. When browser sends requests on 443 port to the server, first connect to reverse proxy server (by NGINX). Then NGINX redirect request to the port where the application runs.
 3. When browser requests the article content, the application first check if the content has been cached. If yes, response with cache.
 4. If the content hasn't been cached or cached content was expired, query database.
+5. The app crawls and scrape news content regularly.
 
 ---
 
@@ -65,6 +66,8 @@ Eyes on Taiwan is a website gathering international news about Taiwan automatica
 ![Imgur](https://i.imgur.com/fZ6oFJg.png)
 
 - Set primary key, foreign keys
+    - news.id PK -> FK article.news_id
+    - article.id PK -> FK tag.article_id
 - Index improves query performance (use `EXPLAIN`)
 
 ---

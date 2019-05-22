@@ -21,7 +21,7 @@
 
 - Linux Crontab: to assign scheduled scraping and computational tasks.
     1. Crawl 9 source news.
-    2. Fix images that didn't scrape - call Google Image Search API under specific news domain.
+    2. Fix images which were not scraped successfully - call Google Image Search API under specific news domain.
     3. Calculate and generate tags, abstracts and similar article
     4. Call Google Cloud API to translate article content. 
 - Article **Recommender System** - find similar articles based on [tf-idf](https://zh.wikipedia.org/wiki/Tf-idf) analysis method:
@@ -39,7 +39,7 @@
     - Implement Amazon **CloudFront** (CDN) for image loading
 - Performance Optimization:
     - **Redis**: cache for article content and view counts.
-        - The reason to cache view counts is to reduce MySQL queries. If the application queries DB each time when a user reads one article, the server may become slow when traffic goes high. Therefore, this website is designed to cache all the view count in memory and regularly update to DB to reduce DB queries. 
+        > The reason to cache view counts is to reduce MySQL queries. If the application queries DB each time when a user reads one article, the server may become slow when traffic goes high. Therefore, this website is designed to cache all the view count in memory and regularly update to DB to reduce DB queries. 
     - MySQL: connection pool
 - Implement Data Access Object (DAO)
 - Error mailer: send notifications by email when the application throws errors.
@@ -77,8 +77,8 @@
 ![Imgur](https://i.imgur.com/fZ6oFJg.png)
 
 -  Set primary key, foreign keys to improve query performance (use `EXPLAIN`)
-    - news.id PK -> FK article.news_id
-    - article.id PK -> FK tag.article_id
+    - `news.id` PK -> FK `article.news_id`
+    - `article.id` PK -> FK `tag.article_id`
 
 ---
 

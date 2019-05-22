@@ -51,7 +51,7 @@
 
 ## Backend Architecture
 
-![Imgur](https://i.imgur.com/fDFsrAK.png)
+![Imgur](https://i.imgur.com/TwbA681.png)
 
 1. The images are uploaded to AWS S3, and CloudFront is used to establish CDN and reduce loading latency.
 2. When browser sends requests on 443 port to the server, first connect to reverse proxy server (by NGINX). Then NGINX redirect request to the port where the application runs.

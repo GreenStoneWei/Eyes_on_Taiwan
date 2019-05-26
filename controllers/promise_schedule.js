@@ -5,7 +5,7 @@ const myLib = require('../util/config.js');
 const request = require('request');
 const localHost = 'http://localhost:8000';
 const domainName = 'https://wheatxstone.com';
-const host = domainName;
+const host = localHost;
 
 const fixImgs = require('./img_fixer.js');
 const findSimilarArticle = require('./similar_article_finder.js').calSimilarArticle;

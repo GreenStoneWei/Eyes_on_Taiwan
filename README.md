@@ -22,7 +22,7 @@
 - Linux Crontab: to assign scheduled scraping and computational tasks.
     1. Crawl 9 source news.
     2. Fix images which were not scraped successfully - call Google Image Search API under specific news domain.
-    3. Calculate and generate tags, abstracts and similar article
+    3. Calculate and generate tags, abstracts and similar article.
     4. Call Google Cloud API to translate article content. 
 - Article **Recommender System** - find similar articles based on [tf-idf](https://zh.wikipedia.org/wiki/Tf-idf) analysis method:
     1. Set up stemmers and stop words then slice each valid word.
@@ -31,8 +31,8 @@
     4. Find similar articles by calculating cosine theta of two article. The result closer to 1 stands for higher similarity. 
 - Text Mining - Abstract and Tag extraction model:
     1. Slice each sentence.
-    2. Calculate the term frequency of the article. A word with higher frequency means that its more important to the article.
-    3. Find out which sentence contains the most important word. That sentence is supposed to be close to the article content.
+    2. Calculate the term frequency of the article. A word with higher frequency means that it is more important to the article.
+    3. Find out which sentence contains the most number of important words. That sentence is supposed to be close to the article content.
 - Loading Speed Optimization:
     - Image compression
     - Upload images to Amazon **S3**
@@ -77,7 +77,7 @@
 ![Imgur](https://i.imgur.com/fZ6oFJg.png)
 
 -  Set primary key, foreign keys to improve query performance (use `EXPLAIN`)
-    - `news.id` PK -> FK `article.news_id`
+    - `news.id`    PK -> FK `article.news_id`
     - `article.id` PK -> FK `tag.article_id`
 
 ---

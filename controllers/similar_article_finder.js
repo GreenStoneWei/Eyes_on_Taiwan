@@ -3,7 +3,7 @@ const mysql = require('../util/mysql.js');
 const TfIdf = natural.TfIdf;
 const redis = require('redis');
 const client = redis.createClient();
-const dimensionN = 50;
+const dimensionN = 15;
 
 /**
  * Calculate total corpus Term Frequency

@@ -3,7 +3,7 @@ const mysql = require('../util/mysql.js');
 const TfIdf = natural.TfIdf;
 const redis = require('redis');
 const client = redis.createClient();
-const dimensionN = 50;
+const dimensionN = 15;
 
 /**
  * Calculate total corpus Term Frequency
@@ -165,10 +165,19 @@ function findSimilarArticle(allArticle, corpusTF, returnN) {
 			const cosD = cosTheta(allArticle[j].vector, allArticle[k].vector);
 			cosThetaObj[allArticle[k].id] = cosD;
 		}
-		// 排序後拿回前三個分數的 id
-		const result = Object.keys(cosThetaObj).sort(function(a, b) {
+		// 排序後拿回前三個分數的 id，不要拿到自己
+		const sorted = Object.keys(cosThetaObj).sort(function(a, b) {
 			return cosThetaObj[b]-cosThetaObj[a];
-		}).slice(1, returnN+1); // 因為第一篇會是自己
+		});
+		const result = [];
+		for (let l=0; l<10; l++) {
+			if (parseInt(sorted[l]) !== allArticle[j].id) {
+				result.push(sorted[l]);
+			}
+			if (result.length === 3) {
+				break;
+			}
+		}
 		allArticle[j].similar = result;
 	}
 	return allArticle;
@@ -194,13 +203,12 @@ function calSimilarArticle() {
 				const similarJSON = JSON.stringify(similarResult[i].similar);
 				mysql.conPool.query(`UPDATE article SET similar_article = '${similarJSON}' WHERE id = ${similarResult[i].id}`, (err, result)=>{
 					done ++;
-					console.log('calSimilarAritlce '+done);
 					if (err) {
 						reject(err);
 					}
 					if (done === similarResult.length) {
 						client.flushall();
-						console.log('Done');
+						console.log('Cal Similar Aritlce Done'+' Total='+done);
 						resolve('ok');
 					}
 				});

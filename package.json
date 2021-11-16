@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/translate": "^3.0.1",
-    "aws-sdk": "^2.437.0",
+    "aws-sdk": "^2.814.0",
     "cheerio": "^1.0.0-rc.2",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
